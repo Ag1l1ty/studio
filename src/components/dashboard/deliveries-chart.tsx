@@ -1,8 +1,9 @@
 "use client"
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { getProjects, aggregateMetrics } from "@/lib/data"
+import { aggregateMetrics } from "@/lib/data"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import type { Project } from "@/lib/types";
 
 const chartConfig = {
   deliveries: {
@@ -10,8 +11,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function DeliveriesChart() {
-  const projects = getProjects()
+interface DeliveriesChartProps {
+  projects: Project[];
+}
+
+export function DeliveriesChart({ projects }: DeliveriesChartProps) {
   const data = aggregateMetrics(projects);
 
   return (

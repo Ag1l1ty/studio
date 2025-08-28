@@ -1,8 +1,9 @@
 "use client"
 
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
-import { getProjects, aggregateMetrics } from "@/lib/data"
+import { aggregateMetrics } from "@/lib/data"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import type { Project } from "@/lib/types";
 
 const chartConfig = {
   errors: {
@@ -11,8 +12,11 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function ErrorsChart() {
-  const projects = getProjects()
+interface ErrorsChartProps {
+    projects: Project[];
+}
+
+export function ErrorsChart({ projects }: ErrorsChartProps) {
   const data = aggregateMetrics(projects);
 
   return (
