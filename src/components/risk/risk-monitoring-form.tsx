@@ -25,6 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
+import { Input } from '../ui/input';
 
 const formSchema = z.object({
     projectId: z.string().min(1, 'Please select a project'),
