@@ -2,11 +2,26 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import type { Project } from '@/lib/types';
-import { ChartTooltipContent } from '../ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 
 interface ProjectTrendsChartProps {
     metrics: Project['metrics'];
 }
+
+const chartConfig = {
+    Deliveries: {
+        label: "Deliveries",
+        color: "hsl(var(--chart-1))",
+    },
+    Errors: {
+        label: "Errors",
+        color: "hsl(var(--chart-3))",
+    },
+    "Budget Spent": {
+        label: "Budget Spent",
+        color: "hsl(var(--chart-2))",
+    },
+} satisfies ChartConfig;
 
 export function ProjectTrendsChart({ metrics }: ProjectTrendsChartProps) {
     const data = metrics.map(m => ({
@@ -17,8 +32,9 @@ export function ProjectTrendsChart({ metrics }: ProjectTrendsChartProps) {
     }));
 
     return (
-        <ResponsiveContainer width="100%" height={400}>
+        <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
             <LineChart
+                accessibilityLayer
                 data={data}
                 margin={{
                     top: 5,
@@ -37,6 +53,6 @@ export function ProjectTrendsChart({ metrics }: ProjectTrendsChartProps) {
                 <Line yAxisId="left" type="monotone" dataKey="Errors" stroke="hsl(var(--chart-3))" strokeWidth={2} />
                 <Line yAxisId="right" type="monotone" dataKey="Budget Spent" stroke="hsl(var(--chart-2))" strokeWidth={2} />
             </LineChart>
-        </ResponsiveContainer>
+        </ChartContainer>
     );
 }

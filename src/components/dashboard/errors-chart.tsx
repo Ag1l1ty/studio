@@ -2,15 +2,22 @@
 
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { getProjects, aggregateMetrics } from "@/lib/data"
-import { ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+
+const chartConfig = {
+  errors: {
+    label: "Errors",
+    color: "hsl(var(--destructive))",
+  },
+} satisfies ChartConfig;
 
 export function ErrorsChart() {
   const projects = getProjects()
   const data = aggregateMetrics(projects);
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <LineChart data={data}>
+    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+      <LineChart accessibilityLayer data={data}>
         <XAxis
           dataKey="name"
           stroke="hsl(var(--foreground))"
@@ -31,6 +38,6 @@ export function ErrorsChart() {
         />
         <Line type="monotone" dataKey="errors" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--destructive))" }} />
       </LineChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   )
 }

@@ -2,11 +2,22 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
 import type { Project } from "@/lib/types"
-import { ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 
 interface BudgetChartProps {
   projects: Project[];
 }
+
+const chartConfig = {
+  budget: {
+    label: "Budget",
+    color: "hsl(var(--chart-2))",
+  },
+  spent: {
+    label: "Spent",
+    color: "hsl(var(--chart-1))",
+  },
+} satisfies ChartConfig
 
 export function BudgetChart({ projects }: BudgetChartProps) {
   const chartData = projects
@@ -18,8 +29,8 @@ export function BudgetChart({ projects }: BudgetChartProps) {
     }));
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={chartData}>
+    <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+      <BarChart accessibilityLayer data={chartData}>
         <XAxis
           dataKey="name"
           stroke="hsl(var(--foreground))"
@@ -47,6 +58,6 @@ export function BudgetChart({ projects }: BudgetChartProps) {
         <Bar dataKey="budget" name="Budget" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
         <Bar dataKey="spent" name="Spent" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
       </BarChart>
-    </ResponsiveContainer>
+    </ChartContainer>
   )
 }
