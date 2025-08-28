@@ -51,7 +51,7 @@ export function KanbanCard({ project }: KanbanCardProps) {
                     <AvatarImage src={`https://picsum.photos/seed/${project.owner.name}/100`} alt={project.owner.name} />
                     <AvatarFallback>{project.owner.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <Link href={`/projects/${project.id}`} passHref legacyBehavior>
+                <Link href={`/projects/${project.id}`} passHref>
                     <Button variant="ghost" size="sm" className="h-8">
                         Details <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
