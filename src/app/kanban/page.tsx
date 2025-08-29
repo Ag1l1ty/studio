@@ -145,9 +145,9 @@ export default function KanbanPage() {
             estimatedDate: values.estimatedDate.toISOString(),
             owner: project.owner,
         };
+
         addDelivery(newDelivery);
-        setDeliveries(getDeliveries());
-        setProjects(getProjects());
+        setDeliveries(prevDeliveries => [...prevDeliveries, newDelivery]);
     }
 
 
