@@ -3,9 +3,10 @@
 
 import { getDeliveryById, getProjectById } from "@/lib/data";
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { ProjectDetailCard } from "@/components/projects/project-detail-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DollarSign, TrendingUp, AlertTriangle, Calendar, Users, Target, Package, AlertCircle } from "lucide-react";
+import { DollarSign, TrendingUp, AlertTriangle, Calendar, Users, Target, Package, AlertCircle, ArrowLeft } from "lucide-react";
 import { DeliveryBudgetChart } from "@/components/deliveries/delivery-budget-chart";
 import { DeliveryErrorsChart } from "@/components/deliveries/delivery-errors-chart";
 import { DeliveryPlanChart } from "@/components/deliveries/delivery-plan-chart";
@@ -43,9 +44,17 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
 
     return (
         <div className="flex-1 space-y-6 p-4 md:p-8 pt-6">
-            <div className="space-y-1">
-                <h2 className="text-2xl font-bold tracking-tight">Detalle Entrega #{delivery.deliveryNumber}</h2>
-                <p className="text-muted-foreground">Proyecto: <a href={`/projects/${project.id}`} className="text-primary hover:underline">{project.name}</a></p>
+            <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                    <h2 className="text-2xl font-bold tracking-tight">Detalle Entrega #{delivery.deliveryNumber}</h2>
+                    <p className="text-muted-foreground">Proyecto: <a href={`/projects/${project.id}`} className="text-primary hover:underline">{project.name}</a></p>
+                </div>
+                <Link href="/kanban">
+                    <Button variant="outline">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Volver al Kanban
+                    </Button>
+                </Link>
             </div>
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
