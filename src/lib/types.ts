@@ -10,6 +10,7 @@ export type Project = {
   riskLevel: RiskLevel;
   budget: number;
   budgetSpent: number;
+  projectedDeliveries?: number; // Added this field
   startDate: string;
   endDate: string;
   owner: {

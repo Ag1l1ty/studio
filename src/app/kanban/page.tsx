@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -13,10 +14,12 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { ListFilter, PlusCircle } from 'lucide-react';
+import { ListFilter, PlusCircle, ChevronDown } from 'lucide-react';
 import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
+import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
 
 const ALL_RISKS: RiskLevel[] = ['Low', 'Medium', 'High'];
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
@@ -27,6 +30,7 @@ export default function KanbanPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRisks, setSelectedRisks] = useState<Set<RiskLevel>>(new Set(ALL_RISKS));
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
+    const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
 
     const handleRiskToggle = (risk: RiskLevel) => {
         const newRisks = new Set(selectedRisks);
@@ -115,10 +119,23 @@ export default function KanbanPage() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button onClick={() => setCreateProjectDialogOpen(true)}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Create Project
-                    </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                             <Button>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Create
+                                <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setCreateProjectDialogOpen(true)}>
+                                Create New Project
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setCreateDeliveryCardDialogOpen(true)}>
+                                Create Delivery Card
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <div className="flex-1 overflow-x-auto p-4 md:p-8">
                     <KanbanBoard projects={filteredProjects} stages={STAGES} />
@@ -128,6 +145,11 @@ export default function KanbanPage() {
                 isOpen={isCreateProjectDialogOpen}
                 onOpenChange={setCreateProjectDialogOpen}
                 onProjectCreated={handleProjectCreated}
+            />
+             <CreateDeliveryCardDialog
+                isOpen={isCreateDeliveryCardDialogOpen}
+                onOpenChange={setCreateDeliveryCardDialogOpen}
+                projects={projects}
             />
         </DragDropContext>
     );
