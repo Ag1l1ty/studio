@@ -52,7 +52,7 @@ let MOCK_PROJECTS: Project[] = [
     riskLevel: 'Low',
     budget: 350000,
     budgetSpent: 345000,
-    projectedDeliveries: 30,
+    projectedDeliveries: 105,
     startDate: '2023-09-01',
     endDate: '2024-05-30',
     owner: { name: 'Sofia Fernandez', avatar: '/avatars/03.png' },
