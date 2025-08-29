@@ -1,12 +1,34 @@
+
+"use client";
+
 import type { Project, ProjectStage } from '@/lib/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { KanbanCard } from './kanban-card';
-import { Droppable } from 'react-beautiful-dnd';
+import { Droppable, DroppableProps } from 'react-beautiful-dnd';
+import { useEffect, useState } from 'react';
 
 interface KanbanColumnProps {
     stage: ProjectStage;
     projects: Project[];
 }
+
+// A workaround for the react-beautiful-dnd library with React 18 strict mode
+// See: https://github.com/atlassian/react-beautiful-dnd/issues/2396
+const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
+    const [enabled, setEnabled] = useState(false);
+    useEffect(() => {
+        const animation = requestAnimationFrame(() => setEnabled(true));
+        return () => {
+            cancelAnimationFrame(animation);
+            setEnabled(false);
+        };
+    }, []);
+    if (!enabled) {
+        return null;
+    }
+    return <Droppable {...props}>{children}</Droppable>;
+};
+
 
 export function KanbanColumn({ stage, projects }: KanbanColumnProps) {
     return (
@@ -17,7 +39,7 @@ export function KanbanColumn({ stage, projects }: KanbanColumnProps) {
                     <span className="text-sm font-normal bg-muted text-muted-foreground rounded-full px-2 py-0.5">{projects.length}</span>
                 </CardTitle>
             </CardHeader>
-            <Droppable droppableId={stage}>
+            <StrictModeDroppable droppableId={stage}>
                 {(provided, snapshot) => (
                     <CardContent
                         ref={provided.innerRef}
@@ -32,7 +54,7 @@ export function KanbanColumn({ stage, projects }: KanbanColumnProps) {
                         </div>
                     </CardContent>
                 )}
-            </Droppable>
+            </StrictModeDroppable>
         </Card>
     );
 }
