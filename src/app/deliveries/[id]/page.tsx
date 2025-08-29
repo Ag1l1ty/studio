@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ProjectDetailCard } from "@/components/projects/project-detail-card";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DollarSign, TrendingUp, AlertTriangle, Calendar, Users, Target, Package, AlertCircle, ArrowLeft } from "lucide-react";
+import { DollarSign, TrendingUp, AlertTriangle, Calendar, Users, Target, Package, AlertCircle, ArrowLeft, History } from "lucide-react";
 import { DeliveryBudgetChart } from "@/components/deliveries/delivery-budget-chart";
 import { DeliveryErrorsChart } from "@/components/deliveries/delivery-errors-chart";
 import { DeliveryPlanChart } from "@/components/deliveries/delivery-plan-chart";
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { differenceInDays, isBefore } from "date-fns";
+import { differenceInDays, isBefore, format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,10 +25,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import type { BudgetHistoryEntry } from "@/lib/types";
 
 export default function DeliveryDetailsPage({ params }: { params: { id: string } }) {
     const delivery = getDeliveryById(params.id);
     const [budgetSpent, setBudgetSpent] = useState(delivery?.budgetSpent || 0);
+    const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>(delivery?.budgetHistory || []);
     const [showUpdateWarning, setShowUpdateWarning] = useState(true);
     const [isConfirmingBudget, setConfirmingBudget] = useState(false);
     const [pendingBudget, setPendingBudget] = useState(0);
@@ -55,12 +57,18 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
     };
 
     const handleConfirmBudgetUpdate = () => {
-        console.log("Updated budget spent:", pendingBudget);
-        // In a real app, you would save this to the backend
-        // For now, just update the local state for the chart
+        const newHistoryEntry: BudgetHistoryEntry = {
+            date: new Date().toISOString(),
+            amount: pendingBudget,
+        };
+
+        setBudgetHistory(prevHistory => [...prevHistory, newHistoryEntry]);
         setBudgetSpent(pendingBudget); 
         setShowUpdateWarning(false);
         setConfirmingBudget(false);
+        
+        // In a real app, you would also save this updated history to the backend
+        // For now, it only updates local state
     }
 
     return (
@@ -119,6 +127,22 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
                                 </div>
                             )}
                              <DeliveryBudgetChart delivery={delivery} currentSpent={budgetSpent} />
+                             {budgetHistory.length > 0 && (
+                                <div className="space-y-3 pt-4 border-t">
+                                    <h4 className="flex items-center text-sm font-semibold">
+                                        <History className="mr-2 h-4 w-4" />
+                                        Historial de Actualizaciones
+                                    </h4>
+                                    <ul className="space-y-2 text-xs text-muted-foreground">
+                                        {budgetHistory.slice().reverse().map((entry, index) => (
+                                            <li key={index} className="flex justify-between items-center p-2 bg-muted/50 rounded-md">
+                                                <span>{format(new Date(entry.date), "MMM d, yyyy 'at' h:mm a")}</span>
+                                                <span className="font-medium text-foreground">${entry.amount.toLocaleString()}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                             )}
                         </CardContent>
                     </Card>
                 </div>

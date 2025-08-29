@@ -2,6 +2,11 @@ export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' |
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 
+export type BudgetHistoryEntry = {
+  date: string;
+  amount: number;
+};
+
 export type Delivery = {
   id: string;
   projectId: string;
@@ -21,6 +26,7 @@ export type Delivery = {
   errorCount?: number;
   errorSolutionTime?: number;
   stageDates?: Partial<Record<ProjectStage, string>>;
+  budgetHistory?: BudgetHistoryEntry[];
 };
 
 export type Project = {
