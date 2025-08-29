@@ -106,6 +106,18 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
+        if (!selectedProject) return;
+
+        const deliveriesMade = selectedProject.metrics.reduce((acc, m) => acc + m.deliveries, 0);
+        if (selectedProject.projectedDeliveries && deliveriesMade >= selectedProject.projectedDeliveries) {
+            toast({
+                variant: 'destructive',
+                title: "Cannot Create Delivery",
+                description: "This project has already reached its projected number of deliveries.",
+            });
+            return;
+        }
+
         if (!budgetValidation(values.budget)) {
             form.setError("budget", {
                 type: "manual",
