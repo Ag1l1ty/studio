@@ -20,6 +20,7 @@ export type Delivery = {
   isArchived?: boolean;
   errorCount?: number;
   errorSolutionTime?: number;
+  stageDates?: Partial<Record<ProjectStage, string>>;
 };
 
 export type Project = {
