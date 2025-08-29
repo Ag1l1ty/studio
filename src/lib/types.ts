@@ -1,4 +1,4 @@
-export type ProjectStage = 'Definition' | 'Development' | 'Testing' | 'Production' | 'Closed';
+export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' | 'Ambiente TST' | 'Ambiente UAT' | 'Soporte Productivo' | 'Cerrado';
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 

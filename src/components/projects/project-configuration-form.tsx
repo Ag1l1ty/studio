@@ -25,6 +25,7 @@ import { useToast } from '@/hooks/use-toast';
 const formSchema = z.object({
     projectName: z.string().min(3, "Project name must be at least 3 characters."),
     description: z.string().min(10, "Description must be at least 10 characters."),
+    projectedDeliveries: z.coerce.number().int().positive("Projected deliveries must be a positive integer."),
     budget: z.coerce.number().positive("Budget must be a positive number."),
     startDate: z.date({ required_error: "A start date is required." }),
     endDate: z.date({ required_error: "An end date is required." }),
@@ -41,6 +42,7 @@ export function ProjectConfigurationForm() {
         defaultValues: {
             projectName: "",
             description: "",
+            projectedDeliveries: 1,
             budget: 0,
         },
     });
@@ -85,21 +87,44 @@ export function ProjectConfigurationForm() {
                         </FormItem>
                     )}
                 />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <FormField
+                        control={form.control}
+                        name="projectedDeliveries"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Projected Deliveries</FormLabel>
+                                <FormControl>
+                                    <Input type="number" min="1" step="1" placeholder="e.g., 10" {...field} />
+                                </FormControl>
+                                <FormDescription>Total number of expected deliveries for this project.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    <FormField
+                        control={form.control}
+                        name="budget"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Total Budget</FormLabel>
+                                <FormControl>
+                                    <Input type="number" placeholder="e.g., 500000" {...field} />
+                                </FormControl>
+                                <FormDescription>The total allocated budget in USD.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 
-                <FormField
-                    control={form.control}
-                    name="budget"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Total Budget</FormLabel>
-                            <FormControl>
-                                <Input type="number" placeholder="e.g., 500000" {...field} />
-                            </FormControl>
-                            <FormDescription>The total allocated budget in USD.</FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                <div className="text-sm font-medium">Projected Dates per Delivery</div>
+                <div className="p-4 border rounded-md bg-secondary/50 text-muted-foreground text-sm">
+                    Functionality to set individual dates for each of the <strong>{form.watch('projectedDeliveries') || 0}</strong> deliveries will be available here soon.
+                </div>
+
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <FormField

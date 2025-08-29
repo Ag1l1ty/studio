@@ -3,7 +3,7 @@
 import type { Project, ProjectStage } from '@/lib/types';
 import { KanbanColumn } from './kanban-column';
 
-const STAGES: ProjectStage[] = ['Definition', 'Development', 'Testing', 'Production', 'Closed'];
+const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
 interface KanbanBoardProps {
     projects: Project[];
