@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -20,12 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getProjects, getProjectById } from '@/lib/data';
+import { getProjects, getProjectById, getRiskProfile } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
+import type { RiskLevel } from '@/lib/types';
 
 const formSchema = z.object({
     projectId: z.string().min(1, 'Please select a project'),
@@ -37,8 +39,8 @@ const formSchema = z.object({
 });
 
 type UpdateResult = {
-    initialRisk: 'Low' | 'Medium' | 'High';
-    newRisk: 'Low' | 'Medium' | 'High';
+    initialRisk: RiskLevel;
+    newRisk: RiskLevel;
     change: 'Increased' | 'Decreased' | 'Maintained';
 }
 
@@ -61,26 +63,32 @@ export function RiskMonitoringForm() {
     const initialProject = getProjectById(selectedProjectId);
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        if (!initialProject) return;
+        if (!initialProject || typeof initialProject.riskScore === 'undefined') return;
         
-        const riskMapping = { 'Low': 1, 'Medium': 2, 'High': 3 };
-        let currentRiskLevel = riskMapping[initialProject.riskLevel];
+        let newScore = initialProject.riskScore;
 
-        if (values.budgetDeviation > 15 || values.timelineDeviation > 15) {
-            currentRiskLevel = Math.min(3, currentRiskLevel + 1);
-        }
-        if (values.hasTechnicalIssues || values.hasScopeChanges) {
-            currentRiskLevel = Math.min(3, currentRiskLevel + 1);
-        }
-        if (values.budgetDeviation < -10 && values.timelineDeviation < -10 && !values.hasTechnicalIssues && !values.hasScopeChanges) {
-             currentRiskLevel = Math.max(1, currentRiskLevel - 1);
-        }
-
-        const newRisk = Object.keys(riskMapping).find(key => riskMapping[key as keyof typeof riskMapping] === currentRiskLevel) as 'Low' | 'Medium' | 'High';
+        if (values.budgetDeviation > 15) newScore += 2;
+        if (values.timelineDeviation > 15) newScore += 2;
+        if (values.budgetDeviation < -15) newScore -= 1;
+        if (values.timelineDeviation < -15) newScore -= 1;
         
+        if (values.hasTechnicalIssues) newScore += 3;
+        if (values.hasScopeChanges) newScore += 3;
+
+        // Ensure score doesn't go below a minimum (e.g., 1) or above a maximum (e.g., 25)
+        newScore = Math.max(1, Math.min(25, newScore));
+        
+        const initialRiskProfile = getRiskProfile(initialProject.riskScore);
+        const newRiskProfile = getRiskProfile(newScore);
+        const newRisk = newRiskProfile.classification;
+        
+        const riskOrder: RiskLevel[] = ['Muy conservador', 'Conservador', 'Moderado', 'Moderado - alto', 'Agresivo', 'Muy Agresivo'];
+        const initialIndex = riskOrder.indexOf(initialRiskProfile.classification);
+        const newIndex = riskOrder.indexOf(newRisk);
+
         let change: UpdateResult['change'] = 'Maintained';
-        if (riskMapping[newRisk] > riskMapping[initialProject.riskLevel]) change = 'Increased';
-        if (riskMapping[newRisk] < riskMapping[initialProject.riskLevel]) change = 'Decreased';
+        if (newIndex > initialIndex) change = 'Increased';
+        if (newIndex < initialIndex) change = 'Decreased';
 
         setResult({ initialRisk: initialProject.riskLevel, newRisk, change });
     }
@@ -131,7 +139,7 @@ export function RiskMonitoringForm() {
                 />
                 
                 {initialProject && (
-                    <div className="text-sm">Current Risk Level: <span className="font-semibold">{initialProject.riskLevel}</span></div>
+                    <div className="text-sm">Current Risk Level: <span className="font-semibold">{initialProject.riskLevel}</span> (Score: {initialProject.riskScore})</div>
                 )}
 
                 <FormField

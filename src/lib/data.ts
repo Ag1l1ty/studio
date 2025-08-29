@@ -39,12 +39,12 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-12-31',
     owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' },
     metrics: [
-      { month: 'Jan', deliveries: 2, errors: 5, budget: 100000, spent: 110000 },
-      { month: 'Feb', deliveries: 3, errors: 8, budget: 100000, spent: 120000 },
-      { month: 'Mar', deliveries: 4, errors: 6, budget: 100000, spent: 95000 },
-      { month: 'Apr', deliveries: 5, errors: 4, budget: 100000, spent: 105000 },
-      { month: 'May', deliveries: 5, errors: 3, budget: 100000, spent: 98000 },
-      { month: 'Jun', deliveries: 6, errors: 2, budget: 100000, spent: 102000 },
+      { month: 'Jan', deliveries: 1, errors: 5, budget: 100000, spent: 110000 },
+      { month: 'Feb', deliveries: 1, errors: 8, budget: 100000, spent: 120000 },
+      { month: 'Mar', deliveries: 1, errors: 6, budget: 100000, spent: 95000 },
+      { month: 'Apr', deliveries: 1, errors: 4, budget: 100000, spent: 105000 },
+      { month: 'May', deliveries: 1, errors: 3, budget: 100000, spent: 98000 },
+      { month: 'Jun', deliveries: 1, errors: 2, budget: 100000, spent: 102000 },
     ],
   },
   {
@@ -56,17 +56,17 @@ let MOCK_PROJECTS: Project[] = [
     riskScore: 2,
     budget: 350000,
     budgetSpent: 345000,
-    projectedDeliveries: 105,
+    projectedDeliveries: 25,
     startDate: '2023-09-01',
     endDate: '2024-05-30',
     owner: { name: 'Sofia Fernandez', avatar: '/avatars/03.png' },
     metrics: [
-      { month: 'Jan', deliveries: 20, errors: 1, budget: 40000, spent: 38000 },
-      { month: 'Feb', deliveries: 25, errors: 0, budget: 40000, spent: 40000 },
-      { month: 'Mar', deliveries: 22, errors: 1, budget: 40000, spent: 41000 },
-      { month: 'Apr', deliveries: 18, errors: 0, budget: 40000, spent: 39000 },
-      { month: 'May', deliveries: 15, errors: 0, budget: 40000, spent: 40000 },
-      { month: 'Jun', deliveries: 2, errors: 0, budget: 10000, spent: 10000 },
+      { month: 'Jan', deliveries: 5, errors: 1, budget: 40000, spent: 38000 },
+      { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000 },
+      { month: 'Mar', deliveries: 5, errors: 1, budget: 40000, spent: 41000 },
+      { month: 'Apr', deliveries: 5, errors: 0, budget: 40000, spent: 39000 },
+      { month: 'May', deliveries: 4, errors: 0, budget: 40000, spent: 40000 },
+      { month: 'Jun', deliveries: 1, errors: 0, budget: 10000, spent: 10000 },
     ],
   },
   {
@@ -100,8 +100,8 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-02-28',
     owner: { name: 'Elena Petrova', avatar: '/avatars/05.png' },
     metrics: [
-        { month: 'Jan', deliveries: 10, errors: 0, budget: 50000, spent: 50000 },
-        { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000 },
+        { month: 'Jan', deliveries: 4, errors: 0, budget: 50000, spent: 50000 },
+        { month: 'Feb', deliveries: 4, errors: 0, budget: 40000, spent: 40000 },
     ],
   },
   {
@@ -119,9 +119,9 @@ let MOCK_PROJECTS: Project[] = [
     owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' },
     metrics: [
       { month: 'Mar', deliveries: 2, errors: 1, budget: 30000, spent: 28000 },
-      { month: 'Apr', deliveries: 4, errors: 0, budget: 30000, spent: 30000 },
-      { month: 'May', deliveries: 5, errors: 1, budget: 30000, spent: 32000 },
-      { month: 'Jun', deliveries: 5, errors: 0, budget: 30000, spent: 20000 },
+      { month: 'Apr', deliveries: 2, errors: 0, budget: 30000, spent: 30000 },
+      { month: 'May', deliveries: 1, errors: 1, budget: 30000, spent: 32000 },
+      { month: 'Jun', deliveries: 1, errors: 0, budget: 30000, spent: 20000 },
     ],
   },
 ];
@@ -276,5 +276,6 @@ export function getRiskProfile(score: number): { classification: RiskLevel, devi
     if (score >= 10) return { classification: 'Moderado - alto', deviation: '+70%' };
     if (score >= 6) return { classification: 'Moderado', deviation: '+40%' };
     if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
-    return { classification: 'Muy conservador', deviation: '+10%' };
+    if (score >= 1) return { classification: 'Muy conservador', deviation: '+10%' };
+    return { classification: 'Muy conservador', deviation: '+10%' }; // Default for 0 or less
 }
