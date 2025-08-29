@@ -25,10 +25,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { BudgetHistoryEntry } from "@/lib/types";
+import type { BudgetHistoryEntry, Delivery } from "@/lib/types";
 
 export default function DeliveryDetailsPage({ params }: { params: { id: string } }) {
-    const delivery = getDeliveryById(params.id);
+    const [delivery, setDelivery] = useState<Delivery | null>(null);
     const [budgetSpent, setBudgetSpent] = useState(0);
     const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>([]);
     const [showUpdateWarning, setShowUpdateWarning] = useState(true);
@@ -38,15 +38,18 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
 
     useEffect(() => {
         setIsClient(true);
-        if(delivery) {
-            setBudgetSpent(delivery.budgetSpent || 0);
-            setBudgetHistory(delivery.budgetHistory || []);
+        const deliveryData = getDeliveryById(params.id);
+        if (deliveryData) {
+            setDelivery(deliveryData);
+            setBudgetSpent(deliveryData.budgetSpent || 0);
+            setBudgetHistory(deliveryData.budgetHistory || []);
         }
-    }, [delivery]);
+    }, [params.id]);
 
 
     if (!delivery) {
-        notFound();
+        // You can render a loading state here
+        return <div>Loading...</div>;
     }
     
     const project = getProjectById(delivery.projectId);
