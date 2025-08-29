@@ -22,7 +22,6 @@ import { CreateProjectDialog } from '@/components/projects/create-project-dialog
 import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
 import { addMonths, format } from 'date-fns';
 
-const ALL_PROJECT_IDS: string[] = getProjects().map(p => p.id);
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
 
@@ -30,7 +29,7 @@ export default function KanbanPage() {
     const [projects, setProjects] = useState(getProjects());
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(ALL_PROJECT_IDS));
+    const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(projects.map(p => p.id)));
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
 
@@ -98,8 +97,7 @@ export default function KanbanPage() {
                         });
                     }
                     
-                    // We don't remove the delivery anymore, just update its state
-                    // The project object is modified by reference from getProjectById
+                    // The project object is modified by reference from getProjectById, so we need to update the state
                     setProjects(getProjects());
                 }
             }
@@ -128,7 +126,9 @@ export default function KanbanPage() {
             metrics: [],
         };
         addProject(newProject);
-        setProjects(getProjects());
+        const updatedProjects = getProjects();
+        setProjects(updatedProjects);
+        setSelectedProjects(new Set(updatedProjects.map(p => p.id)));
     };
     
     const handleDeliveryCardCreated = (values: {projectId: string; deliveryNumber: number; budget: number; estimatedDate: Date}) => {
@@ -136,7 +136,7 @@ export default function KanbanPage() {
         if (!project) return;
 
         const newDelivery: Delivery = {
-            id: `DLV-00${deliveries.length + 1}`,
+            id: `DLV-00${getDeliveries().length + 1}`,
             projectId: project.id,
             projectName: project.name,
             deliveryNumber: values.deliveryNumber,
@@ -147,7 +147,7 @@ export default function KanbanPage() {
         };
 
         addDelivery(newDelivery);
-        setDeliveries(prevDeliveries => [...prevDeliveries, newDelivery]);
+        setDeliveries(getDeliveries());
     }
 
 

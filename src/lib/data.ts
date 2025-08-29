@@ -154,11 +154,6 @@ export function getDeliveries(): Delivery[] {
 
 export function addDelivery(delivery: Delivery) {
     MOCK_DELIVERIES.push(delivery);
-    // The budget is spent when the delivery is closed, not when it's created.
-    // const project = getProjectById(delivery.projectId);
-    // if(project) {
-    //     project.budgetSpent += delivery.budget;
-    // }
 }
 
 

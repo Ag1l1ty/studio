@@ -59,9 +59,20 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
             budget: 0,
         },
     });
+    
+    // Reset form when dialog opens with different projects
+    React.useEffect(() => {
+        if (isOpen) {
+            form.reset({
+                projectId: "",
+                deliveryNumber: 1,
+                budget: 0,
+            });
+        }
+    }, [isOpen, projects, form]);
 
     const selectedProjectId = form.watch('projectId');
-    const selectedProject = React.useMemo(() => getProjectById(selectedProjectId), [selectedProjectId]);
+    const selectedProject = React.useMemo(() => projects.find(p => p.id === selectedProjectId), [selectedProjectId, projects]);
 
     const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
         const value = e.target.value;
@@ -218,6 +229,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
                                                 selected={field.value}
                                                 onSelect={field.onChange}
                                                 initialFocus
+                                                fixedWeeks
                                             />
                                         </PopoverContent>
                                     </Popover>
