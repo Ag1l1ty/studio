@@ -302,6 +302,7 @@ export default function KanbanPage() {
                 onOpenChange={setCreateDeliveryCardDialogOpen}
                 onDeliveryCardCreated={handleDeliveryCardCreated}
                 projects={projects}
+                deliveries={deliveries}
             />
             <AlertDialog open={isConfirmingMove} onOpenChange={setConfirmingMove}>
                 <AlertDialogContent>

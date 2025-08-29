@@ -29,15 +29,26 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import type { Project } from '@/lib/types';
-import { getProjectById } from '@/lib/data';
+import type { Project, Delivery } from '@/lib/types';
 import React from 'react';
 
-const formSchema = z.object({
+const createFormSchema = (deliveries: Delivery[]) => z.object({
     projectId: z.string().min(1, "Please select a project."),
     deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
     budget: z.string().refine(val => !isNaN(Number(val.replace(/,/g, ''))), "Must be a number").transform(val => Number(val.replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     estimatedDate: z.date({ required_error: "An estimated date is required." }),
+}).superRefine((data, ctx) => {
+    const existingDeliveryNumbers = deliveries
+        .filter(d => d.projectId === data.projectId)
+        .map(d => d.deliveryNumber);
+
+    if (existingDeliveryNumbers.includes(data.deliveryNumber)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "This delivery number already exists for this project.",
+            path: ["deliveryNumber"],
+        });
+    }
 });
 
 
@@ -45,11 +56,13 @@ type CreateDeliveryCardDialogProps = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     projects: Project[];
-    onDeliveryCardCreated: (values: z.infer<typeof formSchema> & { creationDate: string }) => void;
+    deliveries: Delivery[];
+    onDeliveryCardCreated: (values: z.infer<ReturnType<typeof createFormSchema>>) => void;
 }
 
-export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDeliveryCardCreated }: CreateDeliveryCardDialogProps) {
+export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliveries, onDeliveryCardCreated }: CreateDeliveryCardDialogProps) {
     const { toast } = useToast();
+    const formSchema = createFormSchema(deliveries);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -60,16 +73,17 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
         },
     });
     
-    // Reset form when dialog opens with different projects
+    // Reset form when dialog opens
     React.useEffect(() => {
         if (isOpen) {
             form.reset({
                 projectId: "",
                 deliveryNumber: 1,
                 budget: 0,
+                estimatedDate: undefined,
             });
         }
-    }, [isOpen, projects, form]);
+    }, [isOpen, form]);
 
     const selectedProjectId = form.watch('projectId');
     const selectedProject = React.useMemo(() => projects.find(p => p.id === selectedProjectId), [selectedProjectId, projects]);
@@ -84,13 +98,6 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
             field.onChange('');
         }
     }
-
-    const deliveryNumberValidation = (deliveryNumber: number) => {
-        if (!selectedProject) return true;
-        const projectedDeliveries = selectedProject.projectedDeliveries || 0;
-        // This validation is simplified. A real app would check existing delivery numbers.
-        return deliveryNumber > 0 && deliveryNumber <= projectedDeliveries;
-    }
     
     const budgetValidation = (budget: number) => {
         if (!selectedProject) return true;
@@ -98,17 +105,16 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
         return budget <= remainingBudget;
     }
 
-    const dynamicFormSchema = formSchema.refine(data => deliveryNumberValidation(data.deliveryNumber), {
-        message: "Delivery number is invalid or exceeds projected deliveries.",
-        path: ["deliveryNumber"],
-    }).refine(data => budgetValidation(data.budget), {
-        message: "Budget for this delivery exceeds remaining project budget.",
-        path: ["budget"],
-    });
-
-
     function onSubmit(values: z.infer<typeof formSchema>) {
-        onDeliveryCardCreated({ ...values, creationDate: new Date().toISOString() });
+        if (!budgetValidation(values.budget)) {
+            form.setError("budget", {
+                type: "manual",
+                message: "Budget for this delivery exceeds remaining project budget.",
+            });
+            return;
+        }
+
+        onDeliveryCardCreated(values);
         toast({
             title: "Delivery Card Created",
             description: `A new delivery card for project "${selectedProject?.name}" has been created.`,
