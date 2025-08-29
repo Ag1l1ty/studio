@@ -1,4 +1,4 @@
-import type { Project, ProjectStage, Delivery } from './types';
+import type { Project, ProjectStage, Delivery, RiskLevel } from './types';
 import { subDays, addDays } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
@@ -7,7 +7,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'Digital Onboarding Platform',
     description: 'Development of a new digital onboarding experience for clients.',
     stage: 'Desarrollo Local',
-    riskLevel: 'Medium',
+    riskLevel: 'Moderado',
+    riskScore: 7,
     budget: 500000,
     budgetSpent: 275000,
     projectedDeliveries: 20,
@@ -28,7 +29,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'AI-Powered Claims Processing',
     description: 'Implementing an AI model to automate insurance claims processing.',
     stage: 'Ambiente TST',
-    riskLevel: 'High',
+    riskLevel: 'Agresivo',
+    riskScore: 15,
     budget: 1200000,
     budgetSpent: 950000,
     projectedDeliveries: 10,
@@ -49,7 +51,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'Mobile App Refresh',
     description: 'Complete UI/UX overhaul for the main customer-facing mobile app.',
     stage: 'Soporte Productivo',
-    riskLevel: 'Low',
+    riskLevel: 'Muy conservador',
+    riskScore: 2,
     budget: 350000,
     budgetSpent: 345000,
     projectedDeliveries: 105,
@@ -70,7 +73,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'Internal CRM System',
     description: 'New CRM system for the sales and marketing teams.',
     stage: 'Definición',
-    riskLevel: 'Medium',
+    riskLevel: 'Moderado',
+    riskScore: 8,
     budget: 750000,
     budgetSpent: 50000,
     projectedDeliveries: 15,
@@ -86,7 +90,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'Data Warehouse Migration',
     description: 'Migrating legacy data warehouse to a cloud-based solution.',
     stage: 'Cerrado',
-    riskLevel: 'Low',
+    riskLevel: 'Conservador',
+    riskScore: 4,
     budget: 400000,
     budgetSpent: 390000,
     projectedDeliveries: 8,
@@ -103,7 +108,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'Cybersecurity Audit Tool',
     description: 'A tool for internal teams to perform regular security audits.',
     stage: 'Ambiente DEV',
-    riskLevel: 'Medium',
+    riskLevel: 'Moderado - alto',
+    riskScore: 11,
     budget: 250000,
     budgetSpent: 110000,
     projectedDeliveries: 12,
@@ -220,20 +226,34 @@ export function addDelivery(delivery: Delivery) {
     MOCK_DELIVERIES.push(delivery);
 }
 
+export function getRiskProfile(score: number): { classification: RiskLevel, deviation: string } {
+    if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
+    if (score >= 12) return { classification: 'Agresivo', deviation: '+100%' };
+    if (score >= 10) return { classification: 'Moderado - alto', deviation: '+70%' };
+    if (score >= 6) return { classification: 'Moderado', deviation: '+40%' };
+    if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
+    return { classification: 'Muy conservador', deviation: '+10%' };
+}
+
 
 export function getDashboardKpis(projects: Project[]) {
     const projectsInProgress = projects.filter(p => p.stage !== 'Cerrado');
     const totalBudget = projectsInProgress.reduce((sum, p) => sum + p.budget, 0);
-    const onTrackProjects = projects.filter(p => p.riskLevel === 'Low').length;
-    const highRiskProjects = projects.filter(p => p.riskLevel === 'High').length;
-    const totalDeliveries = projects.flatMap(p => p.metrics).reduce((sum, m) => sum + m.deliveries, 0);
+
+    const onTrackProjects = projectsInProgress.length;
+
+    const highRiskProjects = projectsInProgress.filter(p => 
+        ['Moderado - alto', 'Agresivo', 'Muy Agresivo'].includes(p.riskLevel)
+    ).length;
+    
+    const totalDeliveries = getDeliveries().filter(d => d.stage === 'Cerrado').length;
     
     return {
         totalBudget,
         onTrackProjects,
         highRiskProjects,
         totalDeliveries,
-        onTrackPercentage: projects.length > 0 ? Math.round((onTrackProjects / projects.filter(p => p.stage !== 'Cerrado').length) * 100) : 0,
+        onTrackPercentage: projects.length > 0 ? Math.round((onTrackProjects / projectsInProgress.length) * 100) : 0,
     }
 }
 
