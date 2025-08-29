@@ -28,6 +28,7 @@ import {
 import type { BudgetHistoryEntry, Delivery } from "@/lib/types";
 
 export default function DeliveryDetailsPage({ params }: { params: { id: string } }) {
+    const { id } = params;
     const [delivery, setDelivery] = useState<Delivery | null>(null);
     const [budgetSpent, setBudgetSpent] = useState(0);
     const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>([]);
@@ -38,13 +39,13 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
 
     useEffect(() => {
         setIsClient(true);
-        const deliveryData = getDeliveryById(params.id);
+        const deliveryData = getDeliveryById(id);
         if (deliveryData) {
             setDelivery(deliveryData);
             setBudgetSpent(deliveryData.budgetSpent || 0);
             setBudgetHistory(deliveryData.budgetHistory || []);
         }
-    }, [params.id]);
+    }, [id]);
 
 
     if (!delivery) {
