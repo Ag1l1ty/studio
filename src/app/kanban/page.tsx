@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import type { Project, RiskLevel, ProjectStage, Delivery } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { addProject, getProjects, getDeliveries, addDelivery } from '@/lib/data';
+import { addProject, getProjects, getDeliveries, addDelivery, getProjectById } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ import { ListFilter, PlusCircle, ChevronDown } from 'lucide-react';
 import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
+import { addMonths, format } from 'date-fns';
 
 const ALL_PROJECT_IDS: string[] = getProjects().map(p => p.id);
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
@@ -61,12 +62,46 @@ export default function KanbanPage() {
         }
         
         const newDeliveries = Array.from(deliveries);
-        const delivery = newDeliveries.find(d => d.id === draggableId);
+        const deliveryIndex = newDeliveries.findIndex(d => d.id === draggableId);
+        const delivery = newDeliveries[deliveryIndex];
 
         if (delivery) {
-            delivery.stage = destination.droppableId as ProjectStage;
-            // Note: This only updates the local state. 
-            // In a real app, you'd call an API to persist this change.
+            const originalStage = delivery.stage;
+            const newStage = destination.droppableId as ProjectStage;
+            delivery.stage = newStage;
+
+            // If the card is moved to the "Cerrado" column
+            if (newStage === 'Cerrado' && originalStage !== 'Cerrado') {
+                const project = getProjectById(delivery.projectId);
+                if (project) {
+                    project.budgetSpent += delivery.budget;
+                    
+                    const deliveryDate = new Date(delivery.estimatedDate);
+                    const monthName = format(deliveryDate, 'Jan'); // Using a simple format for month name
+                    
+                    const metricIndex = project.metrics.findIndex(m => m.month === monthName);
+
+                    if (metricIndex > -1) {
+                        project.metrics[metricIndex].deliveries += 1;
+                        project.metrics[metricIndex].spent += delivery.budget;
+                    } else {
+                        // If no metric for this month, create one
+                        project.metrics.push({
+                            month: monthName,
+                            deliveries: 1,
+                            errors: 0,
+                            budget: delivery.budget, // This might need more sophisticated logic
+                            spent: delivery.budget,
+                        });
+                    }
+                    // Remove the delivery from the board as it is closed
+                    newDeliveries.splice(deliveryIndex, 1);
+                }
+                 // This is where you would typically update the project in your data source
+                 // For now, we update the local state to reflect the change
+                setProjects(getProjects());
+            }
+
             setDeliveries(newDeliveries);
         }
     };

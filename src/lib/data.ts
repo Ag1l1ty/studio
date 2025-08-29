@@ -138,6 +138,8 @@ export function addProject(project: Project) {
 
 
 export function getProjectById(id: string): Project | undefined {
+    // This is a bit of a hack for a mock API, but it allows us to "update" the project
+    // by returning a reference to the object in the array.
     return MOCK_PROJECTS.find(p => p.id === id);
 }
 
@@ -152,10 +154,11 @@ export function getDeliveries(): Delivery[] {
 
 export function addDelivery(delivery: Delivery) {
     MOCK_DELIVERIES.push(delivery);
-    const project = getProjectById(delivery.projectId);
-    if(project) {
-        project.budgetSpent += delivery.budget;
-    }
+    // The budget is spent when the delivery is closed, not when it's created.
+    // const project = getProjectById(delivery.projectId);
+    // if(project) {
+    //     project.budgetSpent += delivery.budget;
+    // }
 }
 
 
