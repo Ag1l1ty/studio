@@ -77,7 +77,7 @@ export default function KanbanPage() {
                     project.budgetSpent += delivery.budget;
                     
                     const deliveryDate = new Date(delivery.estimatedDate);
-                    const monthName = format(deliveryDate, 'Jan'); // Using a simple format for month name
+                    const monthName = format(deliveryDate, 'MMM'); // Using a simple format for month name
                     
                     const metricIndex = project.metrics.findIndex(m => m.month === monthName);
 
