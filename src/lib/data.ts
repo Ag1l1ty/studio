@@ -206,7 +206,13 @@ export function getDeliveries(): Delivery[] {
 }
 
 export function getDeliveryById(id: string): Delivery | undefined {
-    return MOCK_DELIVERIES.find(d => d.id === id);
+    const delivery = MOCK_DELIVERIES.find(d => d.id === id);
+    if (!delivery) return undefined;
+    // Ensure budget history is an array
+    if (!delivery.budgetHistory) {
+        delivery.budgetHistory = [];
+    }
+    return JSON.parse(JSON.stringify(delivery));
 }
 
 
