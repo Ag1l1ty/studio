@@ -128,7 +128,7 @@ export default function DashboardPage() {
         <KpiCard
           title="Projects On Track"
           value={kpis.onTrackProjects.toString()}
-          description={`${kpis.onTrackPercentage}% of projects are on schedule`}
+          description={`${kpis.onTrackProjects} projects are currently active`}
           icon={<CheckCircle className="text-green-500" />}
         />
         <KpiCard
