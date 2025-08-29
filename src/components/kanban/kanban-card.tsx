@@ -1,4 +1,4 @@
-import type { Delivery } from '@/lib/types';
+import type { Delivery, ProjectStage } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
@@ -16,12 +16,20 @@ interface KanbanCardProps {
     onUpdateDelivery: (deliveryId: string, updatedFields: Partial<Delivery>) => void;
 }
 
+const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
+
+
 export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: KanbanCardProps) {
 
     const handleTstFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         onUpdateDelivery(delivery.id, { [name]: value ? Number(value) : undefined });
     }
+    
+    const isTstOrLater = STAGES.indexOf(delivery.stage) >= STAGES.indexOf('Ambiente TST');
+    const isTst = delivery.stage === 'Ambiente TST';
+    const showTstFields = isTstOrLater && (delivery.errorCount !== undefined || delivery.errorSolutionTime !== undefined || isTst);
+
 
     return (
         <Draggable draggableId={delivery.id} index={index}>
@@ -45,7 +53,7 @@ export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: Kan
                                 <Flag className="w-3 h-3" />
                                 <span>Budget: ${delivery.budget.toLocaleString()}</span>
                             </div>
-                            {delivery.stage === 'Ambiente TST' && (
+                            {showTstFields && (
                                 <div className="space-y-2 pt-2 border-t mt-2">
                                     <div className="space-y-1">
                                         <Label htmlFor={`errorCount-${delivery.id}`} className="text-xs flex items-center gap-1"><Bug className="w-3 h-3" /> Cantidad Errores</Label>
@@ -59,6 +67,7 @@ export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: Kan
                                             onChange={handleTstFieldChange}
                                             onClick={(e) => e.stopPropagation()} // Prevent drag from starting on click
                                             onMouseDown={(e) => e.stopPropagation()} // Prevent drag from starting on click
+                                            readOnly={!isTst}
                                         />
                                     </div>
                                     <div className="space-y-1">
@@ -73,6 +82,7 @@ export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: Kan
                                             onChange={handleTstFieldChange}
                                             onClick={(e) => e.stopPropagation()}
                                             onMouseDown={(e) => e.stopPropagation()}
+                                            readOnly={!isTst}
                                         />
                                     </div>
                                 </div>

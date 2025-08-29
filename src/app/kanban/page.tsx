@@ -105,7 +105,7 @@ export default function KanbanPage() {
                     if (metricIndex > -1) {
                         project.metrics[metricIndex].deliveries += 1;
                         project.metrics[metricIndex].spent += delivery.budget;
-                        if(delivery.errorCount) {
+                        if(typeof delivery.errorCount === 'number') {
                             project.metrics[metricIndex].errors += delivery.errorCount;
                         }
                     } else {
