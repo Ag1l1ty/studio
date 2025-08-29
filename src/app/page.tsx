@@ -24,12 +24,12 @@ export default function DashboardPage() {
     ? allProjects
     : allProjects.filter(p => p.id === selectedProjectId);
 
-  const kpis = getDashboardKpis(projectsToDisplay);
+  const kpis = getDashboardKpis(allProjects);
 
   if (selectedProjectId !== 'all' && projectsToDisplay.length > 0) {
     const project = projectsToDisplay[0];
     const deliveriesMade = project.metrics.reduce((acc, m) => acc + m.deliveries, 0);
-    const deliveriesPending = (project.projectedDeliveries || 0) - deliveriesMade;
+    const totalPlanned = project.projectedDeliveries || 0;
     const riskProfile = getRiskProfile(project.riskScore || 0);
 
     return (
@@ -58,8 +58,8 @@ export default function DashboardPage() {
           />
           <KpiCard
             title="Deliveries On Track"
-            value={`${deliveriesMade} / ${deliveriesPending + deliveriesMade}`}
-            description="Made vs. Planned"
+            value={`${deliveriesMade} / ${totalPlanned}`}
+            description="Realizadas vs. Planeadas"
             icon={<Package className="text-primary" />}
           />
           <KpiCard
@@ -128,7 +128,7 @@ export default function DashboardPage() {
         <KpiCard
           title="Projects On Track"
           value={kpis.onTrackProjects.toString()}
-          description={`${kpis.onTrackProjects} projects are currently active`}
+          description={`${kpis.onTrackProjects} proyectos en curso`}
           icon={<CheckCircle className="text-green-500" />}
         />
         <KpiCard
