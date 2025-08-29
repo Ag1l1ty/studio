@@ -27,8 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { BudgetHistoryEntry, Delivery } from "@/lib/types";
 
-export default function DeliveryDetailsPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+export default function DeliveryDetailsPage({ params: { id } }: { params: { id: string } }) {
     const [delivery, setDelivery] = useState<Delivery | null>(null);
     const [budgetSpent, setBudgetSpent] = useState(0);
     const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>([]);
