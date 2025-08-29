@@ -45,6 +45,9 @@ export default function KanbanPage() {
     };
     
     const filteredDeliveries = deliveries.filter(delivery => {
+        if (delivery.isArchived) {
+            return false;
+        }
         const matchesSearch = delivery.projectName.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesProject = selectedProjects.size === 0 || selectedProjects.has(delivery.projectId);
         return matchesSearch && matchesProject;
@@ -77,7 +80,7 @@ export default function KanbanPage() {
                     project.budgetSpent += delivery.budget;
                     
                     const deliveryDate = new Date(delivery.estimatedDate);
-                    const monthName = format(deliveryDate, 'MMM'); // Using a simple format for month name
+                    const monthName = format(deliveryDate, 'MMM');
                     
                     const metricIndex = project.metrics.findIndex(m => m.month === monthName);
 
@@ -94,17 +97,25 @@ export default function KanbanPage() {
                             spent: delivery.budget,
                         });
                     }
-                    // Remove the delivery from the board as it is closed
-                    newDeliveries.splice(deliveryIndex, 1);
+                    
+                    // We don't remove the delivery anymore, just update its state
+                    // The project object is modified by reference from getProjectById
+                    setProjects(getProjects());
                 }
-                 // This is where you would typically update the project in your data source
-                 // For now, we update the local state to reflect the change
-                setProjects(getProjects());
             }
 
             setDeliveries(newDeliveries);
         }
     };
+    
+    const handleArchiveDelivery = (deliveryId: string) => {
+        setDeliveries(currentDeliveries => 
+            currentDeliveries.map(d => 
+                d.id === deliveryId ? { ...d, isArchived: true } : d
+            )
+        );
+    };
+
 
     const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
         const newProject: Project = {
@@ -193,7 +204,7 @@ export default function KanbanPage() {
                     </DropdownMenu>
                 </div>
                 <div className="flex-1 overflow-x-auto p-4 md:p-8">
-                    <KanbanBoard deliveries={filteredDeliveries} stages={STAGES} />
+                    <KanbanBoard deliveries={filteredDeliveries} stages={STAGES} onArchiveDelivery={handleArchiveDelivery} />
                 </div>
             </div>
             <CreateProjectDialog 

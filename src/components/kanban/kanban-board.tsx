@@ -6,15 +6,21 @@ import { KanbanColumn } from './kanban-column';
 interface KanbanBoardProps {
     deliveries: Delivery[];
     stages: ProjectStage[];
+    onArchiveDelivery: (deliveryId: string) => void;
 }
 
-export function KanbanBoard({ deliveries, stages }: KanbanBoardProps) {
+export function KanbanBoard({ deliveries, stages, onArchiveDelivery }: KanbanBoardProps) {
     return (
         <div className="flex gap-4 h-full pb-4">
             {stages.map(stage => {
                 const deliveriesInStage = deliveries.filter(d => d.stage === stage);
                 return (
-                    <KanbanColumn key={stage} stage={stage} deliveries={deliveriesInStage} />
+                    <KanbanColumn 
+                        key={stage} 
+                        stage={stage} 
+                        deliveries={deliveriesInStage} 
+                        onArchiveDelivery={onArchiveDelivery}
+                    />
                 );
             })}
         </div>

@@ -3,16 +3,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { ArrowRight, Calendar, Flag, Package } from 'lucide-react';
+import { ArrowRight, Calendar, Flag, Archive, Package } from 'lucide-react';
 import { Draggable } from 'react-beautiful-dnd';
 import { format } from 'date-fns';
 
 interface KanbanCardProps {
     delivery: Delivery;
     index: number;
+    onArchive: (deliveryId: string) => void;
 }
 
-export function KanbanCard({ delivery, index }: KanbanCardProps) {
+export function KanbanCard({ delivery, index, onArchive }: KanbanCardProps) {
 
     return (
         <Draggable draggableId={delivery.id} index={index}>
@@ -42,11 +43,17 @@ export function KanbanCard({ delivery, index }: KanbanCardProps) {
                                 <AvatarImage src={`https://picsum.photos/seed/${delivery.owner.name}/100`} alt={delivery.owner.name} />
                                 <AvatarFallback>{delivery.owner.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                             <Link href={`/projects/${delivery.projectId}`} passHref>
-                                <Button variant="ghost" size="sm" className="h-8">
-                                    Ver Proyecto <ArrowRight className="ml-2 h-4 w-4" />
+                            {delivery.stage === 'Cerrado' ? (
+                                <Button variant="outline" size="sm" className="h-8" onClick={() => onArchive(delivery.id)}>
+                                    <Archive className="mr-2 h-4 w-4" /> Archivar
                                 </Button>
-                            </Link>
+                            ) : (
+                                <Link href={`/projects/${delivery.projectId}`} passHref>
+                                    <Button variant="ghost" size="sm" className="h-8">
+                                        Ver Proyecto <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            )}
                         </CardFooter>
                     </Card>
                 </div>

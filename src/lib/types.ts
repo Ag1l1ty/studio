@@ -14,6 +14,7 @@ export type Delivery = {
     name: string;
     avatar: string;
   };
+  isArchived?: boolean;
 };
 
 export type Project = {
