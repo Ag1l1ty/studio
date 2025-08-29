@@ -13,7 +13,7 @@ import { DeliveryPlanChart } from "@/components/deliveries/delivery-plan-chart";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { differenceInDays, isBefore, format } from "date-fns";
 import {
   AlertDialog,
@@ -29,11 +29,21 @@ import type { BudgetHistoryEntry } from "@/lib/types";
 
 export default function DeliveryDetailsPage({ params }: { params: { id: string } }) {
     const delivery = getDeliveryById(params.id);
-    const [budgetSpent, setBudgetSpent] = useState(delivery?.budgetSpent || 0);
-    const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>(delivery?.budgetHistory || []);
+    const [budgetSpent, setBudgetSpent] = useState(0);
+    const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>([]);
     const [showUpdateWarning, setShowUpdateWarning] = useState(true);
     const [isConfirmingBudget, setConfirmingBudget] = useState(false);
     const [pendingBudget, setPendingBudget] = useState(0);
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+        if(delivery) {
+            setBudgetSpent(delivery.budgetSpent || 0);
+            setBudgetHistory(delivery.budgetHistory || []);
+        }
+    }, [delivery]);
+
 
     if (!delivery) {
         notFound();
@@ -127,7 +137,7 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
                                 </div>
                             )}
                              <DeliveryBudgetChart delivery={delivery} currentSpent={budgetSpent} />
-                             {budgetHistory.length > 0 && (
+                             {isClient && budgetHistory.length > 0 && (
                                 <div className="space-y-3 pt-4 border-t">
                                     <h4 className="flex items-center text-sm font-semibold">
                                         <History className="mr-2 h-4 w-4" />
