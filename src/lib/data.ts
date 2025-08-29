@@ -1,3 +1,4 @@
+
 import type { Project, ProjectStage, Delivery, RiskLevel } from './types';
 import { subDays, addDays } from 'date-fns';
 
@@ -243,7 +244,6 @@ export function getDashboardKpis(projects: Project[]) {
         onTrackProjects,
         highRiskProjects,
         totalDeliveries,
-        onTrackPercentage: projects.length > 0 ? Math.round((onTrackProjects / projectsInProgress.length) * 100) : 0,
     }
 }
 
