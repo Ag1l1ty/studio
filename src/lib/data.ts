@@ -16,12 +16,12 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-09-30',
     owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
     metrics: [
-      { month: 'Jan', deliveries: 5, errors: 2, budget: 55000, spent: 50000 },
-      { month: 'Feb', deliveries: 8, errors: 1, budget: 55000, spent: 60000 },
-      { month: 'Mar', deliveries: 12, errors: 3, budget: 55000, spent: 52000 },
-      { month: 'Apr', deliveries: 10, errors: 4, budget: 55000, spent: 58000 },
-      { month: 'May', deliveries: 15, errors: 2, budget: 55000, spent: 55000 },
-      { month: 'Jun', deliveries: 18, errors: 1, budget: 55000, spent: 54000 },
+      { month: 'Jan', deliveries: 2, errors: 2, budget: 55000, spent: 50000 },
+      { month: 'Feb', deliveries: 3, errors: 1, budget: 55000, spent: 60000 },
+      { month: 'Mar', deliveries: 4, errors: 3, budget: 55000, spent: 52000 },
+      { month: 'Apr', deliveries: 3, errors: 4, budget: 55000, spent: 58000 },
+      { month: 'May', deliveries: 4, errors: 2, budget: 55000, spent: 55000 },
+      { month: 'Jun', deliveries: 2, errors: 1, budget: 55000, spent: 54000 },
     ],
   },
   {
@@ -226,16 +226,6 @@ export function addDelivery(delivery: Delivery) {
     MOCK_DELIVERIES.push(delivery);
 }
 
-export function getRiskProfile(score: number): { classification: RiskLevel, deviation: string } {
-    if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
-    if (score >= 12) return { classification: 'Agresivo', deviation: '+100%' };
-    if (score >= 10) return { classification: 'Moderado - alto', deviation: '+70%' };
-    if (score >= 6) return { classification: 'Moderado', deviation: '+40%' };
-    if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
-    return { classification: 'Muy conservador', deviation: '+10%' };
-}
-
-
 export function getDashboardKpis(projects: Project[]) {
     const projectsInProgress = projects.filter(p => p.stage !== 'Cerrado');
     const totalBudget = projectsInProgress.reduce((sum, p) => sum + p.budget, 0);
@@ -279,3 +269,12 @@ export const aggregateMetrics = (projects: Project[]) => {
             errors: monthlyData[month].errors,
         }));
 };
+
+export function getRiskProfile(score: number): { classification: RiskLevel, deviation: string } {
+    if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
+    if (score >= 12) return { classification: 'Agresivo', deviation: '+100%' };
+    if (score >= 10) return { classification: 'Moderado - alto', deviation: '+70%' };
+    if (score >= 6) return { classification: 'Moderado', deviation: '+40%' };
+    if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
+    return { classification: 'Muy conservador', deviation: '+10%' };
+}

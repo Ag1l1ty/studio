@@ -1,6 +1,6 @@
 export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' | 'Ambiente TST' | 'Ambiente UAT' | 'Soporte Productivo' | 'Cerrado';
 
-export type RiskLevel = 'Low' | 'Medium' | 'High';
+export type RiskLevel = 'Muy conservador' | 'Conservador' | 'Moderado' | 'Moderado - alto' | 'Agresivo' | 'Muy Agresivo';
 
 export type BudgetHistoryEntry = {
   date: string;
@@ -35,6 +35,7 @@ export type Project = {
   description: string;
   stage: ProjectStage;
   riskLevel: RiskLevel;
+  riskScore?: number;
   budget: number;
   budgetSpent: number;
   projectedDeliveries?: number; // Added this field
