@@ -2,6 +2,20 @@ export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' |
 
 export type RiskLevel = 'Low' | 'Medium' | 'High';
 
+export type Delivery = {
+  id: string;
+  projectId: string;
+  projectName: string;
+  deliveryNumber: number;
+  stage: ProjectStage;
+  budget: number;
+  estimatedDate: string;
+  owner: {
+    name: string;
+    avatar: string;
+  };
+};
+
 export type Project = {
   id: string;
   name: string;

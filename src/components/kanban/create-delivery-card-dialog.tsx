@@ -45,9 +45,10 @@ type CreateDeliveryCardDialogProps = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     projects: Project[];
+    onDeliveryCardCreated: (values: z.infer<typeof formSchema>) => void;
 }
 
-export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: CreateDeliveryCardDialogProps) {
+export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDeliveryCardCreated }: CreateDeliveryCardDialogProps) {
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -65,8 +66,8 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: Cre
     const deliveryNumberValidation = (deliveryNumber: number) => {
         if (!selectedProject) return true;
         const projectedDeliveries = selectedProject.projectedDeliveries || 0;
-        const currentDeliveries = selectedProject.metrics.length;
-        return deliveryNumber > currentDeliveries && deliveryNumber <= projectedDeliveries;
+        // This validation is simplified. A real app would check existing delivery numbers.
+        return deliveryNumber > 0 && deliveryNumber <= projectedDeliveries;
     }
     
     const budgetValidation = (budget: number) => {
@@ -76,7 +77,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: Cre
     }
 
     const dynamicFormSchema = formSchema.refine(data => deliveryNumberValidation(data.deliveryNumber), {
-        message: "Delivery number is invalid or already exists.",
+        message: "Delivery number is invalid or exceeds projected deliveries.",
         path: ["deliveryNumber"],
     }).refine(data => budgetValidation(data.budget), {
         message: "Budget for this delivery exceeds remaining project budget.",
@@ -85,13 +86,11 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: Cre
 
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        // Here you would typically handle the logic to add the delivery to the project.
-        // For now, we'll just show a success toast.
+        onDeliveryCardCreated(values);
         toast({
             title: "Delivery Card Created",
             description: `A new delivery card for project "${selectedProject?.name}" has been created.`,
         });
-        console.log("New Delivery Card Data:", values);
         form.reset();
         onOpenChange(false);
     }
@@ -127,7 +126,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: Cre
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {projects.map(p => (
+                                            {projects.filter(p => p.stage !== 'Cerrado').map(p => (
                                                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                                             ))}
                                         </SelectContent>
@@ -140,7 +139,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: Cre
                         {selectedProject && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm p-3 bg-muted/50 rounded-lg border">
                                 <div><span className="font-semibold">Projected Deliveries:</span> {selectedProject.projectedDeliveries}</div>
-                                <div><span className="font-semibold">Deliveries Made:</span> {selectedProject.metrics.length}</div>
+                                <div><span className="font-semibold">Deliveries Made:</span> {selectedProject.metrics.reduce((acc, m) => acc + m.deliveries, 0)}</div>
                                 <div><span className="font-semibold">Total Budget:</span> ${selectedProject.budget.toLocaleString()}</div>
                                 <div><span className="font-semibold">Remaining Budget:</span> ${(selectedProject.budget - selectedProject.budgetSpent).toLocaleString()}</div>
                             </div>
@@ -222,4 +221,3 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects }: Cre
         </Dialog>
     );
 }
-

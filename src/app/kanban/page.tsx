@@ -2,9 +2,9 @@
 "use client";
 
 import { useState } from 'react';
-import type { Project, RiskLevel, ProjectStage } from '@/lib/types';
+import type { Project, RiskLevel, ProjectStage, Delivery } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { addProject, getProjects } from '@/lib/data';
+import { addProject, getProjects, getDeliveries, addDelivery } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,31 +21,32 @@ import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
 
-const ALL_RISKS: RiskLevel[] = ['Low', 'Medium', 'High'];
+const ALL_PROJECT_IDS: string[] = getProjects().map(p => p.id);
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
 
 export default function KanbanPage() {
     const [projects, setProjects] = useState(getProjects());
+    const [deliveries, setDeliveries] = useState(getDeliveries());
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedRisks, setSelectedRisks] = useState<Set<RiskLevel>>(new Set(ALL_RISKS));
+    const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(ALL_PROJECT_IDS));
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
 
-    const handleRiskToggle = (risk: RiskLevel) => {
-        const newRisks = new Set(selectedRisks);
-        if (newRisks.has(risk)) {
-            newRisks.delete(risk);
+    const handleProjectToggle = (projectId: string) => {
+        const newProjects = new Set(selectedProjects);
+        if (newProjects.has(projectId)) {
+            newProjects.delete(projectId);
         } else {
-            newRisks.add(risk);
+            newProjects.add(projectId);
         }
-        setSelectedRisks(newRisks);
+        setSelectedProjects(newProjects);
     };
     
-    const filteredProjects = projects.filter(project => {
-        const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesRisk = selectedRisks.size === 0 || selectedRisks.has(project.riskLevel);
-        return matchesSearch && matchesRisk;
+    const filteredDeliveries = deliveries.filter(delivery => {
+        const matchesSearch = delivery.projectName.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesProject = selectedProjects.size === 0 || selectedProjects.has(delivery.projectId);
+        return matchesSearch && matchesProject;
     });
 
     const onDragEnd = (result: DropResult) => {
@@ -59,20 +60,20 @@ export default function KanbanPage() {
             return;
         }
         
-        const newProjects = Array.from(projects);
-        const project = newProjects.find(p => p.id === draggableId);
+        const newDeliveries = Array.from(deliveries);
+        const delivery = newDeliveries.find(d => d.id === draggableId);
 
-        if (project) {
-            project.stage = destination.droppableId as ProjectStage;
+        if (delivery) {
+            delivery.stage = destination.droppableId as ProjectStage;
             // Note: This only updates the local state. 
             // In a real app, you'd call an API to persist this change.
-            setProjects(newProjects);
+            setDeliveries(newDeliveries);
         }
     };
 
-    const handleProjectCreated = (newProject: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
-        const project: Project = {
-            ...newProject,
+    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
+        const newProject: Project = {
+            ...newProjectData,
             id: `PRJ-00${getProjects().length + 1}`,
             stage: 'Definición',
             riskLevel: 'Low', // Default risk level
@@ -80,9 +81,28 @@ export default function KanbanPage() {
             owner: { name: 'New User', avatar: '' }, // Placeholder owner
             metrics: [],
         };
-        addProject(project);
+        addProject(newProject);
         setProjects(getProjects());
     };
+    
+    const handleDeliveryCardCreated = (values: {projectId: string; deliveryNumber: number; budget: number; estimatedDate: Date}) => {
+        const project = projects.find(p => p.id === values.projectId);
+        if (!project) return;
+
+        const newDelivery: Delivery = {
+            id: `DLV-00${deliveries.length + 1}`,
+            projectId: project.id,
+            projectName: project.name,
+            deliveryNumber: values.deliveryNumber,
+            stage: 'Definición', // Default stage
+            budget: values.budget,
+            estimatedDate: values.estimatedDate.toISOString(),
+            owner: project.owner,
+        };
+        addDelivery(newDelivery);
+        setDeliveries(getDeliveries());
+        setProjects(getProjects());
+    }
 
 
     return (
@@ -91,7 +111,7 @@ export default function KanbanPage() {
                 <div className="flex items-center gap-4 p-4 md:p-8 md:pb-4 pb-2 border-b">
                     <div className="relative flex-1">
                         <Input
-                            placeholder="Search projects..."
+                            placeholder="Search deliveries..."
                             className="w-full max-w-sm"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -101,20 +121,20 @@ export default function KanbanPage() {
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <ListFilter className="mr-2 h-4 w-4" />
-                                Filter
+                                Filter by Project
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Filter by Risk</DropdownMenuLabel>
+                            <DropdownMenuLabel>Filter by Project</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            {ALL_RISKS.map(risk => (
+                            {projects.map(p => (
                                 <DropdownMenuCheckboxItem
-                                    key={risk}
-                                    checked={selectedRisks.has(risk)}
+                                    key={p.id}
+                                    checked={selectedProjects.has(p.id)}
                                     onSelect={(e) => e.preventDefault()}
-                                    onClick={() => handleRiskToggle(risk)}
+                                    onClick={() => handleProjectToggle(p.id)}
                                 >
-                                    {risk}
+                                    {p.name}
                                 </DropdownMenuCheckboxItem>
                             ))}
                         </DropdownMenuContent>
@@ -138,7 +158,7 @@ export default function KanbanPage() {
                     </DropdownMenu>
                 </div>
                 <div className="flex-1 overflow-x-auto p-4 md:p-8">
-                    <KanbanBoard projects={filteredProjects} stages={STAGES} />
+                    <KanbanBoard deliveries={filteredDeliveries} stages={STAGES} />
                 </div>
             </div>
             <CreateProjectDialog 
@@ -149,6 +169,7 @@ export default function KanbanPage() {
              <CreateDeliveryCardDialog
                 isOpen={isCreateDeliveryCardDialogOpen}
                 onOpenChange={setCreateDeliveryCardDialogOpen}
+                onDeliveryCardCreated={handleDeliveryCardCreated}
                 projects={projects}
             />
         </DragDropContext>

@@ -1,4 +1,4 @@
-import type { Project, ProjectStage } from './types';
+import type { Project, ProjectStage, Delivery } from './types';
 
 let MOCK_PROJECTS: Project[] = [
   {
@@ -118,6 +118,15 @@ let MOCK_PROJECTS: Project[] = [
   },
 ];
 
+let MOCK_DELIVERIES: Delivery[] = [
+    { id: 'DLV-001', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 13, stage: 'Desarrollo Local', budget: 25000, estimatedDate: '2024-07-15', owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
+    { id: 'DLV-002', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 14, stage: 'Definición', budget: 25000, estimatedDate: '2024-07-30', owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
+    { id: 'DLV-003', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 7, stage: 'Ambiente TST', budget: 150000, estimatedDate: '2024-08-01', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' } },
+    { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, estimatedDate: '2024-07-20', owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
+    { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, estimatedDate: '2024-09-01', owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' } },
+];
+
+
 export function getProjects(): Project[] {
   // Return a copy to avoid mutation of the original array
   return JSON.parse(JSON.stringify(MOCK_PROJECTS));
@@ -134,6 +143,19 @@ export function getProjectById(id: string): Project | undefined {
 
 export function getProjectsByStage(stage: ProjectStage): Project[] {
     return MOCK_PROJECTS.filter(p => p.stage === stage);
+}
+
+
+export function getDeliveries(): Delivery[] {
+  return JSON.parse(JSON.stringify(MOCK_DELIVERIES));
+}
+
+export function addDelivery(delivery: Delivery) {
+    MOCK_DELIVERIES.push(delivery);
+    const project = getProjectById(delivery.projectId);
+    if(project) {
+        project.budgetSpent += delivery.budget;
+    }
 }
 
 
