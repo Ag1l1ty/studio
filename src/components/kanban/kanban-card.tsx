@@ -3,11 +3,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { ArrowRight, Calendar, Flag, Archive, Package, Bug, Clock } from 'lucide-react';
+import { ArrowRight, Calendar, Flag, Archive, Package, Bug, Clock, MoreVertical, Trash2 } from 'lucide-react';
 import { Draggable } from 'react-beautiful-dnd';
 import { format } from 'date-fns';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface KanbanCardProps {
     delivery: Delivery;
@@ -40,9 +46,24 @@ export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: Kan
                     {...provided.dragHandleProps}
                 >
                     <Card className={`hover:shadow-md transition-shadow duration-200 bg-card ${snapshot.isDragging ? 'shadow-lg' : ''}`}>
-                        <CardHeader className="p-3 pb-2">
-                            <CardTitle className="text-sm font-semibold">Entrega #{delivery.deliveryNumber}</CardTitle>
-                            <p className="text-xs text-muted-foreground">{delivery.projectName}</p>
+                        <CardHeader className="p-3 pb-2 flex-row items-start justify-between">
+                            <div>
+                                <CardTitle className="text-sm font-semibold">Entrega #{delivery.deliveryNumber}</CardTitle>
+                                <p className="text-xs text-muted-foreground">{delivery.projectName}</p>
+                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => onArchive(delivery.id)}>
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Archivar
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </CardHeader>
                         <CardContent className="p-3 pt-0 text-xs text-muted-foreground space-y-2">
                            <div className="flex items-center gap-2">
@@ -93,17 +114,11 @@ export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: Kan
                                 <AvatarImage src={`https://picsum.photos/seed/${delivery.owner.name}/100`} alt={delivery.owner.name} />
                                 <AvatarFallback>{delivery.owner.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            {delivery.stage === 'Cerrado' ? (
-                                <Button variant="outline" size="sm" className="h-8" onClick={() => onArchive(delivery.id)}>
-                                    <Archive className="mr-2 h-4 w-4" /> Archivar
+                            <Link href={`/deliveries/${delivery.id}`} passHref>
+                                <Button variant="ghost" size="sm" className="h-8">
+                                    Ver detalle entrega <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
-                            ) : (
-                                <Link href={`/deliveries/${delivery.id}`} passHref>
-                                    <Button variant="ghost" size="sm" className="h-8">
-                                        Ver detalle entrega <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Button>
-                                </Link>
-                            )}
+                            </Link>
                         </CardFooter>
                     </Card>
                 </div>

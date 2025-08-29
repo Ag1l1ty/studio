@@ -50,6 +50,8 @@ export default function KanbanPage() {
     const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
     const [isConfirmingMove, setConfirmingMove] = useState(false);
     const [pendingMove, setPendingMove] = useState<PendingMove>(null);
+    const [isConfirmingArchive, setConfirmingArchive] = useState(false);
+    const [deliveryToArchive, setDeliveryToArchive] = useState<string | null>(null);
     const { toast } = useToast();
 
     const handleProjectToggle = (projectId: string) => {
@@ -163,11 +165,25 @@ export default function KanbanPage() {
     };
     
     const handleArchiveDelivery = (deliveryId: string) => {
-        setDeliveries(currentDeliveries => 
-            currentDeliveries.map(d => 
-                d.id === deliveryId ? { ...d, isArchived: true } : d
-            )
-        );
+        setDeliveryToArchive(deliveryId);
+        setConfirmingArchive(true);
+    };
+
+    const handleConfirmArchive = () => {
+        if (deliveryToArchive) {
+            setDeliveries(currentDeliveries =>
+                currentDeliveries.map(d =>
+                    d.id === deliveryToArchive ? { ...d, isArchived: true } : d
+                )
+            );
+        }
+        setConfirmingArchive(false);
+        setDeliveryToArchive(null);
+    };
+
+    const handleCancelArchive = () => {
+        setConfirmingArchive(false);
+        setDeliveryToArchive(null);
     };
 
     const handleUpdateDelivery = (deliveryId: string, updatedFields: Partial<Delivery>) => {
@@ -298,6 +314,20 @@ export default function KanbanPage() {
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={handleCancelMove}>Cancelar</AlertDialogCancel>
                         <AlertDialogAction onClick={handleConfirmMove}>Sí, mover tarjeta</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+             <AlertDialog open={isConfirmingArchive} onOpenChange={setConfirmingArchive}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                           Esta acción no se puede deshacer. Esto archivará permanentemente la tarjeta de entrega.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={handleCancelArchive}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmArchive}>Sí, archivar</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
