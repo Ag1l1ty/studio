@@ -3,17 +3,25 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { ArrowRight, Calendar, Flag, Archive, Package } from 'lucide-react';
+import { ArrowRight, Calendar, Flag, Archive, Package, Bug, Clock } from 'lucide-react';
 import { Draggable } from 'react-beautiful-dnd';
 import { format } from 'date-fns';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 
 interface KanbanCardProps {
     delivery: Delivery;
     index: number;
     onArchive: (deliveryId: string) => void;
+    onUpdateDelivery: (deliveryId: string, updatedFields: Partial<Delivery>) => void;
 }
 
-export function KanbanCard({ delivery, index, onArchive }: KanbanCardProps) {
+export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: KanbanCardProps) {
+
+    const handleTstFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        onUpdateDelivery(delivery.id, { [name]: value ? Number(value) : undefined });
+    }
 
     return (
         <Draggable draggableId={delivery.id} index={index}>
@@ -37,6 +45,38 @@ export function KanbanCard({ delivery, index, onArchive }: KanbanCardProps) {
                                 <Flag className="w-3 h-3" />
                                 <span>Budget: ${delivery.budget.toLocaleString()}</span>
                             </div>
+                            {delivery.stage === 'Ambiente TST' && (
+                                <div className="space-y-2 pt-2 border-t mt-2">
+                                    <div className="space-y-1">
+                                        <Label htmlFor={`errorCount-${delivery.id}`} className="text-xs flex items-center gap-1"><Bug className="w-3 h-3" /> Cantidad Errores</Label>
+                                        <Input
+                                            id={`errorCount-${delivery.id}`}
+                                            name="errorCount"
+                                            type="number"
+                                            className="h-7 text-xs"
+                                            placeholder="0"
+                                            value={delivery.errorCount ?? ''}
+                                            onChange={handleTstFieldChange}
+                                            onClick={(e) => e.stopPropagation()} // Prevent drag from starting on click
+                                            onMouseDown={(e) => e.stopPropagation()} // Prevent drag from starting on click
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor={`errorSolutionTime-${delivery.id}`} className="text-xs flex items-center gap-1"><Clock className="w-3 h-3" /> Tiempo Solución (días)</Label>
+                                        <Input
+                                            id={`errorSolutionTime-${delivery.id}`}
+                                            name="errorSolutionTime"
+                                            type="number"
+                                            className="h-7 text-xs"
+                                            placeholder="0"
+                                            value={delivery.errorSolutionTime ?? ''}
+                                            onChange={handleTstFieldChange}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                         <CardFooter className="p-3 pt-0 flex justify-between items-center">
                              <Avatar className="h-6 w-6">

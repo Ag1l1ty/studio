@@ -11,6 +11,7 @@ interface KanbanColumnProps {
     stage: ProjectStage;
     deliveries: Delivery[];
     onArchiveDelivery: (deliveryId: string) => void;
+    onUpdateDelivery: (deliveryId: string, updatedFields: Partial<Delivery>) => void;
 }
 
 // A workaround for the react-beautiful-dnd library with React 18 strict mode
@@ -31,7 +32,7 @@ const StrictModeDroppable = ({ children, ...props }: DroppableProps) => {
 };
 
 
-export function KanbanColumn({ stage, deliveries, onArchiveDelivery }: KanbanColumnProps) {
+export function KanbanColumn({ stage, deliveries, onArchiveDelivery, onUpdateDelivery }: KanbanColumnProps) {
     return (
         <Card className="w-80 shrink-0 h-full flex flex-col">
             <CardHeader className="p-4">
@@ -54,6 +55,7 @@ export function KanbanColumn({ stage, deliveries, onArchiveDelivery }: KanbanCol
                                     delivery={delivery} 
                                     index={index}
                                     onArchive={onArchiveDelivery}
+                                    onUpdateDelivery={onUpdateDelivery}
                                 />
                             ))}
                             {provided.placeholder}

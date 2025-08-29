@@ -7,9 +7,10 @@ interface KanbanBoardProps {
     deliveries: Delivery[];
     stages: ProjectStage[];
     onArchiveDelivery: (deliveryId: string) => void;
+    onUpdateDelivery: (deliveryId: string, updatedFields: Partial<Delivery>) => void;
 }
 
-export function KanbanBoard({ deliveries, stages, onArchiveDelivery }: KanbanBoardProps) {
+export function KanbanBoard({ deliveries, stages, onArchiveDelivery, onUpdateDelivery }: KanbanBoardProps) {
     return (
         <div className="flex gap-4 h-full pb-4">
             {stages.map(stage => {
@@ -20,6 +21,7 @@ export function KanbanBoard({ deliveries, stages, onArchiveDelivery }: KanbanBoa
                         stage={stage} 
                         deliveries={deliveriesInStage} 
                         onArchiveDelivery={onArchiveDelivery}
+                        onUpdateDelivery={onUpdateDelivery}
                     />
                 );
             })}

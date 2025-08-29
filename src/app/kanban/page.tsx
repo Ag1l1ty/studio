@@ -21,6 +21,7 @@ import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
 import { addMonths, format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
@@ -32,6 +33,7 @@ export default function KanbanPage() {
     const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(projects.map(p => p.id)));
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
+    const { toast } = useToast();
 
     const handleProjectToggle = (projectId: string) => {
         const newProjects = new Set(selectedProjects);
@@ -58,6 +60,23 @@ export default function KanbanPage() {
         if (!destination) {
             return;
         }
+
+        const movedDelivery = deliveries.find(d => d.id === draggableId);
+        if (!movedDelivery) return;
+        
+        // Prevent moving from TST if fields are not filled
+        if (movedDelivery.stage === 'Ambiente TST' && 
+            STAGES.indexOf(destination.droppableId as ProjectStage) > STAGES.indexOf('Ambiente TST')) {
+            if (movedDelivery.errorCount === undefined || movedDelivery.errorSolutionTime === undefined) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Campos requeridos incompletos',
+                    description: 'Por favor, complete los campos de errores y tiempo de solución antes de mover la tarjeta.',
+                })
+                return;
+            }
+        }
+
 
         if (destination.droppableId === source.droppableId && destination.index === source.index) {
             return;
@@ -86,12 +105,15 @@ export default function KanbanPage() {
                     if (metricIndex > -1) {
                         project.metrics[metricIndex].deliveries += 1;
                         project.metrics[metricIndex].spent += delivery.budget;
+                        if(delivery.errorCount) {
+                            project.metrics[metricIndex].errors += delivery.errorCount;
+                        }
                     } else {
                         // If no metric for this month, create one
                         project.metrics.push({
                             month: monthName,
                             deliveries: 1,
-                            errors: 0,
+                            errors: delivery.errorCount || 0,
                             budget: delivery.budget, // This might need more sophisticated logic
                             spent: delivery.budget,
                         });
@@ -114,6 +136,13 @@ export default function KanbanPage() {
         );
     };
 
+    const handleUpdateDelivery = (deliveryId: string, updatedFields: Partial<Delivery>) => {
+        setDeliveries(currentDeliveries =>
+            currentDeliveries.map(d =>
+                d.id === deliveryId ? { ...d, ...updatedFields } : d
+            )
+        );
+    };
 
     const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
         const newProject: Project = {
@@ -204,7 +233,12 @@ export default function KanbanPage() {
                     </DropdownMenu>
                 </div>
                 <div className="flex-1 overflow-x-auto p-4 md:p-8">
-                    <KanbanBoard deliveries={filteredDeliveries} stages={STAGES} onArchiveDelivery={handleArchiveDelivery} />
+                    <KanbanBoard 
+                        deliveries={filteredDeliveries} 
+                        stages={STAGES} 
+                        onArchiveDelivery={handleArchiveDelivery}
+                        onUpdateDelivery={handleUpdateDelivery}
+                    />
                 </div>
             </div>
             <CreateProjectDialog 

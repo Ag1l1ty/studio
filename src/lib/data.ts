@@ -124,6 +124,7 @@ let MOCK_DELIVERIES: Delivery[] = [
     { id: 'DLV-003', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 7, stage: 'Ambiente TST', budget: 150000, estimatedDate: '2024-08-01', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' } },
     { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, estimatedDate: '2024-07-20', owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
     { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, estimatedDate: '2024-09-01', owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' } },
+    { id: 'DLV-006', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 8, stage: 'Ambiente TST', budget: 120000, estimatedDate: '2024-08-15', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' }, errorCount: 5, errorSolutionTime: 2 },
 ];
 
 

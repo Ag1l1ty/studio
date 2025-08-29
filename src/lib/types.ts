@@ -15,6 +15,8 @@ export type Delivery = {
     avatar: string;
   };
   isArchived?: boolean;
+  errorCount?: number;
+  errorSolutionTime?: number;
 };
 
 export type Project = {
