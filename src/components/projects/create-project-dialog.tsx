@@ -31,11 +31,15 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
+const numberValue = z.custom<number>().refine(value => value > 0, {
+    message: "Budget must be a positive number.",
+});
+
 const formSchema = z.object({
     name: z.string().min(3, "Project name must be at least 3 characters."),
     description: z.string().min(10, "Description must be at least 10 characters."),
     projectedDeliveries: z.coerce.number().int().positive("Projected deliveries must be a positive integer."),
-    budget: z.coerce.number().positive("Budget must be a positive number."),
+    budget: z.string().refine(val => !isNaN(Number(val.replace(/,/g, ''))), "Must be a number").transform(val => Number(val.replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     startDate: z.date({ required_error: "A start date is required." }),
     endDate: z.date({ required_error: "An end date is required." }),
 }).refine(data => data.endDate > data.startDate, {
@@ -47,7 +51,7 @@ const formSchema = z.object({
 type CreateProjectDialogProps = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onProjectCreated: (values: Omit<z.infer<typeof formSchema>, 'id'>) => void;
+    onProjectCreated: (values: z.infer<typeof formSchema>) => void;
 }
 
 export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: CreateProjectDialogProps) {
@@ -62,6 +66,18 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
             budget: 0,
         },
     });
+
+    const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+        const value = e.target.value;
+        const numericValue = value.replace(/[^0-9]/g, '');
+        if (numericValue) {
+            const formattedValue = new Intl.NumberFormat('en-US').format(Number(numericValue));
+            field.onChange(formattedValue);
+        } else {
+            field.onChange('');
+        }
+    }
+
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         onProjectCreated(values);
@@ -142,7 +158,11 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
                                     <FormItem>
                                         <FormLabel>Total Budget</FormLabel>
                                         <FormControl>
-                                            <Input type="number" placeholder="e.g., 500000" {...field} />
+                                             <Input 
+                                                placeholder="e.g., 500,000"
+                                                {...field}
+                                                onChange={(e) => handleBudgetChange(e, field)}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -236,4 +256,3 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
         </Dialog>
     );
 }
-

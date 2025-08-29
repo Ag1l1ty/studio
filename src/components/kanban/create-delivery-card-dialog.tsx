@@ -36,7 +36,7 @@ import React from 'react';
 const formSchema = z.object({
     projectId: z.string().min(1, "Please select a project."),
     deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
-    budget: z.coerce.number().positive("Budget must be a positive number."),
+    budget: z.string().refine(val => !isNaN(Number(val.replace(/,/g, ''))), "Must be a number").transform(val => Number(val.replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     estimatedDate: z.date({ required_error: "An estimated date is required." }),
 });
 
@@ -62,6 +62,17 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
 
     const selectedProjectId = form.watch('projectId');
     const selectedProject = React.useMemo(() => getProjectById(selectedProjectId), [selectedProjectId]);
+
+    const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+        const value = e.target.value;
+        const numericValue = value.replace(/[^0-9]/g, '');
+        if (numericValue) {
+            const formattedValue = new Intl.NumberFormat('en-US').format(Number(numericValue));
+            field.onChange(formattedValue);
+        } else {
+            field.onChange('');
+        }
+    }
 
     const deliveryNumberValidation = (deliveryNumber: number) => {
         if (!selectedProject) return true;
@@ -167,7 +178,11 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
                                     <FormItem>
                                         <FormLabel>Budget for Delivery</FormLabel>
                                         <FormControl>
-                                            <Input type="number" {...field} disabled={!selectedProject} />
+                                            <Input 
+                                                {...field}
+                                                onChange={(e) => handleBudgetChange(e, field)} 
+                                                disabled={!selectedProject} 
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
