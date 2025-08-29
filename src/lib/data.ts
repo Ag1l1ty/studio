@@ -222,7 +222,8 @@ export function addDelivery(delivery: Delivery) {
 
 
 export function getDashboardKpis(projects: Project[]) {
-    const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
+    const projectsInProgress = projects.filter(p => p.stage !== 'Cerrado');
+    const totalBudget = projectsInProgress.reduce((sum, p) => sum + p.budget, 0);
     const onTrackProjects = projects.filter(p => p.riskLevel === 'Low').length;
     const highRiskProjects = projects.filter(p => p.riskLevel === 'High').length;
     const totalDeliveries = projects.flatMap(p => p.metrics).reduce((sum, m) => sum + m.deliveries, 0);
