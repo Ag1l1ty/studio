@@ -9,7 +9,10 @@ export type Delivery = {
   deliveryNumber: number;
   stage: ProjectStage;
   budget: number;
+  budgetSpent?: number;
   estimatedDate: string;
+  creationDate: string;
+  lastBudgetUpdate?: string;
   owner: {
     name: string;
     avatar: string;

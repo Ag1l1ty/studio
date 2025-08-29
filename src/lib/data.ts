@@ -1,4 +1,5 @@
 import type { Project, ProjectStage, Delivery } from './types';
+import { subDays } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
   {
@@ -118,13 +119,14 @@ let MOCK_PROJECTS: Project[] = [
   },
 ];
 
+const today = new Date();
 let MOCK_DELIVERIES: Delivery[] = [
-    { id: 'DLV-001', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 13, stage: 'Desarrollo Local', budget: 25000, estimatedDate: '2024-07-15', owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
-    { id: 'DLV-002', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 14, stage: 'Definición', budget: 25000, estimatedDate: '2024-07-30', owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
-    { id: 'DLV-003', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 7, stage: 'Ambiente TST', budget: 150000, estimatedDate: '2024-08-01', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' } },
-    { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, estimatedDate: '2024-07-20', owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
-    { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, estimatedDate: '2024-09-01', owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' } },
-    { id: 'DLV-006', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 8, stage: 'Ambiente TST', budget: 120000, estimatedDate: '2024-08-15', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' }, errorCount: 5, errorSolutionTime: 2 },
+    { id: 'DLV-001', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 13, stage: 'Desarrollo Local', budget: 25000, budgetSpent: 10000, creationDate: subDays(today, 20).toISOString(), estimatedDate: '2024-07-15', lastBudgetUpdate: subDays(today, 3).toISOString(), owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
+    { id: 'DLV-002', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 14, stage: 'Definición', budget: 25000, budgetSpent: 0, creationDate: subDays(today, 2).toISOString(), estimatedDate: '2024-07-30', owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
+    { id: 'DLV-003', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 7, stage: 'Ambiente TST', budget: 150000, budgetSpent: 95000, creationDate: subDays(today, 45).toISOString(), estimatedDate: '2024-08-01', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' } },
+    { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, budgetSpent: 20000, creationDate: subDays(today, 30).toISOString(), estimatedDate: '2024-07-20', owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
+    { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, budgetSpent: 0, creationDate: subDays(today, 1).toISOString(), estimatedDate: '2024-09-01', owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' }, lastBudgetUpdate: subDays(today, 10).toISOString() },
+    { id: 'DLV-006', projectId: 'PRJ-002', projectName: 'AI-Powered Claims Processing', deliveryNumber: 8, stage: 'Ambiente TST', budget: 120000, budgetSpent: 10000, creationDate: subDays(today, 15).toISOString(), estimatedDate: '2024-08-15', owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' }, errorCount: 5, errorSolutionTime: 2 },
 ];
 
 
@@ -152,6 +154,11 @@ export function getProjectsByStage(stage: ProjectStage): Project[] {
 export function getDeliveries(): Delivery[] {
   return JSON.parse(JSON.stringify(MOCK_DELIVERIES));
 }
+
+export function getDeliveryById(id: string): Delivery | undefined {
+    return MOCK_DELIVERIES.find(d => d.id === id);
+}
+
 
 export function addDelivery(delivery: Delivery) {
     MOCK_DELIVERIES.push(delivery);

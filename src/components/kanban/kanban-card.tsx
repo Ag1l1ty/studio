@@ -98,9 +98,9 @@ export function KanbanCard({ delivery, index, onArchive, onUpdateDelivery }: Kan
                                     <Archive className="mr-2 h-4 w-4" /> Archivar
                                 </Button>
                             ) : (
-                                <Link href={`/projects/${delivery.projectId}`} passHref>
+                                <Link href={`/deliveries/${delivery.id}`} passHref>
                                     <Button variant="ghost" size="sm" className="h-8">
-                                        Ver Proyecto <ArrowRight className="ml-2 h-4 w-4" />
+                                        Ver detalle entrega <ArrowRight className="ml-2 h-4 w-4" />
                                     </Button>
                                 </Link>
                             )}

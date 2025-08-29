@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const getTitleFromPathname = (pathname: string) => {
     if (pathname === '/') return 'Executive Dashboard';
     if (pathname.startsWith('/projects')) return 'Project Details';
+    if (pathname.startsWith('/deliveries')) return 'Delivery Details';
     const cleanPath = pathname.replace('/', '').replace(/-/g, ' ');
     return cleanPath.charAt(0).toUpperCase() + cleanPath.slice(1);
 }
