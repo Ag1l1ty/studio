@@ -16,6 +16,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ListFilter, PlusCircle, ChevronDown } from 'lucide-react';
 import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
@@ -25,6 +35,11 @@ import { useToast } from '@/hooks/use-toast';
 
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
+type PendingMove = {
+    deliveryId: string;
+    destination: DropResult['destination'];
+} | null;
+
 
 export default function KanbanPage() {
     const [projects, setProjects] = useState(getProjects());
@@ -33,6 +48,8 @@ export default function KanbanPage() {
     const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(projects.map(p => p.id)));
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
+    const [isConfirmingMove, setConfirmingMove] = useState(false);
+    const [pendingMove, setPendingMove] = useState<PendingMove>(null);
     const { toast } = useToast();
 
     const handleProjectToggle = (projectId: string) => {
@@ -54,36 +71,11 @@ export default function KanbanPage() {
         return matchesSearch && matchesProject;
     });
 
-    const onDragEnd = (result: DropResult) => {
-        const { destination, source, draggableId } = result;
+    const executeMove = (deliveryId: string, destination: DropResult['destination']) => {
+        if (!destination) return;
 
-        if (!destination) {
-            return;
-        }
-
-        const movedDelivery = deliveries.find(d => d.id === draggableId);
-        if (!movedDelivery) return;
-        
-        // Prevent moving from TST if fields are not filled
-        if (movedDelivery.stage === 'Ambiente TST' && 
-            STAGES.indexOf(destination.droppableId as ProjectStage) > STAGES.indexOf('Ambiente TST')) {
-            if (movedDelivery.errorCount === undefined || movedDelivery.errorSolutionTime === undefined) {
-                toast({
-                    variant: 'destructive',
-                    title: 'Campos requeridos incompletos',
-                    description: 'Por favor, complete los campos de errores y tiempo de solución antes de mover la tarjeta.',
-                })
-                return;
-            }
-        }
-
-
-        if (destination.droppableId === source.droppableId && destination.index === source.index) {
-            return;
-        }
-        
         const newDeliveries = Array.from(deliveries);
-        const deliveryIndex = newDeliveries.findIndex(d => d.id === draggableId);
+        const deliveryIndex = newDeliveries.findIndex(d => d.id === deliveryId);
         const delivery = newDeliveries[deliveryIndex];
 
         if (delivery) {
@@ -91,7 +83,6 @@ export default function KanbanPage() {
             const newStage = destination.droppableId as ProjectStage;
             delivery.stage = newStage;
 
-            // If the card is moved to the "Cerrado" column
             if (newStage === 'Cerrado' && originalStage !== 'Cerrado') {
                 const project = getProjectById(delivery.projectId);
                 if (project) {
@@ -109,23 +100,66 @@ export default function KanbanPage() {
                             project.metrics[metricIndex].errors += delivery.errorCount;
                         }
                     } else {
-                        // If no metric for this month, create one
                         project.metrics.push({
                             month: monthName,
                             deliveries: 1,
                             errors: delivery.errorCount || 0,
-                            budget: delivery.budget, // This might need more sophisticated logic
+                            budget: delivery.budget,
                             spent: delivery.budget,
                         });
                     }
-                    
-                    // The project object is modified by reference from getProjectById, so we need to update the state
                     setProjects(getProjects());
                 }
             }
-
             setDeliveries(newDeliveries);
         }
+    };
+
+
+    const onDragEnd = (result: DropResult) => {
+        const { destination, source, draggableId } = result;
+
+        if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
+            return;
+        }
+
+        const movedDelivery = deliveries.find(d => d.id === draggableId);
+        if (!movedDelivery) return;
+        
+        const isMovingFromTst = movedDelivery.stage === 'Ambiente TST' && 
+                               STAGES.indexOf(destination.droppableId as ProjectStage) > STAGES.indexOf('Ambiente TST');
+        
+        if (isMovingFromTst) {
+            if (movedDelivery.errorCount === undefined || movedDelivery.errorSolutionTime === undefined) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Campos requeridos incompletos',
+                    description: 'Por favor, complete los campos de errores y tiempo de solución antes de mover la tarjeta.',
+                });
+                return;
+            }
+            
+            if (movedDelivery.errorCount === 0 || movedDelivery.errorSolutionTime === 0) {
+                setPendingMove({ deliveryId: draggableId, destination });
+                setConfirmingMove(true);
+                return;
+            }
+        }
+        
+        executeMove(draggableId, destination);
+    };
+
+    const handleConfirmMove = () => {
+        if (pendingMove) {
+            executeMove(pendingMove.deliveryId, pendingMove.destination);
+        }
+        setConfirmingMove(false);
+        setPendingMove(null);
+    };
+
+    const handleCancelMove = () => {
+        setConfirmingMove(false);
+        setPendingMove(null);
     };
     
     const handleArchiveDelivery = (deliveryId: string) => {
@@ -172,6 +206,7 @@ export default function KanbanPage() {
             stage: 'Definición', // Default stage
             budget: values.budget,
             estimatedDate: values.estimatedDate.toISOString(),
+            creationDate: new Date().toISOString(),
             owner: project.owner,
         };
 
@@ -252,6 +287,20 @@ export default function KanbanPage() {
                 onDeliveryCardCreated={handleDeliveryCardCreated}
                 projects={projects}
             />
+            <AlertDialog open={isConfirmingMove} onOpenChange={setConfirmingMove}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar Movimiento</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Los campos de errores o tiempo de solución están en cero. ¿Estás seguro de que no hubo errores en esta entrega y deseas mover la tarjeta?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={handleCancelMove}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmMove}>Sí, mover tarjeta</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DragDropContext>
     );
 }

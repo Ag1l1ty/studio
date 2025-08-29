@@ -45,7 +45,7 @@ type CreateDeliveryCardDialogProps = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     projects: Project[];
-    onDeliveryCardCreated: (values: z.infer<typeof formSchema>) => void;
+    onDeliveryCardCreated: (values: z.infer<typeof formSchema> & { creationDate: string }) => void;
 }
 
 export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDeliveryCardCreated }: CreateDeliveryCardDialogProps) {
@@ -108,7 +108,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, onDel
 
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        onDeliveryCardCreated(values);
+        onDeliveryCardCreated({ ...values, creationDate: new Date().toISOString() });
         toast({
             title: "Delivery Card Created",
             description: `A new delivery card for project "${selectedProject?.name}" has been created.`,
