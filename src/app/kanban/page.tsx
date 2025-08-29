@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import type { Project, RiskLevel, ProjectStage } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { getProjects } from '@/lib/data';
+import { addProject, getProjects } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,8 +14,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import { ListFilter } from 'lucide-react';
+import { ListFilter, PlusCircle } from 'lucide-react';
 import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
+import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 
 const ALL_RISKS: RiskLevel[] = ['Low', 'Medium', 'High'];
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
@@ -25,6 +26,7 @@ export default function KanbanPage() {
     const [projects, setProjects] = useState(getProjects());
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedRisks, setSelectedRisks] = useState<Set<RiskLevel>>(new Set(ALL_RISKS));
+    const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
 
     const handleRiskToggle = (risk: RiskLevel) => {
         const newRisks = new Set(selectedRisks);
@@ -64,6 +66,20 @@ export default function KanbanPage() {
         }
     };
 
+    const handleProjectCreated = (newProject: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
+        const project: Project = {
+            ...newProject,
+            id: `PRJ-00${getProjects().length + 1}`,
+            stage: 'Definición',
+            riskLevel: 'Low', // Default risk level
+            budgetSpent: 0,
+            owner: { name: 'New User', avatar: '' }, // Placeholder owner
+            metrics: [],
+        };
+        addProject(project);
+        setProjects(getProjects());
+    };
+
 
     return (
         <DragDropContext onDragEnd={onDragEnd}>
@@ -77,7 +93,7 @@ export default function KanbanPage() {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <DropdownMenu>
+                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <ListFilter className="mr-2 h-4 w-4" />
@@ -99,11 +115,20 @@ export default function KanbanPage() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
+                    <Button onClick={() => setCreateProjectDialogOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Create Project
+                    </Button>
                 </div>
                 <div className="flex-1 overflow-x-auto p-4 md:p-8">
                     <KanbanBoard projects={filteredProjects} stages={STAGES} />
                 </div>
             </div>
+            <CreateProjectDialog 
+                isOpen={isCreateProjectDialogOpen}
+                onOpenChange={setCreateProjectDialogOpen}
+                onProjectCreated={handleProjectCreated}
+            />
         </DragDropContext>
     );
 }

@@ -1,6 +1,6 @@
 import type { Project, ProjectStage } from './types';
 
-const MOCK_PROJECTS: Project[] = [
+let MOCK_PROJECTS: Project[] = [
   {
     id: 'PRJ-001',
     name: 'Digital Onboarding Platform',
@@ -113,8 +113,14 @@ const MOCK_PROJECTS: Project[] = [
 ];
 
 export function getProjects(): Project[] {
-  return MOCK_PROJECTS;
+  // Return a copy to avoid mutation of the original array
+  return JSON.parse(JSON.stringify(MOCK_PROJECTS));
 }
+
+export function addProject(project: Project) {
+    MOCK_PROJECTS.push(project);
+}
+
 
 export function getProjectById(id: string): Project | undefined {
     return MOCK_PROJECTS.find(p => p.id === id);
