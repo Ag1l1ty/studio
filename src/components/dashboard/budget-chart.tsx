@@ -1,8 +1,9 @@
 "use client"
 
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts"
 import type { Project } from "@/lib/types"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { aggregateMetrics } from "@/lib/data"
 
 interface BudgetChartProps {
   projects: Project[];
@@ -20,17 +21,12 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function BudgetChart({ projects }: BudgetChartProps) {
-  const chartData = projects
-    .filter(p => p.stage !== 'Closed')
-    .map(p => ({
-        name: p.id,
-        budget: p.budget,
-        spent: p.budgetSpent,
-    }));
+  const chartData = aggregateMetrics(projects);
 
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
+      <LineChart accessibilityLayer data={chartData}>
+         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="name"
           stroke="hsl(var(--foreground))"
@@ -46,7 +42,7 @@ export function BudgetChart({ projects }: BudgetChartProps) {
           tickFormatter={(value) => `$${value / 1000}k`}
         />
         <Tooltip
-          content={<ChartTooltipContent formatter={(value, name) => `$${Number(value).toLocaleString()}`} />}
+          content={<ChartTooltipContent formatter={(value) => `$${Number(value).toLocaleString()}`} />}
           cursor={{ fill: "hsl(var(--accent))" }}
         />
         <Legend
@@ -55,9 +51,9 @@ export function BudgetChart({ projects }: BudgetChartProps) {
                 paddingTop: "20px"
             }}
         />
-        <Bar dataKey="budget" name="Budget" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="spent" name="Spent" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-      </BarChart>
+        <Line type="monotone" dataKey="budget" name="Budget" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+        <Line type="monotone" dataKey="spent" name="Spent" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+      </LineChart>
     </ChartContainer>
   )
 }

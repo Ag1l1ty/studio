@@ -1,5 +1,4 @@
 
-
 import type { Project, ProjectStage, Delivery, RiskLevel } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
@@ -249,7 +248,7 @@ export function getDashboardKpis(projects: Project[]) {
 }
 
 export const aggregateMetrics = (projects: Project[]) => {
-    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number; totalErrorTime: number; errorEntries: number } } = {};
+    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number; totalErrorTime: number; errorEntries: number, budget: number, spent: number } } = {};
     const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthMap: { [key: string]: number } = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
@@ -270,7 +269,7 @@ export const aggregateMetrics = (projects: Project[]) => {
             const dataKey = `${monthName}-${currentYear}`;
 
             if (!monthlyData[dataKey]) {
-                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0 };
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0 };
             }
             monthlyData[dataKey].planned += plannedPerMonth;
         }
@@ -279,19 +278,21 @@ export const aggregateMetrics = (projects: Project[]) => {
         project.metrics.forEach(metric => {
             const metricMonthIndex = monthMap[metric.month];
             let metricYear = startYear;
-            if (metricMonthIndex < startMonth) {
+            if (metricMonthIndex < startMonth && startYear < getYear(endDate)) {
                 metricYear = startYear + 1;
-            }
-            if (getYear(parseISO(project.endDate)) < metricYear) {
-                metricYear = getYear(parseISO(project.endDate));
+            } else if (getYear(startDate) !== getYear(endDate) && metricMonthIndex < startMonth) {
+                metricYear = getYear(endDate);
             }
             
             const dataKey = `${metric.month}-${metricYear}`;
              if (!monthlyData[dataKey]) {
-                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0 };
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0 };
             }
             monthlyData[dataKey].actual += metric.deliveries;
             monthlyData[dataKey].errors += metric.errors;
+            monthlyData[dataKey].budget += metric.budget;
+            monthlyData[dataKey].spent += metric.spent;
+
             if (metric.errorSolutionTime && metric.errors > 0) {
               monthlyData[dataKey].totalErrorTime += metric.errorSolutionTime * metric.errors;
               monthlyData[dataKey].errorEntries += metric.errors;
@@ -321,7 +322,9 @@ export const aggregateMetrics = (projects: Project[]) => {
             planned: Math.round(cumulativePlanned),
             actual: cumulativeActual,
             errors: monthlyData[key].errors,
-            avgErrorSolutionTime: avgErrorTime
+            avgErrorSolutionTime: avgErrorTime,
+            budget: monthlyData[key].budget,
+            spent: monthlyData[key].spent
         };
     });
 };
@@ -335,5 +338,3 @@ export function getRiskProfile(score: number): { classification: RiskLevel, devi
     if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
     return { classification: 'Muy conservador', deviation: '+10%' };
 }
-
-    
