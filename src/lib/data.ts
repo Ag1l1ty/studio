@@ -1,5 +1,5 @@
 
-import type { Project, ProjectStage, Delivery, RiskLevel } from './types';
+import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
@@ -198,8 +198,6 @@ export function addProject(project: Project) {
 
 
 export function getProjectById(id: string): Project | undefined {
-    // This is a bit of a hack for a mock API, but it allows us to "update" the project
-    // by returning a reference to the object in the array.
     return MOCK_PROJECTS.find(p => p.id === id);
 }
 
@@ -335,7 +333,7 @@ export const aggregateMetrics = (projects: Project[]) => {
 };
 
 
-export function getRiskProfile(score: number): { classification: RiskLevel, deviation: string } {
+export function getRiskProfile(score: number): Omit<RiskResult, 'score'> {
     if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
     if (score >= 12 && score <=17) return { classification: 'Agresivo', deviation: '+100%' };
     if (score >= 10 && score <= 11) return { classification: 'Moderado - alto', deviation: '+70%' };
@@ -344,3 +342,13 @@ export function getRiskProfile(score: number): { classification: RiskLevel, devi
     if (score >= 1 && score <= 2) return { classification: 'Muy conservador', deviation: '+10%' };
     return { classification: 'Muy conservador', deviation: '+10%' };
 }
+
+export function updateProjectRisk(projectId: string, score: number, level: RiskLevel) {
+    const project = MOCK_PROJECTS.find(p => p.id === projectId);
+    if (project) {
+        project.riskScore = score;
+        project.riskLevel = level;
+    }
+}
+
+    

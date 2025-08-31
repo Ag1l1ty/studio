@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -24,29 +25,32 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { AlertCircle, CheckCircle, Shield, TrendingUp } from 'lucide-react';
-import { Input } from '../ui/input';
+import { getProjects, getProjectById, getRiskProfile, updateProjectRisk } from '@/lib/data';
+import type { Project, RiskResult } from '@/lib/types';
+
 
 const formSchema = z.object({
-    projectName: z.string().min(1, "Project name is required"),
+    projectId: z.string().min(1, "Project selection is required"),
     scopeClarity: z.coerce.number().min(1).max(5),
     techNovelty: z.enum(['low', 'medium', 'high']),
     teamExperience: z.enum(['high', 'medium', 'low']),
     externalDeps: z.coerce.number().min(0).max(10),
 });
 
-type RiskResult = {
-    score: number;
-    classification: 'Low' | 'Medium' | 'High';
-    deviation: string;
-}
 
 export function RiskAssessmentForm() {
     const [result, setResult] = useState<RiskResult | null>(null);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+    useEffect(() => {
+        setProjects(getProjects());
+    }, []);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            projectName: '',
+            projectId: '',
             scopeClarity: 3,
             techNovelty: 'medium',
             teamExperience: 'medium',
@@ -54,34 +58,38 @@ export function RiskAssessmentForm() {
         },
     });
 
+    const projectId = form.watch('projectId');
+
+    useEffect(() => {
+        if (projectId) {
+            const project = getProjectById(projectId);
+            if(project) {
+                setSelectedProject(project);
+            }
+        } else {
+            setSelectedProject(null);
+        }
+    }, [projectId]);
+
+
     function onSubmit(values: z.infer<typeof formSchema>) {
         let score = 0;
         
-        // Scope Clarity (1-5, lower is better) -> weight: 3
         score += (5 - values.scopeClarity) * 3;
 
-        // Tech Novelty -> weight: 4
         if (values.techNovelty === 'medium') score += 2 * 4;
         if (values.techNovelty === 'high') score += 4 * 4;
 
-        // Team Experience -> weight: 5
         if (values.teamExperience === 'medium') score += 2 * 5;
         if (values.teamExperience === 'low') score += 4 * 5;
 
-        // External Dependencies -> weight: 2
         score += values.externalDeps * 2;
         
-        let classification: RiskResult['classification'] = 'Low';
-        let deviation = "±10% in time/budget";
-        if (score > 40) {
-            classification = 'High';
-            deviation = "> ±25% in time/budget";
-        } else if (score > 20) {
-            classification = 'Medium';
-            deviation = "±10-25% in time/budget";
-        }
+        const riskProfile = getRiskProfile(score);
         
-        setResult({ score, classification, deviation });
+        updateProjectRisk(values.projectId, score, riskProfile.classification);
+        setProjects(getProjects()); // Refresh projects data
+        setResult({ ...riskProfile, score });
     }
     
     if (result) {
@@ -91,7 +99,7 @@ export function RiskAssessmentForm() {
             <Card>
                 <CardHeader>
                     <CardTitle>Risk Assessment Result</CardTitle>
-                    <CardDescription>Risk profile for project: {form.getValues('projectName')}</CardDescription>
+                    <CardDescription>Risk profile for project: {selectedProject?.name}</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                     <div className="flex justify-center">{resultIcon}</div>
@@ -100,7 +108,7 @@ export function RiskAssessmentForm() {
                     <div className="text-sm border rounded-lg p-4 bg-secondary/50 inline-block">
                         <p><TrendingUp className="inline-block mr-2" />Potential Deviation: <span className="font-semibold">{result.deviation}</span></p>
                     </div>
-                     <Button onClick={() => setResult(null)}>Assess Another Project</Button>
+                     <Button onClick={() => { form.reset(); setResult(null); setSelectedProject(null); }}>Assess Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -109,19 +117,43 @@ export function RiskAssessmentForm() {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <FormField
+                 <FormField
                   control={form.control}
-                  name="projectName"
+                  name="projectId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Project Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Digital Onboarding Platform" {...field} />
-                      </FormControl>
+                      <FormLabel>Project</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a project to assess" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {projects.map(p => (
+                                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                
+                {selectedProject && (
+                    <div className="p-4 border rounded-lg bg-muted/50">
+                        <h4 className="font-semibold mb-2">Current Risk Profile</h4>
+                        {selectedProject.riskScore !== undefined && selectedProject.riskScore > 0 ? (
+                            <p className="text-sm">
+                                Current Level: <span className="font-bold">{selectedProject.riskLevel}</span> (Score: {selectedProject.riskScore})
+                            </p>
+                        ) : (
+                            <p className="text-sm text-muted-foreground">This project has not been assessed yet.</p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">Filling out and submitting this form will overwrite the current risk assessment.</p>
+                    </div>
+                )}
+
 
                 <FormField
                     control={form.control}
@@ -134,6 +166,7 @@ export function RiskAssessmentForm() {
                                     min={1} max={5} step={1}
                                     defaultValue={[field.value]}
                                     onValueChange={(value) => field.onChange(value[0])}
+                                    disabled={!selectedProject}
                                 />
                             </FormControl>
                             <div className="text-center font-medium">{field.value}</div>
@@ -152,6 +185,7 @@ export function RiskAssessmentForm() {
                                     onValueChange={field.onChange}
                                     defaultValue={field.value}
                                     className="flex flex-col space-y-1"
+                                     disabled={!selectedProject}
                                 >
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="low" /></FormControl>
@@ -178,7 +212,7 @@ export function RiskAssessmentForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Team Experience with Domain/Tech</FormLabel>
-                             <Select onValueChange={field.onChange} defaultValue={field.value}>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
                                 <FormControl>
                                     <SelectTrigger><SelectValue placeholder="Select team experience level" /></SelectTrigger>
                                 </FormControl>
@@ -200,15 +234,24 @@ export function RiskAssessmentForm() {
                         <FormItem>
                             <FormLabel>Number of External Dependencies</FormLabel>
                             <FormControl>
-                                <Input type="number" min="0" max="10" {...field} />
+                                <Slider
+                                    min={0} max={10} step={1}
+                                    defaultValue={[field.value]}
+                                    onValueChange={(value) => field.onChange(value[0])}
+                                    disabled={!selectedProject}
+                                />
                             </FormControl>
+                             <div className="text-center font-medium">{field.value}</div>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <Button type="submit">Calculate Risk</Button>
+
+                <Button type="submit" disabled={!selectedProject}>Calculate and Save Risk</Button>
             </form>
         </Form>
     );
 }
+
+    

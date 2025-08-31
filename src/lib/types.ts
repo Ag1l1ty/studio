@@ -1,3 +1,4 @@
+
 export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' | 'Ambiente TST' | 'Ambiente UAT' | 'Soporte Productivo' | 'Cerrado';
 
 export type RiskLevel = 'Muy conservador' | 'Conservador' | 'Moderado' | 'Moderado - alto' | 'Agresivo' | 'Muy Agresivo';
@@ -54,3 +55,11 @@ export type Project = {
     errorSolutionTime?: number;
   }>;
 };
+
+export type RiskResult = {
+    score: number;
+    classification: RiskLevel;
+    deviation: string;
+}
+
+    
