@@ -11,11 +11,11 @@ interface BudgetChartProps {
 
 const chartConfig = {
   budget: {
-    label: "Budget",
+    label: "Presupuesto Acumulado",
     color: "hsl(var(--chart-2))",
   },
   spent: {
-    label: "Spent",
+    label: "Gasto Acumulado",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig
@@ -51,8 +51,8 @@ export function BudgetChart({ projects }: BudgetChartProps) {
                 paddingTop: "20px"
             }}
         />
-        <Line type="monotone" dataKey="budget" name="Budget" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} strokeDasharray="5 5" />
-        <Line type="monotone" dataKey="spent" name="Spent" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="cumulativeBudget" name="Presupuesto Acumulado" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+        <Line type="monotone" dataKey="spent" name="Gasto Acumulado" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
       </LineChart>
     </ChartContainer>
   )

@@ -260,8 +260,9 @@ export const aggregateMetrics = (projects: Project[]) => {
         const totalMonths = differenceInMonths(endDate, startDate) + 1;
         const projectedDeliveries = project.projectedDeliveries || 0;
         const plannedPerMonth = totalMonths > 0 ? projectedDeliveries / totalMonths : 0;
+        const budgetPerMonth = totalMonths > 0 ? project.budget / totalMonths : 0;
         
-        // Initialize planned deliveries
+        // Initialize planned data
         for (let i = 0; i < totalMonths; i++) {
             const currentMonthIndex = (startMonth + i) % 12;
             const currentYear = startYear + Math.floor((startMonth + i) / 12);
@@ -272,15 +273,14 @@ export const aggregateMetrics = (projects: Project[]) => {
                 monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0 };
             }
             monthlyData[dataKey].planned += plannedPerMonth;
+            monthlyData[dataKey].budget += budgetPerMonth;
         }
 
         // Add actual metrics
         project.metrics.forEach(metric => {
             const metricMonthIndex = monthMap[metric.month];
             let metricYear = startYear;
-            if (metricMonthIndex < startMonth && startYear < getYear(endDate)) {
-                metricYear = startYear + 1;
-            } else if (getYear(startDate) !== getYear(endDate) && metricMonthIndex < startMonth) {
+             if (getYear(startDate) !== getYear(endDate) && metricMonthIndex < startMonth) {
                 metricYear = getYear(endDate);
             }
             
@@ -290,7 +290,6 @@ export const aggregateMetrics = (projects: Project[]) => {
             }
             monthlyData[dataKey].actual += metric.deliveries;
             monthlyData[dataKey].errors += metric.errors;
-            monthlyData[dataKey].budget += metric.budget;
             monthlyData[dataKey].spent += metric.spent;
 
             if (metric.errorSolutionTime && metric.errors > 0) {
@@ -311,20 +310,26 @@ export const aggregateMetrics = (projects: Project[]) => {
 
     let cumulativePlanned = 0;
     let cumulativeActual = 0;
+    let cumulativeSpent = 0;
+    let cumulativeBudget = 0;
     
     return sortedKeys.map(key => {
         const [month, year] = key.split('-');
         cumulativePlanned += monthlyData[key].planned;
         cumulativeActual += monthlyData[key].actual;
+        cumulativeSpent += monthlyData[key].spent;
+        cumulativeBudget += monthlyData[key].budget;
+
         const avgErrorTime = monthlyData[key].errorEntries > 0 ? monthlyData[key].totalErrorTime / monthlyData[key].errorEntries : 0;
+        
         return {
             name: `${month}-${year.slice(-2)}`,
             planned: Math.round(cumulativePlanned),
             actual: cumulativeActual,
             errors: monthlyData[key].errors,
             avgErrorSolutionTime: avgErrorTime,
-            budget: monthlyData[key].budget,
-            spent: monthlyData[key].spent
+            cumulativeBudget: Math.round(cumulativeBudget),
+            spent: cumulativeSpent
         };
     });
 };
@@ -332,9 +337,10 @@ export const aggregateMetrics = (projects: Project[]) => {
 
 export function getRiskProfile(score: number): { classification: RiskLevel, deviation: string } {
     if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
-    if (score >= 12) return { classification: 'Agresivo', deviation: '+100%' };
-    if (score >= 10) return { classification: 'Moderado - alto', deviation: '+70%' };
-    if (score >= 6) return { classification: 'Moderado', deviation: '+40%' };
-    if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
+    if (score >= 12 && score <=17) return { classification: 'Agresivo', deviation: '+100%' };
+    if (score >= 10 && score <= 11) return { classification: 'Moderado - alto', deviation: '+70%' };
+    if (score >= 6 && score <= 9) return { classification: 'Moderado', deviation: '+40%' };
+    if (score >= 3 && score <= 5) return { classification: 'Conservador', deviation: '+20%' };
+    if (score >= 1 && score <= 2) return { classification: 'Muy conservador', deviation: '+10%' };
     return { classification: 'Muy conservador', deviation: '+10%' };
 }
