@@ -1,13 +1,13 @@
 "use client"
 
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts"
 import { aggregateMetrics } from "@/lib/data"
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import type { Project } from "@/lib/types";
 
 const chartConfig = {
   errors: {
-    label: "Errors",
+    label: "Errores",
     color: "hsl(var(--destructive))",
   },
 } satisfies ChartConfig;
@@ -22,6 +22,7 @@ export function ErrorsChart({ projects }: ErrorsChartProps) {
   return (
     <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
       <LineChart accessibilityLayer data={data}>
+        <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="name"
           stroke="hsl(var(--foreground))"
@@ -40,7 +41,14 @@ export function ErrorsChart({ projects }: ErrorsChartProps) {
             content={<ChartTooltipContent />}
             cursor={{ fill: "hsl(var(--accent))" }}
         />
-        <Line type="monotone" dataKey="errors" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--destructive))" }} />
+        <Line 
+          type="monotone" 
+          dataKey="errors" 
+          stroke="hsl(var(--destructive))" 
+          strokeWidth={2} 
+          name="Errores"
+          dot={{ r: 4, fill: "hsl(var(--destructive))" }} 
+        />
       </LineChart>
     </ChartContainer>
   )
