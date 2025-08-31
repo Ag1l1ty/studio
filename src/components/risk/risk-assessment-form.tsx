@@ -207,27 +207,16 @@ export function RiskAssessmentForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Incertidumbre Técnica</FormLabel>
-                            <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className="flex flex-col space-y-1"
-                                     disabled={!selectedProject}
-                                >
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl><RadioGroupItem value="low" /></FormControl>
-                                        <FormLabel className="font-normal">Cambios menores (mantenimiento, parches)</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl><RadioGroupItem value="medium" /></FormControl>
-                                        <FormLabel className="font-normal">Actualizaciones de versión / mejoras moderadas</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl><RadioGroupItem value="high" /></FormControl>
-                                        <FormLabel className="font-normal">Rediseño de servicio o flujo / Producto completamente nuevo</FormLabel>
-                                    </FormItem>
-                                </RadioGroup>
-                            </FormControl>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Select technical uncertainty level" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="low">Cambios menores (mantenimiento, parches)</SelectItem>
+                                    <SelectItem value="medium">Actualizaciones de versión / mejoras moderadas</SelectItem>
+                                    <SelectItem value="high">Rediseño de servicio o flujo / Producto completamente nuevo</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}
@@ -239,27 +228,16 @@ export function RiskAssessmentForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Madurez de la tecnología</FormLabel>
-                            <FormControl>
-                                <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className="flex flex-col space-y-1"
-                                     disabled={!selectedProject}
-                                >
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl><RadioGroupItem value="stable" /></FormControl>
-                                        <FormLabel className="font-normal">Tecnología ampliamente usada y estable</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl><RadioGroupItem value="recent" /></FormControl>
-                                        <FormLabel className="font-normal">Versión reciente de un producto conocido</FormLabel>
-                                    </FormItem>
-                                    <FormItem className="flex items-center space-x-3 space-y-0">
-                                        <FormControl><RadioGroupItem value="emerging" /></FormControl>
-                                        <FormLabel className="font-normal">Tecnología emergente o “proof-of-concept”</FormLabel>
-                                    </FormItem>
-                                </RadioGroup>
-                            </FormControl>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Select technology maturity level" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="stable">Tecnología ampliamente usada y estable</SelectItem>
+                                    <SelectItem value="recent">Versión reciente de un producto conocido</SelectItem>
+                                    <SelectItem value="emerging">Tecnología emergente o “proof-of-concept”</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}
