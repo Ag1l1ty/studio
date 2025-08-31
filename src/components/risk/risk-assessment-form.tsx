@@ -34,7 +34,7 @@ const formSchema = z.object({
     teamExperience: z.enum(['high', 'medium', 'low']),
     axaKnowledge: z.enum(['high', 'medium', 'low']),
     scopeClarity: z.coerce.number().min(1).max(5),
-    techNovelty: z.enum(['low', 'medium', 'high']),
+    technicalUncertainty: z.enum(['low', 'medium', 'high']),
     externalDeps: z.coerce.number().min(0).max(10),
 });
 
@@ -55,7 +55,7 @@ export function RiskAssessmentForm() {
             teamExperience: 'medium',
             axaKnowledge: 'medium',
             scopeClarity: 3,
-            techNovelty: 'medium',
+            technicalUncertainty: 'medium',
             externalDeps: 2,
         },
     });
@@ -88,9 +88,9 @@ export function RiskAssessmentForm() {
         // scopeClarity scoring
         score += (5 - values.scopeClarity) * 3;
 
-        // techNovelty scoring
-        if (values.techNovelty === 'medium') score += 2 * 4;
-        if (values.techNovelty === 'high') score += 4 * 4;
+        // technicalUncertainty scoring
+        if (values.technicalUncertainty === 'medium') score += 1.5;
+        if (values.technicalUncertainty === 'high') score += 3;
 
         // externalDeps scoring
         score += values.externalDeps * 2;
@@ -227,10 +227,10 @@ export function RiskAssessmentForm() {
 
                 <FormField
                     control={form.control}
-                    name="techNovelty"
+                    name="technicalUncertainty"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Technology Novelty</FormLabel>
+                            <FormLabel>Incertidumbre Técnica</FormLabel>
                             <FormControl>
                                 <RadioGroup
                                     onValueChange={field.onChange}
@@ -240,15 +240,15 @@ export function RiskAssessmentForm() {
                                 >
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="low" /></FormControl>
-                                        <FormLabel className="font-normal">Low (Proven technologies)</FormLabel>
+                                        <FormLabel className="font-normal">Cambios menores (mantenimiento, parches)</FormLabel>
                                     </FormItem>
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="medium" /></FormControl>
-                                        <FormLabel className="font-normal">Medium (Some new components)</FormLabel>
+                                        <FormLabel className="font-normal">Actualizaciones de versión / mejoras moderadas</FormLabel>
                                     </FormItem>
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl><RadioGroupItem value="high" /></FormControl>
-                                        <FormLabel className="font-normal">High (Bleeding-edge technology)</FormLabel>
+                                        <FormLabel className="font-normal">Rediseño de servicio o flujo / Producto completamente nuevo</FormLabel>
                                     </FormItem>
                                 </RadioGroup>
                             </FormControl>
@@ -283,3 +283,5 @@ export function RiskAssessmentForm() {
         </Form>
     );
 }
+
+    
