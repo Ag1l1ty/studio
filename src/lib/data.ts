@@ -1,6 +1,6 @@
 
 import type { Project, ProjectStage, Delivery, RiskLevel } from './types';
-import { subDays, addDays } from 'date-fns';
+import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
   {
@@ -248,27 +248,79 @@ export function getDashboardKpis(projects: Project[]) {
 }
 
 export const aggregateMetrics = (projects: Project[]) => {
-    const monthlyData: { [key: string]: { deliveries: number; errors: number } } = {};
+    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number } } = {};
     const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+    const monthMap: { [key: string]: number } = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+
     projects.forEach(project => {
-        project.metrics.forEach(metric => {
-            if (!monthlyData[metric.month]) {
-                monthlyData[metric.month] = { deliveries: 0, errors: 0 };
+        const startDate = parseISO(project.startDate);
+        const endDate = parseISO(project.endDate);
+        const startMonth = getMonth(startDate);
+        const startYear = getYear(startDate);
+        const totalMonths = differenceInMonths(endDate, startDate) + 1;
+        const projectedDeliveries = project.projectedDeliveries || 0;
+        const plannedPerMonth = totalMonths > 0 ? projectedDeliveries / totalMonths : 0;
+        
+        // Initialize planned deliveries
+        for (let i = 0; i < totalMonths; i++) {
+            const currentMonthIndex = (startMonth + i) % 12;
+            const currentYear = startYear + Math.floor((startMonth + i) / 12);
+            const monthName = monthOrder[currentMonthIndex];
+            const dataKey = `${monthName}-${currentYear}`;
+
+            if (!monthlyData[dataKey]) {
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0 };
             }
-            monthlyData[metric.month].deliveries += metric.deliveries;
-            monthlyData[metric.month].errors += metric.errors;
+            monthlyData[dataKey].planned += plannedPerMonth;
+        }
+
+        // Add actual deliveries
+        project.metrics.forEach(metric => {
+            // Find the year for the metric. Assume current year if not specified.
+            // This is a simplification for mock data.
+            const metricMonthIndex = monthMap[metric.month];
+            let metricYear = startYear;
+            if (metricMonthIndex < startMonth) {
+                metricYear = startYear + 1;
+            }
+            if (metricYear > getYear(endDate)) {
+                 metricYear = getYear(endDate);
+            }
+            
+            const dataKey = `${metric.month}-${metricYear}`;
+             if (!monthlyData[dataKey]) {
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0 };
+            }
+            monthlyData[dataKey].actual += metric.deliveries;
+            monthlyData[dataKey].errors += metric.errors;
         });
     });
 
-    return monthOrder
-        .filter(month => monthlyData[month])
-        .map(month => ({
+    const sortedKeys = Object.keys(monthlyData).sort((a, b) => {
+        const [monthA, yearA] = a.split('-');
+        const [monthB, yearB] = b.split('-');
+        if (yearA !== yearB) {
+            return Number(yearA) - Number(yearB);
+        }
+        return monthMap[monthA] - monthMap[monthB];
+    });
+
+    let cumulativePlanned = 0;
+    let cumulativeActual = 0;
+    
+    return sortedKeys.map(key => {
+        const [month] = key.split('-');
+        cumulativePlanned += monthlyData[key].planned;
+        cumulativeActual += monthlyData[key].actual;
+        return {
             name: month,
-            deliveries: monthlyData[month].deliveries,
-            errors: monthlyData[month].errors,
-        }));
+            planned: Math.round(cumulativePlanned),
+            actual: cumulativeActual,
+            errors: monthlyData[key].errors,
+        };
+    });
 };
+
 
 export function getRiskProfile(score: number): { classification: RiskLevel, deviation: string } {
     if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
