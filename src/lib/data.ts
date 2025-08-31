@@ -282,8 +282,8 @@ export const aggregateMetrics = (projects: Project[]) => {
             if (metricMonthIndex < startMonth) {
                 metricYear = startYear + 1;
             }
-            if (metricYear > getYear(endDate)) {
-                 metricYear = getYear(endDate);
+            if (getYear(parseISO(project.endDate)) < metricYear) {
+                metricYear = getYear(parseISO(project.endDate));
             }
             
             const dataKey = `${metric.month}-${metricYear}`;
@@ -312,12 +312,12 @@ export const aggregateMetrics = (projects: Project[]) => {
     let cumulativeActual = 0;
     
     return sortedKeys.map(key => {
-        const [month] = key.split('-');
+        const [month, year] = key.split('-');
         cumulativePlanned += monthlyData[key].planned;
         cumulativeActual += monthlyData[key].actual;
         const avgErrorTime = monthlyData[key].errorEntries > 0 ? monthlyData[key].totalErrorTime / monthlyData[key].errorEntries : 0;
         return {
-            name: month,
+            name: `${month}-${year.slice(-2)}`,
             planned: Math.round(cumulativePlanned),
             actual: cumulativeActual,
             errors: monthlyData[key].errors,
@@ -335,3 +335,5 @@ export function getRiskProfile(score: number): { classification: RiskLevel, devi
     if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
     return { classification: 'Muy conservador', deviation: '+10%' };
 }
+
+    
