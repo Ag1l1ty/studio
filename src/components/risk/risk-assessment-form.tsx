@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { AlertCircle, CheckCircle, Shield, TrendingUp } from 'lucide-react';
 import { getProjects, getProjectById, getRiskProfile, updateProjectRisk } from '@/lib/data';
@@ -33,10 +32,8 @@ const formSchema = z.object({
     projectId: z.string().min(1, "Project selection is required"),
     teamExperience: z.enum(['high', 'medium', 'low']),
     axaKnowledge: z.enum(['high', 'medium', 'low']),
-    scopeClarity: z.coerce.number().min(1).max(5),
     technicalUncertainty: z.enum(['low', 'medium', 'high']),
     technologyMaturity: z.enum(['stable', 'recent', 'emerging']),
-    externalDeps: z.coerce.number().min(0).max(10),
 });
 
 
@@ -55,10 +52,8 @@ export function RiskAssessmentForm() {
             projectId: '',
             teamExperience: 'medium',
             axaKnowledge: 'medium',
-            scopeClarity: 3,
             technicalUncertainty: 'medium',
             technologyMaturity: 'stable',
-            externalDeps: 2,
         },
     });
 
@@ -87,9 +82,6 @@ export function RiskAssessmentForm() {
         if (values.axaKnowledge === 'medium') score += 1.5;
         if (values.axaKnowledge === 'low') score += 3;
 
-        // scopeClarity scoring
-        score += (5 - values.scopeClarity) * 3;
-
         // technicalUncertainty scoring
         if (values.technicalUncertainty === 'medium') score += 1.5;
         if (values.technicalUncertainty === 'high') score += 3;
@@ -97,9 +89,6 @@ export function RiskAssessmentForm() {
         // technologyMaturity scoring
         if (values.technologyMaturity === 'recent') score += 1.5;
         if (values.technologyMaturity === 'emerging') score += 3;
-
-        // externalDeps scoring
-        score += values.externalDeps * 2;
         
         const riskProfile = getRiskProfile(score);
         
@@ -214,25 +203,6 @@ export function RiskAssessmentForm() {
 
                 <FormField
                     control={form.control}
-                    name="scopeClarity"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Scope Clarity (1=Vague, 5=Very Clear)</FormLabel>
-                            <FormControl>
-                                <Slider
-                                    min={1} max={5} step={1}
-                                    defaultValue={[field.value]}
-                                    onValueChange={(value) => field.onChange(value[0])}
-                                    disabled={!selectedProject}
-                                />
-                            </FormControl>
-                            <div className="text-center font-medium">{field.value}</div>
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
                     name="technicalUncertainty"
                     render={({ field }) => (
                         <FormItem>
@@ -295,27 +265,6 @@ export function RiskAssessmentForm() {
                     )}
                 />
                 
-                <FormField
-                    control={form.control}
-                    name="externalDeps"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Number of External Dependencies</FormLabel>
-                            <FormControl>
-                                <Slider
-                                    min={0} max={10} step={1}
-                                    defaultValue={[field.value]}
-                                    onValueChange={(value) => field.onChange(value[0])}
-                                    disabled={!selectedProject}
-                                />
-                            </FormControl>
-                             <div className="text-center font-medium">{field.value}</div>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-
                 <Button type="submit" disabled={!selectedProject}>Calculate and Save Risk</Button>
             </form>
         </Form>
