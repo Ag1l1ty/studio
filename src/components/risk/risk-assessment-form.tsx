@@ -154,6 +154,26 @@ export function RiskAssessmentForm() {
                     </div>
                 )}
 
+                <FormField
+                    control={form.control}
+                    name="teamExperience"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Experiencia del Equipo</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Select team experience level" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="high">Mayor o igual a 2 años en proyectos idénticos</SelectItem>
+                                    <SelectItem value="medium">6 meses – 2 años en proyectos similares</SelectItem>
+                                    <SelectItem value="low">Menor a 6 meses o equipo nuevo</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <FormField
                     control={form.control}
@@ -208,27 +228,6 @@ export function RiskAssessmentForm() {
                 
                 <FormField
                     control={form.control}
-                    name="teamExperience"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Experiencia del Equipo</FormLabel>
-                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
-                                <FormControl>
-                                    <SelectTrigger><SelectValue placeholder="Select team experience level" /></SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="high">Mayor o igual a 2 años en proyectos idénticos</SelectItem>
-                                    <SelectItem value="medium">6 meses – 2 años en proyectos similares</SelectItem>
-                                    <SelectItem value="low">Menor a 6 meses o equipo nuevo</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
                     name="externalDeps"
                     render={({ field }) => (
                         <FormItem>
@@ -237,7 +236,7 @@ export function RiskAssessmentForm() {
                                 <Slider
                                     min={0} max={10} step={1}
                                     defaultValue={[field.value]}
-                                    onValueChange={(value) => field.onChange(value[0])}
+                                    onValue-change={(value) => field.onChange(value[0])}
                                     disabled={!selectedProject}
                                 />
                             </FormControl>
