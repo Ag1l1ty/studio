@@ -236,7 +236,7 @@ export function RiskAssessmentForm() {
                                 <Slider
                                     min={0} max={10} step={1}
                                     defaultValue={[field.value]}
-                                    onValue-change={(value) => field.onChange(value[0])}
+                                    onValueChange={(value) => field.onChange(value[0])}
                                     disabled={!selectedProject}
                                 />
                             </FormControl>
@@ -252,5 +252,7 @@ export function RiskAssessmentForm() {
         </Form>
     );
 }
+
+    
 
     
