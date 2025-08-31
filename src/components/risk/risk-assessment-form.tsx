@@ -31,9 +31,10 @@ import type { Project, RiskResult } from '@/lib/types';
 
 const formSchema = z.object({
     projectId: z.string().min(1, "Project selection is required"),
+    teamExperience: z.enum(['high', 'medium', 'low']),
+    axaKnowledge: z.enum(['high', 'medium', 'low']),
     scopeClarity: z.coerce.number().min(1).max(5),
     techNovelty: z.enum(['low', 'medium', 'high']),
-    teamExperience: z.enum(['high', 'medium', 'low']),
     externalDeps: z.coerce.number().min(0).max(10),
 });
 
@@ -51,9 +52,10 @@ export function RiskAssessmentForm() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             projectId: '',
+            teamExperience: 'medium',
+            axaKnowledge: 'medium',
             scopeClarity: 3,
             techNovelty: 'medium',
-            teamExperience: 'medium',
             externalDeps: 2,
         },
     });
@@ -75,14 +77,22 @@ export function RiskAssessmentForm() {
     function onSubmit(values: z.infer<typeof formSchema>) {
         let score = 0;
         
-        score += (5 - values.scopeClarity) * 3;
-
-        if (values.techNovelty === 'medium') score += 2 * 4;
-        if (values.techNovelty === 'high') score += 4 * 4;
-
+        // teamExperience scoring
         if (values.teamExperience === 'medium') score += 1.5;
         if (values.teamExperience === 'low') score += 3;
 
+        // axaKnowledge scoring
+        if (values.axaKnowledge === 'medium') score += 1.5;
+        if (values.axaKnowledge === 'low') score += 3;
+
+        // scopeClarity scoring
+        score += (5 - values.scopeClarity) * 3;
+
+        // techNovelty scoring
+        if (values.techNovelty === 'medium') score += 2 * 4;
+        if (values.techNovelty === 'high') score += 4 * 4;
+
+        // externalDeps scoring
         score += values.externalDeps * 2;
         
         const riskProfile = getRiskProfile(score);
@@ -93,7 +103,7 @@ export function RiskAssessmentForm() {
     }
     
     if (result) {
-        const resultIcon = result.classification === 'High' ? <AlertCircle className="w-16 h-16 text-destructive" /> : result.classification === 'Medium' ? <Shield className="w-16 h-16 text-yellow-500" /> : <CheckCircle className="w-16 h-16 text-green-500" />;
+        const resultIcon = result.classification === 'Agresivo' || result.classification === 'Muy Agresivo' ? <AlertCircle className="w-16 h-16 text-destructive" /> : result.classification.includes('Moderado') ? <Shield className="w-16 h-16 text-yellow-500" /> : <CheckCircle className="w-16 h-16 text-green-500" />;
         
         return (
             <Card>
@@ -104,7 +114,7 @@ export function RiskAssessmentForm() {
                 <CardContent className="text-center space-y-4">
                     <div className="flex justify-center">{resultIcon}</div>
                     <p className="text-5xl font-bold">{result.classification} Risk</p>
-                    <p className="text-muted-foreground">Calculated Risk Score: {result.score}</p>
+                    <p className="text-muted-foreground">Calculated Risk Score: {result.score.toFixed(1)}</p>
                     <div className="text-sm border rounded-lg p-4 bg-secondary/50 inline-block">
                         <p><TrendingUp className="inline-block mr-2" />Potential Deviation: <span className="font-semibold">{result.deviation}</span></p>
                     </div>
@@ -145,7 +155,7 @@ export function RiskAssessmentForm() {
                         <h4 className="font-semibold mb-2">Current Risk Profile</h4>
                         {selectedProject.riskScore !== undefined && selectedProject.riskScore > 0 ? (
                             <p className="text-sm">
-                                Current Level: <span className="font-bold">{selectedProject.riskLevel}</span> (Score: {selectedProject.riskScore})
+                                Current Level: <span className="font-bold">{selectedProject.riskLevel}</span> (Score: {selectedProject.riskScore.toFixed(1)})
                             </p>
                         ) : (
                             <p className="text-sm text-muted-foreground">This project has not been assessed yet.</p>
@@ -168,6 +178,27 @@ export function RiskAssessmentForm() {
                                     <SelectItem value="high">Mayor o igual a 2 años en proyectos idénticos</SelectItem>
                                     <SelectItem value="medium">6 meses – 2 años en proyectos similares</SelectItem>
                                     <SelectItem value="low">Menor a 6 meses o equipo nuevo</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                
+                <FormField
+                    control={form.control}
+                    name="axaKnowledge"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Conocimiento entorno AXA</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Select team AXA knowledge level" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="high">Equipo de desarrollo con más de un año trabajando en AXA</SelectItem>
+                                    <SelectItem value="medium">Equipo de desarrollo con entre 3 y 12 meses trabajando en AXA</SelectItem>
+                                    <SelectItem value="low">Equipo de desarrollo con menos de 3 meses o sin experiencia trabajando en AXA</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />
@@ -252,7 +283,3 @@ export function RiskAssessmentForm() {
         </Form>
     );
 }
-
-    
-
-    

@@ -9,7 +9,7 @@ let MOCK_PROJECTS: Project[] = [
     description: 'Development of a new digital onboarding experience for clients.',
     stage: 'Desarrollo Local',
     riskLevel: 'Moderado',
-    riskScore: 8.5,
+    riskScore: 8,
     budget: 500000,
     budgetSpent: 275000,
     projectedDeliveries: 20,
@@ -31,7 +31,7 @@ let MOCK_PROJECTS: Project[] = [
     description: 'Implementing an AI model to automate insurance claims processing.',
     stage: 'Ambiente TST',
     riskLevel: 'Agresivo',
-    riskScore: 16,
+    riskScore: 17,
     budget: 1200000,
     budgetSpent: 950000,
     projectedDeliveries: 10,
@@ -92,7 +92,7 @@ let MOCK_PROJECTS: Project[] = [
     description: 'Migrating legacy data warehouse to a cloud-based solution.',
     stage: 'Cerrado',
     riskLevel: 'Conservador',
-    riskScore: 4.5,
+    riskScore: 5,
     budget: 400000,
     budgetSpent: 390000,
     projectedDeliveries: 8,
@@ -350,5 +350,3 @@ export function updateProjectRisk(projectId: string, score: number, level: RiskL
         project.riskLevel = level;
     }
 }
-
-    
