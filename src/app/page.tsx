@@ -11,6 +11,7 @@ import { getProjects, getDashboardKpis, getRiskProfile } from "@/lib/data";
 import { DollarSign, TrendingUp, AlertTriangle, CheckCircle, Package } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Project } from '@/lib/types';
+import { TimeErrorTrendsChart } from '@/components/dashboard/time-error-trends-chart';
 
 export default function DashboardPage() {
   const allProjects = getProjects();
@@ -87,13 +88,21 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-        <div className="grid gap-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>Budget vs. Spent</CardTitle>
             </CardHeader>
             <CardContent>
               <BudgetChart projects={projectsToDisplay} />
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader>
+              <CardTitle>Time Error Trends</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TimeErrorTrendsChart projects={projectsToDisplay} />
             </CardContent>
           </Card>
         </div>
@@ -162,13 +171,21 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Budget vs. Spent</CardTitle>
           </CardHeader>
           <CardContent>
             <BudgetChart projects={projectsToDisplay} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Time Error Trends</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TimeErrorTrendsChart projects={projectsToDisplay} />
           </CardContent>
         </Card>
       </div>

@@ -51,5 +51,6 @@ export type Project = {
     errors: number;
     budget: number;
     spent: number;
+    errorSolutionTime?: number;
   }>;
 };

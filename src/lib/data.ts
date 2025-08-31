@@ -1,4 +1,5 @@
 
+
 import type { Project, ProjectStage, Delivery, RiskLevel } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
@@ -17,12 +18,12 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-09-30',
     owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
     metrics: [
-      { month: 'Jan', deliveries: 2, errors: 2, budget: 55000, spent: 50000 },
-      { month: 'Feb', deliveries: 3, errors: 1, budget: 55000, spent: 60000 },
-      { month: 'Mar', deliveries: 4, errors: 3, budget: 55000, spent: 52000 },
-      { month: 'Apr', deliveries: 3, errors: 4, budget: 55000, spent: 58000 },
-      { month: 'May', deliveries: 4, errors: 2, budget: 55000, spent: 55000 },
-      { month: 'Jun', deliveries: 2, errors: 1, budget: 55000, spent: 54000 },
+      { month: 'Jan', deliveries: 2, errors: 2, budget: 55000, spent: 50000, errorSolutionTime: 3 },
+      { month: 'Feb', deliveries: 3, errors: 1, budget: 55000, spent: 60000, errorSolutionTime: 2 },
+      { month: 'Mar', deliveries: 4, errors: 3, budget: 55000, spent: 52000, errorSolutionTime: 4 },
+      { month: 'Apr', deliveries: 3, errors: 4, budget: 55000, spent: 58000, errorSolutionTime: 5 },
+      { month: 'May', deliveries: 4, errors: 2, budget: 55000, spent: 55000, errorSolutionTime: 3 },
+      { month: 'Jun', deliveries: 2, errors: 1, budget: 55000, spent: 54000, errorSolutionTime: 2 },
     ],
   },
   {
@@ -39,12 +40,12 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-12-31',
     owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' },
     metrics: [
-      { month: 'Jan', deliveries: 1, errors: 5, budget: 100000, spent: 110000 },
-      { month: 'Feb', deliveries: 1, errors: 8, budget: 100000, spent: 120000 },
-      { month: 'Mar', deliveries: 1, errors: 6, budget: 100000, spent: 95000 },
-      { month: 'Apr', deliveries: 1, errors: 4, budget: 100000, spent: 105000 },
-      { month: 'May', deliveries: 1, errors: 3, budget: 100000, spent: 98000 },
-      { month: 'Jun', deliveries: 1, errors: 2, budget: 100000, spent: 102000 },
+      { month: 'Jan', deliveries: 1, errors: 5, budget: 100000, spent: 110000, errorSolutionTime: 7 },
+      { month: 'Feb', deliveries: 1, errors: 8, budget: 100000, spent: 120000, errorSolutionTime: 9 },
+      { month: 'Mar', deliveries: 1, errors: 6, budget: 100000, spent: 95000, errorSolutionTime: 8 },
+      { month: 'Apr', deliveries: 1, errors: 4, budget: 100000, spent: 105000, errorSolutionTime: 6 },
+      { month: 'May', deliveries: 1, errors: 3, budget: 100000, spent: 98000, errorSolutionTime: 5 },
+      { month: 'Jun', deliveries: 1, errors: 2, budget: 100000, spent: 102000, errorSolutionTime: 4 },
     ],
   },
   {
@@ -61,12 +62,12 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-05-30',
     owner: { name: 'Sofia Fernandez', avatar: '/avatars/03.png' },
     metrics: [
-      { month: 'Jan', deliveries: 5, errors: 1, budget: 40000, spent: 38000 },
-      { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000 },
-      { month: 'Mar', deliveries: 5, errors: 1, budget: 40000, spent: 41000 },
-      { month: 'Apr', deliveries: 5, errors: 0, budget: 40000, spent: 39000 },
-      { month: 'May', deliveries: 4, errors: 0, budget: 40000, spent: 40000 },
-      { month: 'Jun', deliveries: 1, errors: 0, budget: 10000, spent: 10000 },
+      { month: 'Jan', deliveries: 5, errors: 1, budget: 40000, spent: 38000, errorSolutionTime: 1 },
+      { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
+      { month: 'Mar', deliveries: 5, errors: 1, budget: 40000, spent: 41000, errorSolutionTime: 2 },
+      { month: 'Apr', deliveries: 5, errors: 0, budget: 40000, spent: 39000, errorSolutionTime: 0 },
+      { month: 'May', deliveries: 4, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
+      { month: 'Jun', deliveries: 1, errors: 0, budget: 10000, spent: 10000, errorSolutionTime: 0 },
     ],
   },
   {
@@ -83,7 +84,7 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2025-06-30',
     owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' },
     metrics: [
-        { month: 'Jun', deliveries: 0, errors: 0, budget: 50000, spent: 50000 },
+        { month: 'Jun', deliveries: 0, errors: 0, budget: 50000, spent: 50000, errorSolutionTime: 0 },
     ],
   },
   {
@@ -100,8 +101,8 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-02-28',
     owner: { name: 'Elena Petrova', avatar: '/avatars/05.png' },
     metrics: [
-        { month: 'Jan', deliveries: 4, errors: 0, budget: 50000, spent: 50000 },
-        { month: 'Feb', deliveries: 4, errors: 0, budget: 40000, spent: 40000 },
+        { month: 'Jan', deliveries: 4, errors: 0, budget: 50000, spent: 50000, errorSolutionTime: 0 },
+        { month: 'Feb', deliveries: 4, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
     ],
   },
   {
@@ -118,10 +119,10 @@ let MOCK_PROJECTS: Project[] = [
     endDate: '2024-10-31',
     owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' },
     metrics: [
-      { month: 'Mar', deliveries: 2, errors: 1, budget: 30000, spent: 28000 },
-      { month: 'Apr', deliveries: 2, errors: 0, budget: 30000, spent: 30000 },
-      { month: 'May', deliveries: 1, errors: 1, budget: 30000, spent: 32000 },
-      { month: 'Jun', deliveries: 1, errors: 0, budget: 30000, spent: 20000 },
+      { month: 'Mar', deliveries: 2, errors: 1, budget: 30000, spent: 28000, errorSolutionTime: 4 },
+      { month: 'Apr', deliveries: 2, errors: 0, budget: 30000, spent: 30000, errorSolutionTime: 0 },
+      { month: 'May', deliveries: 1, errors: 1, budget: 30000, spent: 32000, errorSolutionTime: 5 },
+      { month: 'Jun', deliveries: 1, errors: 0, budget: 30000, spent: 20000, errorSolutionTime: 0 },
     ],
   },
 ];
@@ -248,7 +249,7 @@ export function getDashboardKpis(projects: Project[]) {
 }
 
 export const aggregateMetrics = (projects: Project[]) => {
-    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number } } = {};
+    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number; totalErrorTime: number; errorEntries: number } } = {};
     const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthMap: { [key: string]: number } = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
@@ -269,15 +270,13 @@ export const aggregateMetrics = (projects: Project[]) => {
             const dataKey = `${monthName}-${currentYear}`;
 
             if (!monthlyData[dataKey]) {
-                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0 };
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0 };
             }
             monthlyData[dataKey].planned += plannedPerMonth;
         }
 
-        // Add actual deliveries
+        // Add actual metrics
         project.metrics.forEach(metric => {
-            // Find the year for the metric. Assume current year if not specified.
-            // This is a simplification for mock data.
             const metricMonthIndex = monthMap[metric.month];
             let metricYear = startYear;
             if (metricMonthIndex < startMonth) {
@@ -289,10 +288,14 @@ export const aggregateMetrics = (projects: Project[]) => {
             
             const dataKey = `${metric.month}-${metricYear}`;
              if (!monthlyData[dataKey]) {
-                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0 };
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0 };
             }
             monthlyData[dataKey].actual += metric.deliveries;
             monthlyData[dataKey].errors += metric.errors;
+            if (metric.errorSolutionTime && metric.errors > 0) {
+              monthlyData[dataKey].totalErrorTime += metric.errorSolutionTime * metric.errors;
+              monthlyData[dataKey].errorEntries += metric.errors;
+            }
         });
     });
 
@@ -312,11 +315,13 @@ export const aggregateMetrics = (projects: Project[]) => {
         const [month] = key.split('-');
         cumulativePlanned += monthlyData[key].planned;
         cumulativeActual += monthlyData[key].actual;
+        const avgErrorTime = monthlyData[key].errorEntries > 0 ? monthlyData[key].totalErrorTime / monthlyData[key].errorEntries : 0;
         return {
             name: month,
             planned: Math.round(cumulativePlanned),
             actual: cumulativeActual,
             errors: monthlyData[key].errors,
+            avgErrorSolutionTime: avgErrorTime
         };
     });
 };
@@ -328,6 +333,5 @@ export function getRiskProfile(score: number): { classification: RiskLevel, devi
     if (score >= 10) return { classification: 'Moderado - alto', deviation: '+70%' };
     if (score >= 6) return { classification: 'Moderado', deviation: '+40%' };
     if (score >= 3) return { classification: 'Conservador', deviation: '+20%' };
-    if (score >= 1) return { classification: 'Muy conservador', deviation: '+10%' };
-    return { classification: 'Muy conservador', deviation: '+10%' }; // Default for 0 or less
+    return { classification: 'Muy conservador', deviation: '+10%' };
 }
