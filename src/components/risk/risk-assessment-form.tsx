@@ -35,6 +35,7 @@ const formSchema = z.object({
     axaKnowledge: z.enum(['high', 'medium', 'low']),
     scopeClarity: z.coerce.number().min(1).max(5),
     technicalUncertainty: z.enum(['low', 'medium', 'high']),
+    technologyMaturity: z.enum(['stable', 'recent', 'emerging']),
     externalDeps: z.coerce.number().min(0).max(10),
 });
 
@@ -56,6 +57,7 @@ export function RiskAssessmentForm() {
             axaKnowledge: 'medium',
             scopeClarity: 3,
             technicalUncertainty: 'medium',
+            technologyMaturity: 'stable',
             externalDeps: 2,
         },
     });
@@ -91,6 +93,10 @@ export function RiskAssessmentForm() {
         // technicalUncertainty scoring
         if (values.technicalUncertainty === 'medium') score += 1.5;
         if (values.technicalUncertainty === 'high') score += 3;
+
+        // technologyMaturity scoring
+        if (values.technologyMaturity === 'recent') score += 1.5;
+        if (values.technologyMaturity === 'emerging') score += 3;
 
         // externalDeps scoring
         score += values.externalDeps * 2;
@@ -256,6 +262,38 @@ export function RiskAssessmentForm() {
                         </FormItem>
                     )}
                 />
+
+                 <FormField
+                    control={form.control}
+                    name="technologyMaturity"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Madurez de la tecnología</FormLabel>
+                            <FormControl>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col space-y-1"
+                                     disabled={!selectedProject}
+                                >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl><RadioGroupItem value="stable" /></FormControl>
+                                        <FormLabel className="font-normal">Tecnología ampliamente usada y estable</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl><RadioGroupItem value="recent" /></FormControl>
+                                        <FormLabel className="font-normal">Versión reciente de un producto conocido</FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl><RadioGroupItem value="emerging" /></FormControl>
+                                        <FormLabel className="font-normal">Tecnología emergente o “proof-of-concept”</FormLabel>
+                                    </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
                 
                 <FormField
                     control={form.control}
@@ -283,5 +321,3 @@ export function RiskAssessmentForm() {
         </Form>
     );
 }
-
-    
