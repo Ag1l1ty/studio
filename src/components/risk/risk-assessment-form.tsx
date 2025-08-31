@@ -80,8 +80,8 @@ export function RiskAssessmentForm() {
         if (values.techNovelty === 'medium') score += 2 * 4;
         if (values.techNovelty === 'high') score += 4 * 4;
 
-        if (values.teamExperience === 'medium') score += 2 * 5;
-        if (values.teamExperience === 'low') score += 4 * 5;
+        if (values.teamExperience === 'medium') score += 1.5;
+        if (values.teamExperience === 'low') score += 3;
 
         score += values.externalDeps * 2;
         
@@ -211,15 +211,15 @@ export function RiskAssessmentForm() {
                     name="teamExperience"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Team Experience with Domain/Tech</FormLabel>
+                            <FormLabel>Experiencia del Equipo</FormLabel>
                              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
                                 <FormControl>
                                     <SelectTrigger><SelectValue placeholder="Select team experience level" /></SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    <SelectItem value="high">High (Experts)</SelectItem>
-                                    <SelectItem value="medium">Medium (Competent)</SelectItem>
-                                    <SelectItem value="low">Low (Inexperienced)</SelectItem>
+                                    <SelectItem value="high">Mayor o igual a 2 años en proyectos idénticos</SelectItem>
+                                    <SelectItem value="medium">6 meses – 2 años en proyectos similares</SelectItem>
+                                    <SelectItem value="low">Menor a 6 meses o equipo nuevo</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />
