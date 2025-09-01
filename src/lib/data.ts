@@ -198,9 +198,9 @@ export let MOCK_USERS: User[] = [
     { id: 'USR-007', firstName: 'Laura', lastName: 'Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png', assignedProjectIds: ['PRJ-001', 'PRJ-002', 'PRJ-003', 'PRJ-004', 'PRJ-005', 'PRJ-006'] },
 ];
 
-export function addUser(user: User): User[] {
+export function addUser(user: User): User {
     MOCK_USERS.push(user);
-    return MOCK_USERS;
+    return user;
 }
 
 export function updateUser(user: User): User {
@@ -296,11 +296,9 @@ export function getDashboardKpis(projects: Project[]) {
         ['Moderado - alto', 'Agresivo', 'Muy Agresivo'].includes(p.riskLevel)
     ).length;
     
+    // Count all deliveries that have been completed (i.e., registered in metrics)
     const totalDeliveries = projects.reduce((acc, project) => {
-        if (project.stage === 'Cerrado') {
-            return acc + project.metrics.reduce((sum, metric) => sum + metric.deliveries, 0);
-        }
-        return acc;
+        return acc + project.metrics.reduce((sum, metric) => sum + metric.deliveries, 0);
     }, 0);
     
     return {
