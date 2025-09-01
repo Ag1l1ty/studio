@@ -198,7 +198,7 @@ export let MOCK_USERS: User[] = [
 
 export function addUser(user: User): User[] {
     MOCK_USERS.push(user);
-    return MOCK_USERS; // Return a new array to ensure reactivity
+    return MOCK_USERS;
 }
 
 export function updateUser(user: User): User {
@@ -294,7 +294,10 @@ export function getDashboardKpis(projects: Project[]) {
         ['Moderado - alto', 'Agresivo', 'Muy Agresivo'].includes(p.riskLevel)
     ).length;
     
-    const totalDeliveries = getDeliveries().filter(d => d.stage === 'Cerrado').length;
+    const currentYear = new Date().getFullYear();
+    const totalDeliveries = getDeliveries().filter(d => 
+        d.stage === 'Cerrado' && new Date(d.creationDate).getFullYear() === currentYear
+    ).length;
     
     return {
         totalBudget,
