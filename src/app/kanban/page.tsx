@@ -154,16 +154,16 @@ export default function KanbanPage() {
         const sourceIndex = STAGES.indexOf(source.droppableId as ProjectStage);
         const destinationIndex = STAGES.indexOf(destination.droppableId as ProjectStage);
         const tstIndex = STAGES.indexOf('Ambiente TST');
-
+        
         if (sourceIndex < tstIndex && destinationIndex > tstIndex) {
-            toast({
+             toast({
                 variant: 'destructive',
                 title: 'Movimiento no permitido',
                 description: 'Debe mover la tarjeta a "Ambiente TST" antes de pasar a etapas posteriores.',
             });
             return;
         }
-        
+
         const isMovingFromTst = movedDelivery.stage === 'Ambiente TST' && destinationIndex > tstIndex;
         
         if (isMovingFromTst) {
@@ -277,6 +277,7 @@ export default function KanbanPage() {
                 title: "Delivery Card Created",
                 description: `A new delivery card for project "${project?.name}" has been created.`,
             });
+            setCreateDeliveryCardDialogOpen(false);
         }
     }
 
