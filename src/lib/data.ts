@@ -188,8 +188,8 @@ let MOCK_DELIVERIES: Delivery[] = [
 
 // Mock data for users - in a real app, this would come from your auth provider or database
 export const MOCK_USERS: User[] = [
-    { id: 'USR-001', name: 'Ana Rodriguez', email: 'ana.rodriguez@example.com', role: 'Project Manager/ Scrum Master', avatar: '/avatars/01.png' },
-    { id: 'USR-002', name: 'Carlos Gomez', email: 'carlos.gomez@example.com', role: 'Project Manager/ Scrum Master', avatar: '/avatars/02.png' },
+    { id: 'USR-001', name: 'Ana Rodriguez', email: 'ana.rodriguez@example.com', role: 'PM/SM', avatar: '/avatars/01.png' },
+    { id: 'USR-002', name: 'Carlos Gomez', email: 'carlos.gomez@example.com', role: 'PM/SM', avatar: '/avatars/02.png' },
     { id: 'USR-004', name: 'Luis Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png' },
     { id: 'USR-005', name: 'Elena Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png' },
     { id: 'USR-007', name: 'Laura Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png' },

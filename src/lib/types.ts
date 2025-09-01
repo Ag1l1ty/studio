@@ -3,7 +3,7 @@ export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' |
 
 export type RiskLevel = 'Muy conservador' | 'Conservador' | 'Moderado' | 'Moderado - alto' | 'Agresivo' | 'Muy Agresivo';
 
-export type Role = 'Admin' | 'Project Manager/ Scrum Master' | 'Viewer' | 'Portfolio Manager';
+export type Role = 'Admin' | 'PM/SM' | 'Viewer' | 'Portfolio Manager';
 
 export type User = {
     id: string;
