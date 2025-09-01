@@ -43,7 +43,7 @@ type PendingMove = {
 
 
 export default function KanbanPage() {
-    const { isManager } = useAuth();
+    const { isManager, isProjectManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const [searchQuery, setSearchQuery] = useState('');
@@ -267,7 +267,7 @@ export default function KanbanPage() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                     {isManager && (
+                     {(isManager || isProjectManager) && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                  <Button>

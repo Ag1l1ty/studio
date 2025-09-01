@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 export function DeliveryAdminForm() {
     const [deliveries, setDeliveries] = useState(getDeliveries());
-    const { isManager } = useAuth();
+    const { isManager, isProjectManager } = useAuth();
 
     return (
         <Card>
@@ -32,7 +32,7 @@ export function DeliveryAdminForm() {
             </CardHeader>
             <CardContent>
                 <div className="flex justify-end mb-4">
-                    {isManager && (
+                    {(isManager || isProjectManager) && (
                         <Button>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Agregar Entrega
@@ -62,21 +62,19 @@ export function DeliveryAdminForm() {
                                     <TableCell>{format(new Date(delivery.estimatedDate), 'MMM dd, yyyy')}</TableCell>
                                     <TableCell>${delivery.budget.toLocaleString()}</TableCell>
                                     <TableCell>
-                                        {isManager && (
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        )}
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                {(isManager || isProjectManager) && <DropdownMenuItem>Edit</DropdownMenuItem>}
+                                                {isManager && <DropdownMenuItem>Delete</DropdownMenuItem>}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             ))}
