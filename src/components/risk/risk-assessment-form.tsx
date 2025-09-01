@@ -153,7 +153,7 @@ export function RiskAssessmentForm() {
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                                {projects.map(p => (
+                                {projects.filter(p => !p.riskScore || p.riskScore === 0).map(p => (
                                     <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                                 ))}
                             </SelectContent>
