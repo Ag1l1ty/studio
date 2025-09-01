@@ -41,11 +41,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
            {currentUser && (
               <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
-                      <AvatarImage src={`https://i.pravatar.cc/150?u=${currentUser.id}`} alt={currentUser.name} />
-                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage src={currentUser.avatar} alt={`${currentUser.firstName} ${currentUser.lastName}`} />
+                      <AvatarFallback>{currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                      <span className="text-sm font-medium text-sidebar-foreground">{currentUser.name}</span>
+                      <span className="text-sm font-medium text-sidebar-foreground">{currentUser.firstName} {currentUser.lastName}</span>
                       <span className="text-xs text-sidebar-foreground/70">{currentUser.role}</span>
                   </div>
               </div>

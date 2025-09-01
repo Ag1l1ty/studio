@@ -7,10 +7,12 @@ export type Role = 'Admin' | 'PM/SM' | 'Viewer' | 'Portfolio Manager';
 
 export type User = {
     id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: Role;
     avatar: string;
+    assignedProjectIds?: string[];
 };
 
 export type BudgetHistoryEntry = {
