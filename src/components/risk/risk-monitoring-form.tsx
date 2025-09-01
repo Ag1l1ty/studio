@@ -102,7 +102,7 @@ export function RiskMonitoringForm() {
         // Timeline deviation logic
         if (values.timelineDeviation >= 20) {
             newScore += 2;
-        } else if (values.timelineDeviation < 0) {
+        } else {
             newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
         }
         
@@ -356,3 +356,5 @@ export function RiskMonitoringForm() {
         </Form>
     );
 }
+
+    
