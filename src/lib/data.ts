@@ -1,4 +1,5 @@
 
+
 import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role, User, RiskProfile } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
@@ -295,9 +296,12 @@ export function getDashboardKpis(projects: Project[]) {
     ).length;
     
     const currentYear = new Date().getFullYear();
-    const totalDeliveries = getDeliveries().filter(d => 
-        d.stage === 'Cerrado' && new Date(d.creationDate).getFullYear() === currentYear
-    ).length;
+    const totalDeliveries = projects.reduce((acc, project) => {
+        if (project.stage === 'Cerrado' && getYear(parseISO(project.endDate)) === currentYear) {
+            return acc + project.metrics.reduce((sum, metric) => sum + metric.deliveries, 0);
+        }
+        return acc;
+    }, 0);
     
     return {
         totalBudget,
