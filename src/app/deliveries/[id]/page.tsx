@@ -31,6 +31,7 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
     const { id } = params;
     const [delivery, setDelivery] = useState<Delivery | null>(null);
     const [budgetSpent, setBudgetSpent] = useState(0);
+    const [formattedBudgetSpent, setFormattedBudgetSpent] = useState("0");
     const [budgetHistory, setBudgetHistory] = useState<BudgetHistoryEntry[]>([]);
     const [showUpdateWarning, setShowUpdateWarning] = useState(true);
     const [isConfirmingBudget, setConfirmingBudget] = useState(false);
@@ -42,7 +43,9 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
         const deliveryData = getDeliveryById(id);
         if (deliveryData) {
             setDelivery(deliveryData);
-            setBudgetSpent(deliveryData.budgetSpent || 0);
+            const initialSpent = deliveryData.budgetSpent || 0;
+            setBudgetSpent(initialSpent);
+            setFormattedBudgetSpent(new Intl.NumberFormat('en-US').format(initialSpent));
             setBudgetHistory(deliveryData.budgetHistory || []);
         }
     }, [id]);
@@ -84,6 +87,20 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
         // In a real app, you would also save this updated history to the backend
         // For now, it only updates local state
     }
+    
+    const handleBudgetInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const numericValue = Number(value.replace(/[^0-9]/g, ''));
+
+        if (!isNaN(numericValue)) {
+            setBudgetSpent(numericValue);
+            setFormattedBudgetSpent(new Intl.NumberFormat('en-US').format(numericValue));
+        } else {
+             setBudgetSpent(0);
+            setFormattedBudgetSpent("0");
+        }
+    };
+
 
     return (
         <>
@@ -128,9 +145,9 @@ export default function DeliveryDetailsPage({ params }: { params: { id: string }
                                 <Label htmlFor="budget-spent">Presupuesto Ejecutado ($)</Label>
                                 <Input 
                                     id="budget-spent" 
-                                    type="number"
-                                    value={budgetSpent}
-                                    onChange={(e) => setBudgetSpent(Number(e.target.value))}
+                                    type="text"
+                                    value={formattedBudgetSpent}
+                                    onChange={handleBudgetInputChange}
                                 />
                            </div>
                            <Button onClick={handleBudgetUpdateClick} className="w-full">Actualizar Uso</Button>
