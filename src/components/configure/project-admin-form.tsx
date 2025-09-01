@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects } from '@/lib/data';
+import { getProjects, getDeliveries } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,10 +16,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
+import { Progress } from '@/components/ui/progress';
+import type { Delivery } from '@/lib/types';
 
 export function ProjectAdminForm() {
     const [projects, setProjects] = useState(getProjects());
+    const [deliveries, setDeliveries] = useState(getDeliveries());
     const { isManager, isProjectManager } = useAuth();
+
+    const getProjectProgress = (project: (typeof projects)[0]) => {
+        const closedDeliveries = deliveries.filter(d => d.projectId === project.id && d.stage === 'Cerrado').length;
+        const totalDeliveries = project.projectedDeliveries || 0;
+        if (totalDeliveries === 0) return 0;
+        return (closedDeliveries / totalDeliveries) * 100;
+    }
 
     return (
         <Card>
@@ -43,7 +53,7 @@ export function ProjectAdminForm() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Nombre del Proyecto</TableHead>
-                                <TableHead>Estado</TableHead>
+                                <TableHead>Progreso del Proyecto</TableHead>
                                 <TableHead>Propietario</TableHead>
                                 <TableHead>Presupuesto</TableHead>
                                 <TableHead>Nivel de Riesgo</TableHead>
@@ -51,36 +61,42 @@ export function ProjectAdminForm() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {projects.map(project => (
-                                <TableRow key={project.id}>
-                                    <TableCell className="font-medium">{project.name}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline">{project.stage}</Badge>
-                                    </TableCell>
-                                    <TableCell>{project.owner.name}</TableCell>
-                                    <TableCell>${project.budget.toLocaleString()}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={project.riskLevel.includes('Agresivo') ? 'destructive' : project.riskLevel.includes('Moderado') ? 'secondary' : 'default'}>
-                                            {project.riskLevel}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                {(isManager || isProjectManager) && <DropdownMenuItem>Edit</DropdownMenuItem>}
-                                                {isManager && <DropdownMenuItem>Delete</DropdownMenuItem>}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            {projects.map(project => {
+                                const progress = getProjectProgress(project);
+                                return (
+                                    <TableRow key={project.id}>
+                                        <TableCell className="font-medium">{project.name}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Progress value={progress} className="w-24" />
+                                                <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{project.owner.name}</TableCell>
+                                        <TableCell>${project.budget.toLocaleString()}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={project.riskLevel.includes('Agresivo') ? 'destructive' : project.riskLevel.includes('Moderado') ? 'secondary' : 'default'}>
+                                                {project.riskLevel}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Toggle menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    {(isManager || isProjectManager) && <DropdownMenuItem>Edit</DropdownMenuItem>}
+                                                    {isManager && <DropdownMenuItem>Delete</DropdownMenuItem>}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })}
                         </TableBody>
                     </Table>
                 </div>
