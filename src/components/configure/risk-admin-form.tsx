@@ -8,18 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import { getRiskProfiles, updateRiskProfiles } from '@/lib/data';
+import type { RiskProfile } from '@/lib/types';
 
-const MOCK_RISK_PROFILES = [
-    { classification: 'Muy Agresivo', score: '>= 18', deviation: '+200%' },
-    { classification: 'Agresivo', score: '12 - 17', deviation: '+100%' },
-    { classification: 'Moderado - alto', score: '10 - 11', deviation: '+70%' },
-    { classification: 'Moderado', score: '6 - 9', deviation: '+40%' },
-    { classification: 'Conservador', score: '3 - 5', deviation: '+20%' },
-    { classification: 'Muy conservador', score: '1 - 2', deviation: '+10%' },
-];
 
 export function RiskAdminForm() {
-    const [profiles, setProfiles] = useState(MOCK_RISK_PROFILES);
+    const [profiles, setProfiles] = useState(getRiskProfiles());
     const { isManager } = useAuth();
     const { toast } = useToast();
 
@@ -30,8 +24,7 @@ export function RiskAdminForm() {
     };
 
     const handleSaveChanges = () => {
-        // In a real app, you would save this data to your backend.
-        // For now, we'll just show a success toast.
+        updateRiskProfiles(profiles);
         toast({
             title: "Perfiles de Riesgo Guardados",
             description: "Los cambios en los perfiles de riesgo han sido guardados exitosamente.",

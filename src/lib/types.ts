@@ -78,4 +78,8 @@ export type RiskResult = {
     deviation: string;
 }
 
-    
+export type RiskProfile = {
+    classification: RiskLevel;
+    score: string;
+    deviation: string;
+}

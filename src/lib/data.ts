@@ -1,5 +1,5 @@
 
-import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role, User } from './types';
+import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role, User, RiskProfile } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
@@ -391,15 +391,45 @@ export const aggregateMetrics = (projects: Project[]) => {
     });
 };
 
+let MOCK_RISK_PROFILES: RiskProfile[] = [
+    { classification: 'Muy Agresivo', score: '>= 18', deviation: '+200%' },
+    { classification: 'Agresivo', score: '12 - 17', deviation: '+100%' },
+    { classification: 'Moderado - alto', score: '10 - 11', deviation: '+70%' },
+    { classification: 'Moderado', score: '6 - 9', deviation: '+40%' },
+    { classification: 'Conservador', score: '3 - 5', deviation: '+20%' },
+    { classification: 'Muy conservador', score: '1 - 2', deviation: '+10%' },
+];
+
+export function getRiskProfiles(): RiskProfile[] {
+    return JSON.parse(JSON.stringify(MOCK_RISK_PROFILES));
+}
+
+export function updateRiskProfiles(profiles: RiskProfile[]) {
+    MOCK_RISK_PROFILES = profiles;
+}
+
+const parseScoreRange = (range: string): [number, number] => {
+    if (range.includes('>=')) {
+        return [parseInt(range.replace('>=', '').trim(), 10), Infinity];
+    }
+    if (range.includes('-')) {
+        const [min, max] = range.split('-').map(s => parseInt(s.trim(), 10));
+        return [min, max];
+    }
+    return [0, 0];
+}
+
 
 export function getRiskProfile(score: number): Omit<RiskResult, 'score'> {
-    if (score >= 18) return { classification: 'Muy Agresivo', deviation: '+200%' };
-    if (score >= 12 && score <=17) return { classification: 'Agresivo', deviation: '+100%' };
-    if (score >= 10 && score <= 11) return { classification: 'Moderado - alto', deviation: '+70%' };
-    if (score >= 6 && score <= 9) return { classification: 'Moderado', deviation: '+40%' };
-    if (score >= 3 && score <= 5) return { classification: 'Conservador', deviation: '+20%' };
-    if (score >= 1 && score <= 2) return { classification: 'Muy conservador', deviation: '+10%' };
-    return { classification: 'Muy conservador', deviation: '+10%' };
+    for (const profile of MOCK_RISK_PROFILES) {
+        const [min, max] = parseScoreRange(profile.score);
+        if (score >= min && score <= max) {
+            return { classification: profile.classification, deviation: profile.deviation };
+        }
+    }
+    // Return the most conservative profile as a fallback
+    const fallbackProfile = MOCK_RISK_PROFILES[MOCK_RISK_PROFILES.length - 1];
+    return { classification: fallbackProfile.classification, deviation: fallbackProfile.deviation };
 }
 
 export function updateProjectRisk(projectId: string, score: number, level: RiskLevel, deliveryId?: string) {
@@ -416,7 +446,3 @@ export function updateProjectRisk(projectId: string, score: number, level: RiskL
         }
     }
 }
-
-    
-
-    
