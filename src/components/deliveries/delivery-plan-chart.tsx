@@ -4,7 +4,7 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import type { Delivery, ProjectStage } from '@/lib/types';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '../ui/chart';
-import { differenceInDays, format, parseISO } from 'date-fns';
+import { differenceInDays, format, parseISO, addDays } from 'date-fns';
 
 interface DeliveryPlanChartProps {
     delivery: Delivery;
@@ -27,11 +27,11 @@ export function DeliveryPlanChart({ delivery }: DeliveryPlanChartProps) {
     const startDate = parseISO(delivery.creationDate);
     const endDate = parseISO(delivery.estimatedDate);
     
+    const totalDays = differenceInDays(endDate, startDate);
+    const daysPerStage = totalDays > 0 ? totalDays / (STAGES.length -1) : 0;
+
     const plannedData = STAGES.map((stage, index) => {
-        const totalDays = differenceInDays(endDate, startDate);
-        const daysPerStage = totalDays > 0 ? totalDays / (STAGES.length - 1) : 0;
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + (daysPerStage * index));
+        const date = addDays(startDate, daysPerStage * index);
         return { x: date.getTime(), y: index, stage, type: 'Planificado' };
     });
 
