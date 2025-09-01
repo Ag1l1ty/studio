@@ -197,7 +197,7 @@ export function RiskMonitoringForm() {
                             <FormLabel>Project</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                    <SelectTrigger><SelectValue placeholder="Select a project to monitor" /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder="Selecciona proyecto a valorar" /></SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
                                     {projects.filter(p => typeof p.riskScore !== 'undefined' && p.riskScore > 0).map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({p.id})</SelectItem>)}
@@ -218,7 +218,7 @@ export function RiskMonitoringForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Delivery</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProjectId}>
+                            <Select onValueChange={field.onChange} value={field.value} disabled={!selectedProjectId}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecciona entrega a valorar" />
