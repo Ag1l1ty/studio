@@ -34,8 +34,14 @@ const formSchema = z.object({
       (val) => (val === "" ? undefined : Number(val)),
        z.coerce.number().min(-100).max(100).optional()
     ),
-    hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
-    functionalFit: z.coerce.number().min(0, "Hours must be a positive number"),
+    hoursToFix: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+      z.coerce.number().min(0, "Hours must be a positive number").optional()
+    ),
+    functionalFit: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+      z.coerce.number().min(0, "Hours must be a positive number").optional()
+    ),
     featureAdjustments: z.preprocess(
       (val) => (val === "" ? undefined : Number(val)),
       z.number().int().min(1, "Please select a number of adjustments").optional()
@@ -70,8 +76,8 @@ export function RiskMonitoringForm() {
             projectId: '',
             deliveryId: '',
             timelineDeviation: '',
-            hoursToFix: 0,
-            functionalFit: 0,
+            hoursToFix: '',
+            functionalFit: '',
             featureAdjustments: '',
             blockHours: '',
         },
@@ -105,16 +111,16 @@ export function RiskMonitoringForm() {
         }
         
         // Hours to fix logic
-        if (values.hoursToFix >= 3) {
+        if (values.hoursToFix && values.hoursToFix >= 3) {
             newScore += 2;
-        } else {
+        } else if (values.hoursToFix) {
             newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
         }
 
         // Functional fit logic
-        if (values.functionalFit >= 3) {
+        if (values.functionalFit && values.functionalFit >= 3) {
             newScore += 2;
-        } else {
+        } else if (values.functionalFit) {
             newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
         }
         
@@ -174,7 +180,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: '', hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '' }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: '', hoursToFix: '', functionalFit: '', featureAdjustments: '', blockHours: '' }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -252,7 +258,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>Horas Arreglar Errores</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="e.g., 5" {...field} disabled={!selectedDeliveryId} />
+                                <Input type="number" placeholder="Solo horas laborables" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
@@ -315,8 +321,3 @@ export function RiskMonitoringForm() {
         </Form>
     );
 }
-
-    
-
-    
-
