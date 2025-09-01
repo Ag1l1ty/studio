@@ -54,7 +54,7 @@ export function ProjectAdminForm() {
                             <TableRow>
                                 <TableHead>Nombre del Proyecto</TableHead>
                                 <TableHead>Progreso del Proyecto</TableHead>
-                                <TableHead>Propietario</TableHead>
+                                <TableHead>Responsable</TableHead>
                                 <TableHead>Presupuesto</TableHead>
                                 <TableHead>Nivel de Riesgo</TableHead>
                                 <TableHead><span className="sr-only">Actions</span></TableHead>
