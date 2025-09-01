@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getDeliveries, getProjects } from '@/lib/data';
+import { getDeliveries, getProjects, addDelivery } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -19,18 +19,32 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
-import type { ProjectStage } from '@/lib/types';
+import type { ProjectStage, Delivery } from '@/lib/types';
+import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
+import { useToast } from '@/hooks/use-toast';
+import * as z from 'zod';
 
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
+
+// This needs to be defined here or imported if it's extracted to a shared place
+const createDeliveryFormSchema = (deliveries: Delivery[]) => z.object({
+    projectId: z.string().min(1, "Please select a project."),
+    deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
+    budget: z.number().positive("Budget must be a positive number."),
+    estimatedDate: z.date({ required_error: "An estimated date is required." }),
+});
 
 export function DeliveryAdminForm() {
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const [projects, setProjects] = useState(getProjects());
     const { isManager, isProjectManager } = useAuth();
+    const { toast } = useToast();
     
     const [deliveryNumberFilter, setDeliveryNumberFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('all');
     const [stageFilter, setStageFilter] = useState('all');
+
+    const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
 
     const filteredDeliveries = deliveries.filter(delivery => {
         const matchesDeliveryNumber = deliveryNumberFilter === '' || delivery.deliveryNumber.toString().includes(deliveryNumberFilter);
@@ -39,7 +53,32 @@ export function DeliveryAdminForm() {
         return matchesDeliveryNumber && matchesProject && matchesStage;
     });
 
+    const handleDeliveryCardCreated = (values: z.infer<ReturnType<typeof createDeliveryFormSchema>>) => {
+        const project = projects.find(p => p.id === values.projectId);
+        if (!project) return;
+
+        const newDelivery: Delivery = {
+            id: `DLV-00${getDeliveries().length + 1}`,
+            projectId: project.id,
+            projectName: project.name,
+            deliveryNumber: values.deliveryNumber,
+            stage: 'Definición', // Default stage
+            budget: values.budget,
+            estimatedDate: values.estimatedDate.toISOString(),
+            creationDate: new Date().toISOString(),
+            owner: project.owner,
+        };
+
+        addDelivery(newDelivery);
+        setDeliveries(getDeliveries());
+        toast({
+            title: "Entrega Creada",
+            description: `La entrega para el proyecto "${project.name}" ha sido creada.`,
+        });
+    };
+
     return (
+        <>
         <Card>
             <CardHeader>
                 <CardTitle>Entregas</CardTitle>
@@ -80,7 +119,7 @@ export function DeliveryAdminForm() {
                         </Select>
                     </div>
                     {(isManager || isProjectManager) && (
-                        <Button>
+                        <Button onClick={() => setCreateDeliveryCardDialogOpen(true)}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Agregar Entrega
                         </Button>
@@ -130,5 +169,13 @@ export function DeliveryAdminForm() {
                 </div>
             </CardContent>
         </Card>
+        <CreateDeliveryCardDialog
+            isOpen={isCreateDeliveryCardDialogOpen}
+            onOpenChange={setCreateDeliveryCardDialogOpen}
+            onDeliveryCardCreated={handleDeliveryCardCreated}
+            projects={projects}
+            deliveries={deliveries}
+        />
+        </>
     );
 }
