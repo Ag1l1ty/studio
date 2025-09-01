@@ -229,20 +229,27 @@ export default function KanbanPage() {
         }
     };
 
-    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
+    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent' | 'startDate' | 'endDate'> & { startDate: Date; endDate: Date }) => {
         const newProject: Project = {
             ...newProjectData,
             id: `PRJ-00${getProjects().length + 1}`,
             stage: 'Definición',
-            riskLevel: 'Low', // Default risk level
+            riskLevel: 'Low',
             budgetSpent: 0,
-            owner: { name: 'New User', avatar: '' }, // Placeholder owner
+            owner: { name: 'New User', avatar: '' },
             metrics: [],
+            startDate: newProjectData.startDate.toISOString(),
+            endDate: newProjectData.endDate.toISOString(),
         };
         addProject(newProject);
         const updatedProjects = getProjects();
         setProjects(updatedProjects);
         setSelectedProjects(new Set(updatedProjects.map(p => p.id)));
+        toast({
+            title: "Project Created",
+            description: `A new project "${newProject.name}" has been created.`,
+        });
+        setCreateProjectDialogOpen(false);
     };
     
      const handleDeliverySubmit = (values: z.infer<ReturnType<typeof createDeliveryFormSchema>>, id?: string) => {
@@ -380,5 +387,7 @@ export default function KanbanPage() {
         </DragDropContext>
     );
 }
+
+    
 
     
