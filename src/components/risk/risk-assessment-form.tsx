@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { AlertCircle, CheckCircle, Shield, TrendingUp } from 'lucide-react';
 import { getProjects, getProjectById, getRiskProfile, updateProjectRisk } from '@/lib/data';
@@ -43,6 +42,7 @@ export function RiskAssessmentForm() {
     const [result, setResult] = useState<RiskResult | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [isUpdate, setIsUpdate] = useState(false);
 
     useEffect(() => {
         setProjects(getProjects());
@@ -68,9 +68,15 @@ export function RiskAssessmentForm() {
             const project = getProjectById(projectId);
             if(project) {
                 setSelectedProject(project);
+                if (project.riskScore !== undefined && project.riskScore > 0) {
+                    setIsUpdate(true);
+                } else {
+                    setIsUpdate(false);
+                }
             }
         } else {
             setSelectedProject(null);
+            setIsUpdate(false);
         }
     }, [projectId]);
 
@@ -116,7 +122,7 @@ export function RiskAssessmentForm() {
             <Card>
                 <CardHeader>
                     <CardTitle>Risk Assessment Result</CardTitle>
-                    <CardDescription>Risk profile for project: {selectedProject?.name}</CardDescription>
+                    <CardDescription>Risk profile for project: {selectedProject?.name} has been {isUpdate ? 'updated' : 'created'}.</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center space-y-4">
                     <div className="flex justify-center">{resultIcon}</div>
@@ -125,7 +131,7 @@ export function RiskAssessmentForm() {
                     <div className="text-sm border rounded-lg p-4 bg-secondary/50 inline-block">
                         <p><TrendingUp className="inline-block mr-2" />Potential Deviation: <span className="font-semibold">{result.deviation}</span></p>
                     </div>
-                     <Button onClick={() => { form.reset(); setResult(null); setSelectedProject(null); }}>Assess Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '' }); setResult(null); setSelectedProject(null); setIsUpdate(false); }}>Assess Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -297,7 +303,9 @@ export function RiskAssessmentForm() {
                     )}
                 />
                 
-                <Button type="submit" disabled={!selectedProject}>Calculate and Save Risk</Button>
+                <Button type="submit" disabled={!selectedProject}>
+                    {isUpdate ? 'Update Risk Profile' : 'Calculate and Save Risk'}
+                </Button>
             </form>
         </Form>
     );
