@@ -41,10 +41,6 @@ const formSchema = z.object({
       (val) => (val === "" ? undefined : Number(val)),
       z.number().int().min(1, "Please select a number of block hours").optional()
     ),
-    changesScope: z.preprocess(
-      (val) => (val === "" ? undefined : Number(val)),
-      z.number().int().min(1, "Please select a number of scope changes").optional()
-    )
 });
 
 type UpdateResult = {
@@ -75,7 +71,6 @@ export function RiskMonitoringForm() {
             functionalFit: 0,
             featureAdjustments: '',
             blockHours: '',
-            changesScope: '',
         },
     });
 
@@ -132,12 +127,6 @@ export function RiskMonitoringForm() {
             newScore += 1;
         }
 
-        // Scope Changes logic
-        if (values.changesScope && values.changesScope >= 2) {
-            newScore += 1;
-        }
-
-
         // Ensure score doesn't go above a maximum (e.g., 25)
         newScore = Math.min(newScore, 25);
         
@@ -182,7 +171,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '', changesScope: '' }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '' }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -326,30 +315,6 @@ export function RiskMonitoringForm() {
                         </FormItem>
                     )}
                 />
-                
-                <FormField
-                    control={form.control}
-                    name="changesScope"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Changes scope</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select number of scope changes" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
-                                        <SelectItem key={num} value={String(num)}>{num}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
 
                 <Button type="submit" disabled={!selectedDeliveryId}>Update Risk</Button>
             </form>
