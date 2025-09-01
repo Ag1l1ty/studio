@@ -32,6 +32,7 @@ import { CreateProjectDialog } from '@/components/projects/create-project-dialog
 import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
 import { addMonths, format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
@@ -42,6 +43,7 @@ type PendingMove = {
 
 
 export default function KanbanPage() {
+    const { isManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const [searchQuery, setSearchQuery] = useState('');
@@ -265,23 +267,25 @@ export default function KanbanPage() {
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                             <Button>
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Create
-                                <ChevronDown className="ml-2 h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setCreateProjectDialogOpen(true)}>
-                                Create New Project
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setCreateDeliveryCardDialogOpen(true)}>
-                                Create Delivery Card
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                     {isManager && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                 <Button>
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Create
+                                    <ChevronDown className="ml-2 h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setCreateProjectDialogOpen(true)}>
+                                    Create New Project
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setCreateDeliveryCardDialogOpen(true)}>
+                                    Create Delivery Card
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
                 <div className="flex-1 overflow-x-auto p-4 md:p-8">
                     <KanbanBoard 

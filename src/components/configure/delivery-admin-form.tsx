@@ -16,9 +16,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
+import { useAuth } from '@/hooks/use-auth';
 
 export function DeliveryAdminForm() {
     const [deliveries, setDeliveries] = useState(getDeliveries());
+    const { isManager } = useAuth();
 
     return (
         <Card>
@@ -30,10 +32,12 @@ export function DeliveryAdminForm() {
             </CardHeader>
             <CardContent>
                 <div className="flex justify-end mb-4">
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Agregar Entrega
-                    </Button>
+                    {isManager && (
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Entrega
+                        </Button>
+                    )}
                 </div>
                 <div className="rounded-md border">
                     <Table>
@@ -58,19 +62,21 @@ export function DeliveryAdminForm() {
                                     <TableCell>{format(new Date(delivery.estimatedDate), 'MMM dd, yyyy')}</TableCell>
                                     <TableCell>${delivery.budget.toLocaleString()}</TableCell>
                                     <TableCell>
-                                         <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                <DropdownMenuItem>Delete</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        {isManager && (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Toggle menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}

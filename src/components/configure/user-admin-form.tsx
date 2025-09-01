@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects, getDeliveries } from '@/lib/data';
+import { getProjects, getDeliveries, MOCK_USERS } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,20 +16,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-// Mock data for users - in a real app, this would come from your auth provider or database
-const MOCK_USERS = [
-    { id: 'USR-001', name: 'Ana Rodriguez', email: 'ana.rodriguez@example.com', role: 'Project Manager', avatar: '/avatars/01.png' },
-    { id: 'USR-002', name: 'Carlos Gomez', email: 'carlos.gomez@example.com', role: 'Project Manager', avatar: '/avatars/02.png' },
-    { id: 'USR-004', name: 'Luis Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png' },
-    { id: 'USR-005', name: 'Elena Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png' },
-];
+import { useAuth } from '@/hooks/use-auth';
 
 
 export function UserAdminForm() {
     const [users, setUsers] = useState(MOCK_USERS);
     const projects = getProjects();
     const deliveries = getDeliveries();
+    const { isManager } = useAuth();
 
     const getUserProjectCount = (userName: string) => {
         return projects.filter(p => p.owner.name === userName).length;
@@ -50,10 +44,12 @@ export function UserAdminForm() {
             </CardHeader>
             <CardContent>
                 <div className="flex justify-end mb-4">
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Agregar Usuario
-                    </Button>
+                    {isManager && (
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Agregar Usuario
+                        </Button>
+                    )}
                 </div>
                 <div className="rounded-md border">
                     <Table>
@@ -82,24 +78,26 @@ export function UserAdminForm() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={user.role === 'Admin' ? 'destructive' : 'secondary'}>{user.role}</Badge>
+                                        <Badge variant={user.role === 'Admin' || user.role === 'Portfolio Manager' ? 'destructive' : 'secondary'}>{user.role}</Badge>
                                     </TableCell>
                                     <TableCell>{getUserProjectCount(user.name)}</TableCell>
                                     <TableCell>{getUserDeliveryCount(user.name)}</TableCell>
                                     <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                    <span className="sr-only">Toggle menu</span>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                <DropdownMenuItem>Delete</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        {isManager && (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                        <span className="sr-only">Toggle menu</span>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                                                    <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -110,5 +108,3 @@ export function UserAdminForm() {
         </Card>
     );
 }
-
-    

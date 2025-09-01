@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useAuth } from '@/hooks/use-auth';
 
 const MOCK_RISK_PROFILES = [
     { classification: 'Muy Agresivo', score: '>= 18', deviation: '+200%' },
@@ -19,6 +20,7 @@ const MOCK_RISK_PROFILES = [
 
 export function RiskAdminForm() {
     const [profiles, setProfiles] = useState(MOCK_RISK_PROFILES);
+    const { isManager } = useAuth();
 
     return (
         <Card>
@@ -43,10 +45,10 @@ export function RiskAdminForm() {
                                 <TableRow key={index}>
                                     <TableCell className="font-semibold">{profile.classification}</TableCell>
                                     <TableCell>
-                                        <Input defaultValue={profile.score} className="w-32" />
+                                        <Input defaultValue={profile.score} className="w-32" disabled={!isManager} />
                                     </TableCell>
                                     <TableCell>
-                                        <Input defaultValue={profile.deviation} className="w-32" />
+                                        <Input defaultValue={profile.deviation} className="w-32" disabled={!isManager} />
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -54,7 +56,7 @@ export function RiskAdminForm() {
                     </Table>
                 </div>
                 <div className="flex justify-end mt-4">
-                    <Button>Guardar Cambios</Button>
+                    {isManager && <Button>Guardar Cambios</Button>}
                 </div>
             </CardContent>
         </Card>

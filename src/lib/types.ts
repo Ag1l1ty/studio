@@ -3,6 +3,16 @@ export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' |
 
 export type RiskLevel = 'Muy conservador' | 'Conservador' | 'Moderado' | 'Moderado - alto' | 'Agresivo' | 'Muy Agresivo';
 
+export type Role = 'Admin' | 'Project Manager' | 'Viewer' | 'Portfolio Manager';
+
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    role: Role;
+    avatar: string;
+};
+
 export type BudgetHistoryEntry = {
   date: string;
   amount: number;

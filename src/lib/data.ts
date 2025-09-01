@@ -1,5 +1,5 @@
 
-import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role } from './types';
+import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role, User } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
@@ -186,6 +186,15 @@ let MOCK_DELIVERIES: Delivery[] = [
     },
 ];
 
+// Mock data for users - in a real app, this would come from your auth provider or database
+export const MOCK_USERS: User[] = [
+    { id: 'USR-001', name: 'Ana Rodriguez', email: 'ana.rodriguez@example.com', role: 'Project Manager', avatar: '/avatars/01.png' },
+    { id: 'USR-002', name: 'Carlos Gomez', email: 'carlos.gomez@example.com', role: 'Project Manager', avatar: '/avatars/02.png' },
+    { id: 'USR-004', name: 'Luis Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png' },
+    { id: 'USR-005', name: 'Elena Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png' },
+    { id: 'USR-007', name: 'Laura Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png' },
+];
+
 
 export function getProjects(): Project[] {
   // Return a copy to avoid mutation of the original array
@@ -362,5 +371,3 @@ export function updateProjectRisk(projectId: string, score: number, level: RiskL
         }
     }
 }
-
-    
