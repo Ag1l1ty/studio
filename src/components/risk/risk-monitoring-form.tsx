@@ -33,6 +33,7 @@ const formSchema = z.object({
     timelineDeviation: z.coerce.number().min(-100).max(100),
     hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
     functionalFit: z.coerce.number().min(0, "Hours must be a positive number"),
+    featureAdjustments: z.coerce.number().int().min(1, "Please select a number of adjustments"),
 });
 
 type UpdateResult = {
@@ -103,6 +104,13 @@ export function RiskMonitoringForm() {
             newScore += 2;
         } else {
             newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
+        }
+        
+        // Feature Adjustments Logic
+        if (values.featureAdjustments >= 3) {
+            newScore += 2;
+        } else {
+            newScore = Math.max(1, newScore - 1);
         }
 
         // Ensure score doesn't go above a maximum (e.g., 25)
@@ -247,6 +255,30 @@ export function RiskMonitoringForm() {
                         </FormItem>
                     )}
                 />
+                
+                <FormField
+                    control={form.control}
+                    name="featureAdjustments"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Feature Adjustments</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : ""} disabled={!selectedDeliveryId}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select number of adjustments" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                                        <SelectItem key={num} value={String(num)}>{num}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
 
                 <Button type="submit" disabled={!selectedDeliveryId}>Update Risk</Button>
             </form>
