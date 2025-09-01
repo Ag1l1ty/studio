@@ -34,6 +34,7 @@ const formSchema = z.object({
     axaKnowledge: z.enum(['high', 'medium', 'low']),
     technicalUncertainty: z.enum(['low', 'medium', 'high']),
     technologyMaturity: z.enum(['stable', 'recent', 'emerging']),
+    externalDependencies: z.enum(['low', 'medium', 'high']),
 });
 
 
@@ -54,6 +55,7 @@ export function RiskAssessmentForm() {
             axaKnowledge: 'medium',
             technicalUncertainty: 'medium',
             technologyMaturity: 'stable',
+            externalDependencies: 'low',
         },
     });
 
@@ -89,6 +91,10 @@ export function RiskAssessmentForm() {
         // technologyMaturity scoring
         if (values.technologyMaturity === 'recent') score += 1.5;
         if (values.technologyMaturity === 'emerging') score += 3;
+
+        // externalDependencies scoring
+        if (values.externalDependencies === 'medium') score += 1.5;
+        if (values.externalDependencies === 'high') score += 3;
         
         const riskProfile = getRiskProfile(score);
         
@@ -236,6 +242,27 @@ export function RiskAssessmentForm() {
                                     <SelectItem value="stable">Tecnología ampliamente usada y estable</SelectItem>
                                     <SelectItem value="recent">Versión reciente de un producto conocido</SelectItem>
                                     <SelectItem value="emerging">Tecnología emergente o “proof-of-concept”</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="externalDependencies"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Dependencia externa</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Select external dependency level" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="low">Ninguna o muy pocas (internas controlables)</SelectItem>
+                                    <SelectItem value="medium">1 – 2 proveedores / 1 terceros críticos externas al equipo de proyecto</SelectItem>
+                                    <SelectItem value="high">Mayor o igual a 3 terceros críticos o dependencias externas al equipo de proyecto</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />
