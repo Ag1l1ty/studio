@@ -5,9 +5,9 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 
 const MOCK_RISK_PROFILES = [
     { classification: 'Muy Agresivo', score: '>= 18', deviation: '+200%' },
@@ -21,6 +21,22 @@ const MOCK_RISK_PROFILES = [
 export function RiskAdminForm() {
     const [profiles, setProfiles] = useState(MOCK_RISK_PROFILES);
     const { isManager } = useAuth();
+    const { toast } = useToast();
+
+    const handleProfileChange = (index: number, field: 'score' | 'deviation', value: string) => {
+        const newProfiles = [...profiles];
+        newProfiles[index] = { ...newProfiles[index], [field]: value };
+        setProfiles(newProfiles);
+    };
+
+    const handleSaveChanges = () => {
+        // In a real app, you would save this data to your backend.
+        // For now, we'll just show a success toast.
+        toast({
+            title: "Perfiles de Riesgo Guardados",
+            description: "Los cambios en los perfiles de riesgo han sido guardados exitosamente.",
+        });
+    }
 
     return (
         <Card>
@@ -45,10 +61,20 @@ export function RiskAdminForm() {
                                 <TableRow key={index}>
                                     <TableCell className="font-semibold">{profile.classification}</TableCell>
                                     <TableCell>
-                                        <Input defaultValue={profile.score} className="w-32" disabled={!isManager} />
+                                        <Input 
+                                            value={profile.score} 
+                                            onChange={(e) => handleProfileChange(index, 'score', e.target.value)}
+                                            className="w-32" 
+                                            disabled={!isManager} 
+                                        />
                                     </TableCell>
                                     <TableCell>
-                                        <Input defaultValue={profile.deviation} className="w-32" disabled={!isManager} />
+                                        <Input 
+                                            value={profile.deviation} 
+                                            onChange={(e) => handleProfileChange(index, 'deviation', e.target.value)}
+                                            className="w-32" 
+                                            disabled={!isManager} 
+                                        />
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -56,7 +82,7 @@ export function RiskAdminForm() {
                     </Table>
                 </div>
                 <div className="flex justify-end mt-4">
-                    {isManager && <Button>Guardar Cambios</Button>}
+                    {isManager && <Button onClick={handleSaveChanges}>Guardar Cambios</Button>}
                 </div>
             </CardContent>
         </Card>
