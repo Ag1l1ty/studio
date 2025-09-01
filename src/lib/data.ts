@@ -201,6 +201,19 @@ export function addUser(user: User) {
     // For this mock, we just add the user.
 }
 
+export function updateUser(user: User): User {
+    const index = MOCK_USERS.findIndex(u => u.id === user.id);
+    if (index !== -1) {
+        MOCK_USERS[index] = user;
+    }
+    return user;
+}
+
+export function deleteUser(userId: string) {
+    MOCK_USERS = MOCK_USERS.filter(u => u.id !== userId);
+}
+
+
 
 export function getProjects(): Project[] {
   // Return a copy to avoid mutation of the original array

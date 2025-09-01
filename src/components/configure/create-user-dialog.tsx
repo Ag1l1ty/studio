@@ -32,8 +32,8 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Check, ChevronsUpDown, UploadCloud } from 'lucide-react';
-import type { Project, Role } from '@/lib/types';
-import React, { useState } from 'react';
+import type { Project, Role, User } from '@/lib/types';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -52,11 +52,12 @@ const formSchema = z.object({
 type CreateUserDialogProps = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onUserCreated: (values: z.infer<typeof formSchema>) => void;
+    onUserSubmit: (values: z.infer<typeof formSchema>, id?: string) => void;
     projects: Project[];
+    user?: User | null;
 };
 
-export function CreateUserDialog({ isOpen, onOpenChange, onUserCreated, projects }: CreateUserDialogProps) {
+export function CreateUserDialog({ isOpen, onOpenChange, onUserSubmit, projects, user }: CreateUserDialogProps) {
     const [preview, setPreview] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -71,12 +72,33 @@ export function CreateUserDialog({ isOpen, onOpenChange, onUserCreated, projects
         },
     });
 
-    React.useEffect(() => {
-        if (!isOpen) {
-            form.reset();
-            setPreview(null);
+    useEffect(() => {
+        if (isOpen) {
+            if (user) {
+                // Edit mode
+                form.reset({
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    role: user.role,
+                    avatar: user.avatar,
+                    assignedProjectIds: user.assignedProjectIds || [],
+                });
+                setPreview(user.avatar || null);
+            } else {
+                // Create mode
+                form.reset({
+                    firstName: "",
+                    lastName: "",
+                    email: "",
+                    role: "",
+                    avatar: "",
+                    assignedProjectIds: [],
+                });
+                setPreview(null);
+            }
         }
-    }, [isOpen, form]);
+    }, [isOpen, user, form]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -92,16 +114,16 @@ export function CreateUserDialog({ isOpen, onOpenChange, onUserCreated, projects
     };
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        onUserCreated({ ...values, role: values.role as Role });
+        onUserSubmit({ ...values, role: values.role as Role }, user?.id);
     }
     
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+                    <DialogTitle>{user ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</DialogTitle>
                     <DialogDescription>
-                        Complete los detalles para agregar un nuevo miembro al equipo.
+                        {user ? 'Actualice los detalles del miembro del equipo.' : 'Complete los detalles para agregar un nuevo miembro al equipo.'}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -244,7 +266,7 @@ export function CreateUserDialog({ isOpen, onOpenChange, onUserCreated, projects
                         </div>
                         <DialogFooter className="col-span-1 md:col-span-3">
                             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                            <Button type="submit">Crear Usuario</Button>
+                            <Button type="submit">{user ? 'Guardar Cambios' : 'Crear Usuario'}</Button>
                         </DialogFooter>
                     </form>
                 </Form>

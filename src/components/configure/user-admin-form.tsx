@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects, getDeliveries, MOCK_USERS, addUser } from '@/lib/data';
+import { getProjects, MOCK_USERS, addUser, updateUser, deleteUser } from '@/lib/data';
 import type { User, Role } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { useAuth } from '@/hooks/use-auth';
 import { CreateUserDialog } from './create-user-dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -26,27 +37,70 @@ export function UserAdminForm() {
     const projects = getProjects();
     const { isManager } = useAuth();
     const [isCreateUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState<User | null>(null);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [isConfirmingDelete, setConfirmingDelete] = useState(false);
     const { toast } = useToast();
 
     const getUserProjectCount = (userId: string) => {
         const user = users.find(u => u.id === userId);
         return user?.assignedProjectIds?.length || 0;
     };
+    
+    const handleEditClick = (user: User) => {
+        setUserToEdit(user);
+        setCreateUserDialogOpen(true);
+    }
+    
+    const handleDeleteClick = (user: User) => {
+        setUserToDelete(user);
+        setConfirmingDelete(true);
+    }
 
-    const handleUserCreated = (values: Omit<User, 'id'>) => {
-        const newUser: User = {
-            ...values,
-            id: `USR-00${users.length + 1}`,
-        };
-        addUser(newUser);
-        setUsers(prevUsers => [...prevUsers, newUser]);
-        
-        toast({
-            title: "Usuario Creado",
-            description: `Se ha creado el usuario ${newUser.firstName} ${newUser.lastName}. Se enviará un correo para la creación de la contraseña.`,
-        });
+    const handleConfirmDelete = () => {
+        if (userToDelete) {
+            deleteUser(userToDelete.id);
+            setUsers(MOCK_USERS);
+            toast({
+                title: "Usuario Eliminado",
+                description: `El usuario ${userToDelete.firstName} ${userToDelete.lastName} ha sido eliminado.`,
+            });
+        }
+        setConfirmingDelete(false);
+        setUserToDelete(null);
+    }
+
+
+    const handleUserSubmit = (values: Omit<User, 'id'>, id?: string) => {
+        if (id) {
+            // Update existing user
+            const updatedUser = updateUser({ ...values, id });
+            setUsers(users.map(u => u.id === id ? updatedUser : u));
+            toast({
+                title: "Usuario Actualizado",
+                description: `Los datos de ${values.firstName} ${values.lastName} han sido actualizados.`,
+            });
+        } else {
+            // Create new user
+            const newUser: User = {
+                ...values,
+                id: `USR-00${users.length + 1}`,
+            };
+            addUser(newUser);
+            setUsers(prevUsers => [...prevUsers, newUser]);
+            toast({
+                title: "Usuario Creado",
+                description: `Se ha creado el usuario ${newUser.firstName} ${newUser.lastName}. Se enviará un correo para la creación de la contraseña.`,
+            });
+        }
         setCreateUserDialogOpen(false);
+        setUserToEdit(null);
     };
+
+    const handleDialogClose = () => {
+        setCreateUserDialogOpen(false);
+        setUserToEdit(null);
+    }
 
     return (
         <>
@@ -106,8 +160,8 @@ export function UserAdminForm() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                                                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleEditClick(user)}>Edit</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(user)}>Delete</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             )}
@@ -121,10 +175,25 @@ export function UserAdminForm() {
             </Card>
             <CreateUserDialog
                 isOpen={isCreateUserDialogOpen}
-                onOpenChange={setCreateUserDialogOpen}
-                onUserCreated={handleUserCreated}
+                onOpenChange={handleDialogClose}
+                onUserSubmit={handleUserSubmit}
                 projects={projects}
+                user={userToEdit}
             />
+            <AlertDialog open={isConfirmingDelete} onOpenChange={setConfirmingDelete}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                           Esta acción no se puede deshacer. Esto eliminará permanentemente al usuario {userToDelete?.firstName} {userToDelete?.lastName}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setConfirmingDelete(false)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmDelete}>Sí, eliminar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
