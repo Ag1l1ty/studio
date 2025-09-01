@@ -32,6 +32,7 @@ const formSchema = z.object({
     deliveryId: z.string().min(1, 'Please select a delivery'),
     timelineDeviation: z.coerce.number().min(-100).max(100),
     hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
+    functionalFit: z.coerce.number().min(0, "Hours must be a positive number"),
 });
 
 type UpdateResult = {
@@ -59,6 +60,7 @@ export function RiskMonitoringForm() {
             deliveryId: '',
             timelineDeviation: 0,
             hoursToFix: 0,
+            functionalFit: 0,
         },
     });
 
@@ -91,6 +93,13 @@ export function RiskMonitoringForm() {
         
         // Hours to fix logic
         if (values.hoursToFix >= 3) {
+            newScore += 2;
+        } else {
+            newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
+        }
+
+        // Functional fit logic
+        if (values.functionalFit >= 3) {
             newScore += 2;
         } else {
             newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
@@ -140,7 +149,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0 }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0 }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -225,10 +234,22 @@ export function RiskMonitoringForm() {
                     )}
                 />
 
+                <FormField
+                    control={form.control}
+                    name="functionalFit"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Functional Fit</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="e.g., 2" {...field} disabled={!selectedDeliveryId} />
+                            </FormControl>
+                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
                 <Button type="submit" disabled={!selectedDeliveryId}>Update Risk</Button>
             </form>
         </Form>
     );
 }
-
-    
