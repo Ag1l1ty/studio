@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -16,8 +17,11 @@ import { AppHeader } from './header';
 import { SidebarNav } from './sidebar-nav';
 import { Button } from '../ui/button';
 import { LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
+  const { currentUser } = useAuth();
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -34,16 +38,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarNav />
         </SidebarContent>
         <SidebarFooter className="p-4 flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-                <Avatar className="h-9 w-9">
-                    <AvatarImage src="https://picsum.photos/100" alt="User Avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col">
-                    <span className="text-sm font-medium text-sidebar-foreground">John Doe</span>
-                    <span className="text-xs text-sidebar-foreground/70">Project Manager</span>
-                </div>
-            </div>
+           {currentUser && (
+              <div className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9">
+                      <AvatarImage src={`https://i.pravatar.cc/150?u=${currentUser.id}`} alt={currentUser.name} />
+                      <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                      <span className="text-sm font-medium text-sidebar-foreground">{currentUser.name}</span>
+                      <span className="text-xs text-sidebar-foreground/70">{currentUser.role}</span>
+                  </div>
+              </div>
+            )}
              <Button variant="ghost" className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent">
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
