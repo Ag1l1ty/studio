@@ -192,13 +192,12 @@ export let MOCK_USERS: User[] = [
     { id: 'USR-002', firstName: 'Carlos', lastName: 'Gomez', email: 'carlos.gomez@example.com', role: 'PM/SM', avatar: '/avatars/02.png', assignedProjectIds: ['PRJ-002'] },
     { id: 'USR-004', firstName: 'Luis', lastName: 'Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png', assignedProjectIds: ['PRJ-004'] },
     { id: 'USR-005', firstName: 'Elena', lastName: 'Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png', assignedProjectIds: ['PRJ-005'] },
+    { id: 'USR-006', firstName: 'Javier', lastName: 'Nuñez', email: 'javier.nunez@example.com', role: 'PM/SM', avatar: '/avatars/06.png', assignedProjectIds: ['PRJ-006'] },
     { id: 'USR-007', firstName: 'Laura', lastName: 'Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png', assignedProjectIds: ['PRJ-001', 'PRJ-002', 'PRJ-003', 'PRJ-004', 'PRJ-005', 'PRJ-006'] },
 ];
 
 export function addUser(user: User) {
     MOCK_USERS.push(user);
-    // In a real app, also update project owners if needed.
-    // For this mock, we just add the user.
 }
 
 export function updateUser(user: User): User {
