@@ -88,7 +88,7 @@ export function ProjectAdminForm() {
                 startDate: values.startDate.toISOString(),
                 endDate: values.endDate.toISOString(),
                 stage: 'Definición',
-                riskLevel: 'Low', // Default risk level
+                riskLevel: 'No Assessment', // Default risk level
                 budgetSpent: 0,
                 owner: ownerData,
                 metrics: [],
@@ -165,6 +165,16 @@ export function ProjectAdminForm() {
                             <TableBody>
                                 {projects.map(project => {
                                     const progress = getProjectProgress(project);
+                                    const hasRiskAssessment = project.riskScore !== undefined && project.riskScore > 0;
+                                    let riskVariant: 'destructive' | 'secondary' | 'default' | 'warning' = 'default';
+                                    if (!hasRiskAssessment) {
+                                        riskVariant = 'warning';
+                                    } else if (project.riskLevel.includes('Agresivo')) {
+                                        riskVariant = 'destructive';
+                                    } else if (project.riskLevel.includes('Moderado')) {
+                                        riskVariant = 'secondary';
+                                    }
+
                                     return (
                                         <TableRow key={project.id}>
                                             <TableCell className="font-medium">{project.name}</TableCell>
@@ -177,8 +187,8 @@ export function ProjectAdminForm() {
                                             <TableCell>{project.owner.name}</TableCell>
                                             <TableCell>${project.budget.toLocaleString()}</TableCell>
                                             <TableCell>
-                                                <Badge variant={project.riskLevel.includes('Agresivo') ? 'destructive' : project.riskLevel.includes('Moderado') ? 'secondary' : 'default'}>
-                                                    {project.riskLevel}
+                                                 <Badge variant={riskVariant}>
+                                                    {hasRiskAssessment ? project.riskLevel : 'No Assessment'}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell>
@@ -228,3 +238,5 @@ export function ProjectAdminForm() {
         </>
     );
 }
+
+    

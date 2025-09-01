@@ -74,8 +74,8 @@ let MOCK_PROJECTS: Project[] = [
     name: 'Internal CRM System',
     description: 'New CRM system for the sales and marketing teams.',
     stage: 'Definición',
-    riskLevel: 'Moderado',
-    riskScore: 9,
+    riskLevel: 'No Assessment',
+    riskScore: 0,
     budget: 750000,
     budgetSpent: 50000,
     projectedDeliveries: 15,
@@ -198,7 +198,7 @@ export let MOCK_USERS: User[] = [
 
 export function addUser(user: User): User[] {
     MOCK_USERS.push(user);
-    return [...MOCK_USERS]; // Return a new array to ensure reactivity
+    return MOCK_USERS; // Return a new array to ensure reactivity
 }
 
 export function updateUser(user: User): User {
@@ -416,5 +416,7 @@ export function updateProjectRisk(projectId: string, score: number, level: RiskL
         }
     }
 }
+
+    
 
     

@@ -49,7 +49,9 @@ export default function DashboardPage() {
     const project = projectsToDisplay[0];
     const deliveriesMade = project.metrics.reduce((acc, m) => acc + m.deliveries, 0);
     const totalPlanned = project.projectedDeliveries || 0;
-    const riskProfile = getRiskProfile(project.riskScore || 0);
+    
+    const hasRiskAssessment = project.riskScore !== undefined && project.riskScore > 0;
+    const riskProfile = hasRiskAssessment ? getRiskProfile(project.riskScore!) : null;
 
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -83,9 +85,9 @@ export default function DashboardPage() {
           />
           <KpiCard
             title="Risk"
-            value={`${project.riskScore} - ${riskProfile.classification}`}
-            description={`Deviation: ${riskProfile.deviation}`}
-            icon={<AlertTriangle className="text-destructive" />}
+            value={hasRiskAssessment ? `${project.riskScore} - ${riskProfile?.classification}` : "No Assessment"}
+            description={hasRiskAssessment ? `Deviation: ${riskProfile?.deviation}` : "This project has not been assessed"}
+            icon={<AlertTriangle className={hasRiskAssessment ? "text-destructive" : "text-yellow-500"} />}
           />
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
@@ -252,3 +254,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    

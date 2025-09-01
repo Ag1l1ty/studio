@@ -1,7 +1,7 @@
 
 export type ProjectStage = 'Definición' | 'Desarrollo Local' | 'Ambiente DEV' | 'Ambiente TST' | 'Ambiente UAT' | 'Soporte Productivo' | 'Cerrado';
 
-export type RiskLevel = 'Muy conservador' | 'Conservador' | 'Moderado' | 'Moderado - alto' | 'Agresivo' | 'Muy Agresivo';
+export type RiskLevel = 'Muy conservador' | 'Conservador' | 'Moderado' | 'Moderado - alto' | 'Agresivo' | 'Muy Agresivo' | 'No Assessment';
 
 export type Role = 'Admin' | 'PM/SM' | 'Viewer' | 'Portfolio Manager';
 
@@ -77,3 +77,5 @@ export type RiskResult = {
     classification: RiskLevel;
     deviation: string;
 }
+
+    
