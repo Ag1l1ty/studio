@@ -17,14 +17,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/use-auth';
 import { Progress } from '@/components/ui/progress';
-import type { Delivery } from '@/lib/types';
+import type { Delivery, Project } from '@/lib/types';
 
 export function ProjectAdminForm() {
     const [projects, setProjects] = useState(getProjects());
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const { isManager, isProjectManager } = useAuth();
 
-    const getProjectProgress = (project: (typeof projects)[0]) => {
+    const getProjectProgress = (project: Project) => {
+        if (project.stage === 'Cerrado') {
+            return 100;
+        }
         const closedDeliveries = deliveries.filter(d => d.projectId === project.id && d.stage === 'Cerrado').length;
         const totalDeliveries = project.projectedDeliveries || 0;
         if (totalDeliveries === 0) return 0;
