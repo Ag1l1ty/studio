@@ -90,7 +90,7 @@ export function UserAdminForm() {
             setUsers(prevUsers => [...prevUsers, newUser]);
             toast({
                 title: "Usuario Creado",
-                description: `Se ha creado el usuario ${newUser.firstName} ${newUser.lastName}. Se enviará un correo para la creación de la contraseña.`,
+                description: `Se ha creado el usuario ${newUser.firstName} ${newUser.lastName}.`,
             });
         }
         setCreateUserDialogOpen(false);
