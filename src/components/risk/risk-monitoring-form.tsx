@@ -244,7 +244,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>(%) Desviación Plan </FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="Procentaje Desvio Planeación" {...field} disabled={!selectedDeliveryId} />
+                                <Input type="number" placeholder="Porcentaje desvío planeación" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
@@ -284,7 +284,7 @@ export function RiskMonitoringForm() {
                     name="featureAdjustments"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Cantidad Cambios Funcionales Post-Desarrollo</FormLabel>
+                            <FormLabel>Cantidad de Cambios Funcionales Post-Desarrollo</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
