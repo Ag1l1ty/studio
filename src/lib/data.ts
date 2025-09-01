@@ -270,6 +270,19 @@ export function addDelivery(delivery: Delivery) {
     MOCK_DELIVERIES.push(delivery);
 }
 
+export function updateDelivery(delivery: Delivery): Delivery {
+    const index = MOCK_DELIVERIES.findIndex(d => d.id === delivery.id);
+    if (index !== -1) {
+        MOCK_DELIVERIES[index] = delivery;
+    }
+    return delivery;
+}
+
+export function deleteDelivery(deliveryId: string) {
+    MOCK_DELIVERIES = MOCK_DELIVERIES.filter(d => d.id !== deliveryId);
+}
+
+
 export function getDashboardKpis(projects: Project[]) {
     const projectsInProgress = projects.filter(p => p.stage !== 'Cerrado');
     const totalBudget = projectsInProgress.reduce((sum, p) => sum + p.budget, 0);
@@ -402,3 +415,5 @@ export function updateProjectRisk(projectId: string, score: number, level: RiskL
         }
     }
 }
+
+    

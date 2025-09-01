@@ -29,17 +29,20 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import type { Project, Delivery } from '@/lib/types';
-import React from 'react';
+import type { Project, Delivery, ProjectStage } from '@/lib/types';
+import React, { useEffect } from 'react';
 
-const createFormSchema = (deliveries: Delivery[]) => z.object({
+const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
+
+const createFormSchema = (deliveries: Delivery[], currentDeliveryId?: string) => z.object({
     projectId: z.string().min(1, "Please select a project."),
     deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
-    budget: z.string().refine(val => !isNaN(Number(val.replace(/,/g, ''))), "Must be a number").transform(val => Number(val.replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
+    budget: z.any().refine(val => !isNaN(Number(String(val).replace(/,/g, ''))), "Must be a number").transform(val => Number(String(val).replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     estimatedDate: z.date({ required_error: "An estimated date is required." }),
+    stage: z.string().optional(),
 }).superRefine((data, ctx) => {
     const existingDeliveryNumbers = deliveries
-        .filter(d => d.projectId === data.projectId)
+        .filter(d => d.projectId === data.projectId && d.id !== currentDeliveryId)
         .map(d => d.deliveryNumber);
 
     if (existingDeliveryNumbers.includes(data.deliveryNumber)) {
@@ -57,12 +60,13 @@ type CreateDeliveryCardDialogProps = {
     onOpenChange: (open: boolean) => void;
     projects: Project[];
     deliveries: Delivery[];
-    onDeliveryCardCreated: (values: z.infer<ReturnType<typeof createFormSchema>>) => void;
+    delivery?: Delivery | null;
+    onDeliverySubmit: (values: z.infer<ReturnType<typeof createFormSchema>>, id?: string) => void;
 }
 
-export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliveries, onDeliveryCardCreated }: CreateDeliveryCardDialogProps) {
+export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliveries, delivery, onDeliverySubmit }: CreateDeliveryCardDialogProps) {
     const { toast } = useToast();
-    const formSchema = createFormSchema(deliveries);
+    const formSchema = createFormSchema(deliveries, delivery?.id);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -70,20 +74,34 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
             projectId: "",
             deliveryNumber: 1,
             budget: 0,
+            stage: 'Definición'
         },
     });
     
-    // Reset form when dialog opens
-    React.useEffect(() => {
+    // Reset form when dialog opens or delivery changes
+    useEffect(() => {
         if (isOpen) {
-            form.reset({
-                projectId: "",
-                deliveryNumber: 1,
-                budget: 0,
-                estimatedDate: undefined,
-            });
+            if (delivery) {
+                // Edit mode
+                form.reset({
+                    projectId: delivery.projectId,
+                    deliveryNumber: delivery.deliveryNumber,
+                    budget: new Intl.NumberFormat('en-US').format(delivery.budget),
+                    estimatedDate: new Date(delivery.estimatedDate),
+                    stage: delivery.stage,
+                });
+            } else {
+                // Create mode
+                form.reset({
+                    projectId: "",
+                    deliveryNumber: 1,
+                    budget: 0,
+                    estimatedDate: undefined,
+                    stage: 'Definición',
+                });
+            }
         }
-    }, [isOpen, form]);
+    }, [isOpen, delivery, form]);
 
     const selectedProjectId = form.watch('projectId');
     const selectedProject = React.useMemo(() => projects.find(p => p.id === selectedProjectId), [selectedProjectId, projects]);
@@ -101,21 +119,26 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
     
     const budgetValidation = (budget: number) => {
         if (!selectedProject) return true;
-        const remainingBudget = selectedProject.budget - selectedProject.budgetSpent;
+        const otherDeliveriesBudget = deliveries
+            .filter(d => d.projectId === selectedProject.id && d.id !== delivery?.id)
+            .reduce((sum, d) => sum + d.budget, 0);
+        const remainingBudget = selectedProject.budget - otherDeliveriesBudget;
         return budget <= remainingBudget;
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         if (!selectedProject) return;
 
-        const deliveriesMade = selectedProject.metrics.reduce((acc, m) => acc + m.deliveries, 0);
-        if (selectedProject.projectedDeliveries && deliveriesMade >= selectedProject.projectedDeliveries) {
-            toast({
-                variant: 'destructive',
-                title: "Cannot Create Delivery",
-                description: "This project has already reached its projected number of deliveries.",
-            });
-            return;
+        if (!delivery) {
+             const deliveriesMade = selectedProject.metrics.reduce((acc, m) => acc + m.deliveries, 0);
+            if (selectedProject.projectedDeliveries && deliveriesMade >= selectedProject.projectedDeliveries) {
+                toast({
+                    variant: 'destructive',
+                    title: "Cannot Create Delivery",
+                    description: "This project has already reached its projected number of deliveries.",
+                });
+                return;
+            }
         }
 
         if (!budgetValidation(values.budget)) {
@@ -126,13 +149,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
             return;
         }
 
-        onDeliveryCardCreated(values);
-        toast({
-            title: "Delivery Card Created",
-            description: `A new delivery card for project "${selectedProject?.name}" has been created.`,
-        });
-        form.reset();
-        onOpenChange(false);
+        onDeliverySubmit(values, delivery?.id);
     }
     
     const handleOpenChange = (open: boolean) => {
@@ -146,9 +163,9 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
          <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
-                    <DialogTitle>Create Delivery Card</DialogTitle>
+                    <DialogTitle>{delivery ? 'Editar Entrega' : 'Crear Tarjeta de Entrega'}</DialogTitle>
                     <DialogDescription>
-                        Fill in the details for the new delivery and associate it with a project.
+                        {delivery ? 'Actualice los detalles de la entrega.' : 'Complete los detalles de la nueva entrega y asóciela a un proyecto.'}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -158,11 +175,11 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                             name="projectId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Project</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormLabel>Proyecto</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!delivery}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a project" />
+                                                <SelectValue placeholder="Seleccionar un proyecto" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -178,10 +195,10 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                         
                         {selectedProject && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm p-3 bg-muted/50 rounded-lg border">
-                                <div><span className="font-semibold">Projected Deliveries:</span> {selectedProject.projectedDeliveries}</div>
-                                <div><span className="font-semibold">Deliveries Made:</span> {selectedProject.metrics.reduce((acc, m) => acc + m.deliveries, 0)}</div>
-                                <div><span className="font-semibold">Total Budget:</span> ${selectedProject.budget.toLocaleString()}</div>
-                                <div><span className="font-semibold">Remaining Budget:</span> ${(selectedProject.budget - selectedProject.budgetSpent).toLocaleString()}</div>
+                                <div><span className="font-semibold">Entregas Proyectadas:</span> {selectedProject.projectedDeliveries}</div>
+                                <div><span className="font-semibold">Entregas Realizadas:</span> {selectedProject.metrics.reduce((acc, m) => acc + m.deliveries, 0)}</div>
+                                <div><span className="font-semibold">Presupuesto Total:</span> ${selectedProject.budget.toLocaleString()}</div>
+                                <div><span className="font-semibold">Presupuesto Restante:</span> ${(selectedProject.budget - deliveries.filter(d => d.projectId === selectedProject.id).reduce((sum, d) => sum + d.budget, 0)).toLocaleString()}</div>
                             </div>
                         )}
 
@@ -191,7 +208,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                                 name="deliveryNumber"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Delivery Number</FormLabel>
+                                        <FormLabel>Número de Entrega</FormLabel>
                                         <FormControl>
                                             <Input type="number" min="1" step="1" {...field} disabled={!selectedProject} />
                                         </FormControl>
@@ -205,7 +222,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                                 name="budget"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Budget for Delivery</FormLabel>
+                                        <FormLabel>Presupuesto para Entrega</FormLabel>
                                         <FormControl>
                                             <Input 
                                                 {...field}
@@ -224,7 +241,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                             name="estimatedDate"
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel>Estimated Delivery Date</FormLabel>
+                                    <FormLabel>Fecha Estimada de Entrega</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
@@ -236,7 +253,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                                                     )}
                                                     disabled={!selectedProject}
                                                 >
-                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    {field.value ? format(field.value, "PPP") : <span>Elegir una fecha</span>}
                                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                 </Button>
                                             </FormControl>
@@ -256,9 +273,34 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                             )}
                         />
 
+                         {delivery && (
+                            <FormField
+                                control={form.control}
+                                name="stage"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Estado</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Seleccionar un estado" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                {STAGES.map(stage => (
+                                                    <SelectItem key={stage} value={stage}>{stage}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        )}
+
                         <DialogFooter>
-                            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>Cancel</Button>
-                            <Button type="submit" disabled={!selectedProject}>Create Card</Button>
+                            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>Cancelar</Button>
+                            <Button type="submit" disabled={!selectedProject}>{delivery ? 'Guardar Cambios' : 'Crear Tarjeta'}</Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -266,3 +308,5 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
         </Dialog>
     );
 }
+
+    

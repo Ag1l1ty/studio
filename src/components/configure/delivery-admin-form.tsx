@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getDeliveries, getProjects, addDelivery } from '@/lib/data';
+import { getDeliveries, getProjects, addDelivery, updateDelivery, deleteDelivery } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +15,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format } from 'date-fns';
@@ -27,12 +37,26 @@ import * as z from 'zod';
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
 // This needs to be defined here or imported if it's extracted to a shared place
-const createDeliveryFormSchema = (deliveries: Delivery[]) => z.object({
+const createDeliveryFormSchema = (deliveries: Delivery[], currentDeliveryId?: string) => z.object({
     projectId: z.string().min(1, "Please select a project."),
     deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
-    budget: z.number().positive("Budget must be a positive number."),
+    budget: z.any().refine(val => !isNaN(Number(String(val).replace(/,/g, ''))), "Must be a number").transform(val => Number(String(val).replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     estimatedDate: z.date({ required_error: "An estimated date is required." }),
+    stage: z.string().optional(),
+}).superRefine((data, ctx) => {
+    const existingDeliveryNumbers = deliveries
+        .filter(d => d.projectId === data.projectId && d.id !== currentDeliveryId)
+        .map(d => d.deliveryNumber);
+
+    if (existingDeliveryNumbers.includes(data.deliveryNumber)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "This delivery number already exists for this project.",
+            path: ["deliveryNumber"],
+        });
+    }
 });
+
 
 export function DeliveryAdminForm() {
     const [deliveries, setDeliveries] = useState(getDeliveries());
@@ -45,6 +69,10 @@ export function DeliveryAdminForm() {
     const [stageFilter, setStageFilter] = useState('all');
 
     const [isCreateDeliveryCardDialogOpen, setCreateDeliveryCardDialogOpen] = useState(false);
+    const [deliveryToEdit, setDeliveryToEdit] = useState<Delivery | null>(null);
+    const [deliveryToDelete, setDeliveryToDelete] = useState<Delivery | null>(null);
+    const [isConfirmingDelete, setConfirmingDelete] = useState(false);
+
 
     const filteredDeliveries = deliveries.filter(delivery => {
         const matchesDeliveryNumber = deliveryNumberFilter === '' || delivery.deliveryNumber.toString().includes(deliveryNumberFilter);
@@ -53,28 +81,76 @@ export function DeliveryAdminForm() {
         return matchesDeliveryNumber && matchesProject && matchesStage;
     });
 
-    const handleDeliveryCardCreated = (values: z.infer<ReturnType<typeof createDeliveryFormSchema>>) => {
+    const handleDialogClose = () => {
+        setCreateDeliveryCardDialogOpen(false);
+        setDeliveryToEdit(null);
+    };
+    
+    const handleEditClick = (delivery: Delivery) => {
+        setDeliveryToEdit(delivery);
+        setCreateDeliveryCardDialogOpen(true);
+    };
+
+    const handleDeleteClick = (delivery: Delivery) => {
+        setDeliveryToDelete(delivery);
+        setConfirmingDelete(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (deliveryToDelete) {
+            deleteDelivery(deliveryToDelete.id);
+            setDeliveries(getDeliveries());
+            toast({
+                title: "Entrega Eliminada",
+                description: `La entrega #${deliveryToDelete.deliveryNumber} ha sido eliminada.`,
+            });
+        }
+        setConfirmingDelete(false);
+        setDeliveryToDelete(null);
+    };
+
+    const handleDeliverySubmit = (values: z.infer<ReturnType<typeof createDeliveryFormSchema>>, id?: string) => {
         const project = projects.find(p => p.id === values.projectId);
         if (!project) return;
 
-        const newDelivery: Delivery = {
-            id: `DLV-00${getDeliveries().length + 1}`,
-            projectId: project.id,
-            projectName: project.name,
-            deliveryNumber: values.deliveryNumber,
-            stage: 'Definición', // Default stage
-            budget: values.budget,
-            estimatedDate: values.estimatedDate.toISOString(),
-            creationDate: new Date().toISOString(),
-            owner: project.owner,
-        };
+        if (id) {
+            // Update existing delivery
+            const originalDelivery = deliveries.find(d => d.id === id);
+            if (!originalDelivery) return;
 
-        addDelivery(newDelivery);
-        setDeliveries(getDeliveries());
-        toast({
-            title: "Entrega Creada",
-            description: `La entrega para el proyecto "${project.name}" ha sido creada.`,
-        });
+            const updatedDeliveryData = {
+                ...originalDelivery,
+                ...values,
+                projectName: project.name,
+                estimatedDate: values.estimatedDate.toISOString(),
+            };
+            const updated = updateDelivery(updatedDeliveryData);
+            setDeliveries(deliveries.map(d => (d.id === id ? updated : d)));
+            toast({
+                title: "Entrega Actualizada",
+                description: `La entrega #${values.deliveryNumber} ha sido actualizada.`,
+            });
+        } else {
+            // Create new delivery
+             const newDelivery: Delivery = {
+                id: `DLV-00${getDeliveries().length + 1}`,
+                projectId: project.id,
+                projectName: project.name,
+                deliveryNumber: values.deliveryNumber,
+                stage: 'Definición', // Default stage
+                budget: values.budget,
+                estimatedDate: values.estimatedDate.toISOString(),
+                creationDate: new Date().toISOString(),
+                owner: project.owner,
+            };
+            addDelivery(newDelivery);
+            setDeliveries(getDeliveries());
+            toast({
+                title: "Entrega Creada",
+                description: `La entrega para el proyecto "${project.name}" ha sido creada.`,
+            });
+        }
+        handleDialogClose();
     };
 
     return (
@@ -157,8 +233,8 @@ export function DeliveryAdminForm() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                {(isManager || isProjectManager) && <DropdownMenuItem>Edit</DropdownMenuItem>}
-                                                {isManager && <DropdownMenuItem>Delete</DropdownMenuItem>}
+                                                {(isManager || isProjectManager) && <DropdownMenuItem onClick={() => handleEditClick(delivery)}>Edit</DropdownMenuItem>}
+                                                {isManager && <DropdownMenuItem onClick={() => handleDeleteClick(delivery)}>Delete</DropdownMenuItem>}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
@@ -171,11 +247,28 @@ export function DeliveryAdminForm() {
         </Card>
         <CreateDeliveryCardDialog
             isOpen={isCreateDeliveryCardDialogOpen}
-            onOpenChange={setCreateDeliveryCardDialogOpen}
-            onDeliveryCardCreated={handleDeliveryCardCreated}
+            onOpenChange={handleDialogClose}
+            onDeliverySubmit={handleDeliverySubmit}
             projects={projects}
             deliveries={deliveries}
+            delivery={deliveryToEdit}
         />
+        <AlertDialog open={isConfirmingDelete} onOpenChange={setConfirmingDelete}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Esto eliminará permanentemente la entrega #{deliveryToDelete?.deliveryNumber}.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setConfirmingDelete(false)}>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmDelete}>Sí, eliminar</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
         </>
     );
 }
+
+    

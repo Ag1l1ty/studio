@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import type { Project, RiskLevel, ProjectStage, Delivery } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { addProject, getProjects, getDeliveries, addDelivery, getProjectById } from '@/lib/data';
+import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,7 @@ import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-ca
 import { addMonths, format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
+import * as z from 'zod';
 
 const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV', 'Ambiente TST', 'Ambiente UAT', 'Soporte Productivo', 'Cerrado'];
 
@@ -40,6 +41,26 @@ type PendingMove = {
     deliveryId: string;
     destination: DropResult['destination'];
 } | null;
+
+const createDeliveryFormSchema = (deliveries: Delivery[], currentDeliveryId?: string) => z.object({
+    projectId: z.string().min(1, "Please select a project."),
+    deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
+    budget: z.any().refine(val => !isNaN(Number(String(val).replace(/,/g, ''))), "Must be a number").transform(val => Number(String(val).replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
+    estimatedDate: z.date({ required_error: "An estimated date is required." }),
+    stage: z.string().optional(),
+}).superRefine((data, ctx) => {
+    const existingDeliveryNumbers = deliveries
+        .filter(d => d.projectId === data.projectId && d.id !== currentDeliveryId)
+        .map(d => d.deliveryNumber);
+
+    if (existingDeliveryNumbers.includes(data.deliveryNumber)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "This delivery number already exists for this project.",
+            path: ["deliveryNumber"],
+        });
+    }
+});
 
 
 export default function KanbanPage() {
@@ -78,14 +99,13 @@ export default function KanbanPage() {
     const executeMove = (deliveryId: string, destination: DropResult['destination']) => {
         if (!destination) return;
 
-        const newDeliveries = Array.from(deliveries);
-        const deliveryIndex = newDeliveries.findIndex(d => d.id === deliveryId);
-        const delivery = newDeliveries[deliveryIndex];
+        const delivery = deliveries.find(d => d.id === deliveryId);
 
         if (delivery) {
             const originalStage = delivery.stage;
             const newStage = destination.droppableId as ProjectStage;
-            delivery.stage = newStage;
+            
+            const updatedDelivery: Delivery = { ...delivery, stage: newStage };
 
             if (newStage === 'Cerrado' && originalStage !== 'Cerrado') {
                 const project = getProjectById(delivery.projectId);
@@ -115,7 +135,8 @@ export default function KanbanPage() {
                     setProjects(getProjects());
                 }
             }
-            setDeliveries(newDeliveries);
+             updateDelivery(updatedDelivery);
+             setDeliveries(getDeliveries());
         }
     };
 
@@ -173,11 +194,11 @@ export default function KanbanPage() {
 
     const handleConfirmArchive = () => {
         if (deliveryToArchive) {
-            setDeliveries(currentDeliveries =>
-                currentDeliveries.map(d =>
-                    d.id === deliveryToArchive ? { ...d, isArchived: true } : d
-                )
-            );
+            const delivery = deliveries.find(d => d.id === deliveryToArchive);
+            if(delivery) {
+                updateDelivery({ ...delivery, isArchived: true });
+                setDeliveries(getDeliveries());
+            }
         }
         setConfirmingArchive(false);
         setDeliveryToArchive(null);
@@ -189,11 +210,11 @@ export default function KanbanPage() {
     };
 
     const handleUpdateDelivery = (deliveryId: string, updatedFields: Partial<Delivery>) => {
-        setDeliveries(currentDeliveries =>
-            currentDeliveries.map(d =>
-                d.id === deliveryId ? { ...d, ...updatedFields } : d
-            )
-        );
+        const delivery = deliveries.find(d => d.id === deliveryId);
+        if (delivery) {
+            updateDelivery({ ...delivery, ...updatedFields });
+            setDeliveries(getDeliveries());
+        }
     };
 
     const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
@@ -212,24 +233,32 @@ export default function KanbanPage() {
         setSelectedProjects(new Set(updatedProjects.map(p => p.id)));
     };
     
-    const handleDeliveryCardCreated = (values: {projectId: string; deliveryNumber: number; budget: number; estimatedDate: Date}) => {
+     const handleDeliverySubmit = (values: z.infer<ReturnType<typeof createDeliveryFormSchema>>, id?: string) => {
         const project = projects.find(p => p.id === values.projectId);
         if (!project) return;
 
-        const newDelivery: Delivery = {
-            id: `DLV-00${getDeliveries().length + 1}`,
-            projectId: project.id,
-            projectName: project.name,
-            deliveryNumber: values.deliveryNumber,
-            stage: 'Definición', // Default stage
-            budget: values.budget,
-            estimatedDate: values.estimatedDate.toISOString(),
-            creationDate: new Date().toISOString(),
-            owner: project.owner,
-        };
-
-        addDelivery(newDelivery);
-        setDeliveries(getDeliveries());
+        if (id) {
+           // This page doesn't handle updates, only creation.
+           // Updates are handled in the admin page.
+        } else {
+             const newDelivery: Delivery = {
+                id: `DLV-00${getDeliveries().length + 1}`,
+                projectId: project.id,
+                projectName: project.name,
+                deliveryNumber: values.deliveryNumber,
+                stage: 'Definición', // Default stage
+                budget: values.budget,
+                estimatedDate: values.estimatedDate.toISOString(),
+                creationDate: new Date().toISOString(),
+                owner: project.owner,
+            };
+            addDelivery(newDelivery);
+            setDeliveries(getDeliveries());
+            toast({
+                title: "Delivery Card Created",
+                description: `A new delivery card for project "${project?.name}" has been created.`,
+            });
+        }
     }
 
 
@@ -299,12 +328,12 @@ export default function KanbanPage() {
             <CreateProjectDialog 
                 isOpen={isCreateProjectDialogOpen}
                 onOpenChange={setCreateProjectDialogOpen}
-                onProjectCreated={handleProjectCreated}
+                onProjectSubmit={handleProjectCreated}
             />
              <CreateDeliveryCardDialog
                 isOpen={isCreateDeliveryCardDialogOpen}
                 onOpenChange={setCreateDeliveryCardDialogOpen}
-                onDeliveryCardCreated={handleDeliveryCardCreated}
+                onDeliverySubmit={handleDeliverySubmit}
                 projects={projects}
                 deliveries={deliveries}
             />
@@ -339,3 +368,5 @@ export default function KanbanPage() {
         </DragDropContext>
     );
 }
+
+    
