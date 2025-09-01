@@ -244,7 +244,7 @@ export function RiskMonitoringForm() {
                     name="timelineDeviation"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Plan Deviation (%)</FormLabel>
+                            <FormLabel>(%) Desviación Plan </FormLabel>
                             <FormControl>
                                 <Input type="number" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
