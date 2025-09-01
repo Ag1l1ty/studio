@@ -59,7 +59,7 @@ export function UserAdminForm() {
     const handleConfirmDelete = () => {
         if (userToDelete) {
             deleteUser(userToDelete.id);
-            setUsers(MOCK_USERS);
+            setUsers([...MOCK_USERS]); // Refresh from the source
             toast({
                 title: "Usuario Eliminado",
                 description: `El usuario ${userToDelete.firstName} ${userToDelete.lastName} ha sido eliminado.`,
@@ -85,11 +85,11 @@ export function UserAdminForm() {
                 ...values,
                 id: `USR-00${users.length + 1}`,
             };
-            const updatedUsers = addUser(newUser);
-            setUsers(updatedUsers);
+            addUser(newUser);
+            setUsers([...MOCK_USERS]); // Create a new array from the updated source
             toast({
                 title: "Usuario Creado",
-                description: `Se ha creado el usuario ${newUser.firstName} ${newUser.lastName}.`,
+                description: `El usuario ${newUser.firstName} ${newUser.lastName} ha sido creado con éxito.`,
             });
         }
         setCreateUserDialogOpen(false);

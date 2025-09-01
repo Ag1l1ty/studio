@@ -198,7 +198,7 @@ export let MOCK_USERS: User[] = [
 
 export function addUser(user: User): User[] {
     MOCK_USERS.push(user);
-    return MOCK_USERS;
+    return [...MOCK_USERS]; // Return a new array to ensure reactivity
 }
 
 export function updateUser(user: User): User {
