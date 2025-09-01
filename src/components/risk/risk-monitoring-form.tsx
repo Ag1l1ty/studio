@@ -309,7 +309,7 @@ export function RiskMonitoringForm() {
                     name="blockHours"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Block hours</FormLabel>
+                            <FormLabel>Cantidad Horas Bloqueos</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
