@@ -145,7 +145,7 @@ export function RiskMonitoringForm() {
         const newRiskProfile = getRiskProfile(newScore);
         const newRiskClassification = newRiskProfile.classification;
         
-        updateProjectRisk(values.projectId, newScore, newRiskClassification);
+        updateProjectRisk(values.projectId, newScore, newRiskClassification, values.deliveryId);
         setProjects(getProjects());
         
         const riskOrder: RiskLevel[] = ['Muy conservador', 'Conservador', 'Moderado', 'Moderado - alto', 'Agresivo', 'Muy Agresivo'];
@@ -227,7 +227,7 @@ export function RiskMonitoringForm() {
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {deliveries.map(d => (
+                                    {deliveries.filter(d => !d.riskAssessed).map(d => (
                                         <SelectItem key={d.id} value={d.id}>
                                             Delivery #{d.deliveryNumber}
                                         </SelectItem>
@@ -356,5 +356,3 @@ export function RiskMonitoringForm() {
         </Form>
     );
 }
-
-    

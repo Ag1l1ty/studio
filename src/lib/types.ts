@@ -24,6 +24,7 @@ export type Delivery = {
     avatar: string;
   };
   isArchived?: boolean;
+  riskAssessed?: boolean;
   errorCount?: number;
   errorSolutionTime?: number;
   stageDates?: Partial<Record<ProjectStage, string>>;
@@ -61,5 +62,3 @@ export type RiskResult = {
     classification: RiskLevel;
     deviation: string;
 }
-
-    

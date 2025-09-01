@@ -348,12 +348,17 @@ export function getRiskProfile(score: number): Omit<RiskResult, 'score'> {
     return { classification: 'Muy conservador', deviation: '+10%' };
 }
 
-export function updateProjectRisk(projectId: string, score: number, level: RiskLevel) {
+export function updateProjectRisk(projectId: string, score: number, level: RiskLevel, deliveryId?: string) {
     const projectIndex = MOCK_PROJECTS.findIndex(p => p.id === projectId);
     if (projectIndex !== -1) {
         MOCK_PROJECTS[projectIndex].riskScore = score;
         MOCK_PROJECTS[projectIndex].riskLevel = level;
     }
-}
 
-    
+    if (deliveryId) {
+        const deliveryIndex = MOCK_DELIVERIES.findIndex(d => d.id === deliveryId);
+        if (deliveryIndex !== -1) {
+            MOCK_DELIVERIES[deliveryIndex].riskAssessed = true;
+        }
+    }
+}
