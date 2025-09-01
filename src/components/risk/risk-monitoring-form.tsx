@@ -221,7 +221,7 @@ export function RiskMonitoringForm() {
                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProjectId}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select a delivery to adjust the valuation" />
+                                        <SelectValue placeholder="Selecciona entrega a valorar" />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -284,7 +284,7 @@ export function RiskMonitoringForm() {
                     name="featureAdjustments"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Cantidad Cambios Funcionales Post-Desarrollo</FormLabel>
+                            <FormLabel>Cantidad de Cambios Funcionales Post-Desarrollo</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
@@ -322,3 +322,6 @@ export function RiskMonitoringForm() {
     );
 }
 
+
+
+    
