@@ -42,9 +42,8 @@ export function UserAdminForm() {
     const [isConfirmingDelete, setConfirmingDelete] = useState(false);
     const { toast } = useToast();
 
-    const getUserProjectCount = (userId: string) => {
-        const user = users.find(u => u.id === userId);
-        return user?.assignedProjectIds?.length || 0;
+    const getUserProjectCount = (user: User) => {
+        return user.assignedProjectIds?.length || 0;
     };
     
     const handleEditClick = (user: User) => {
@@ -86,8 +85,8 @@ export function UserAdminForm() {
                 ...values,
                 id: `USR-00${users.length + 1}`,
             };
-            addUser(newUser);
-            setUsers(prevUsers => [...prevUsers, newUser]);
+            const updatedUsers = addUser(newUser);
+            setUsers(updatedUsers);
             toast({
                 title: "Usuario Creado",
                 description: `Se ha creado el usuario ${newUser.firstName} ${newUser.lastName}.`,
@@ -148,7 +147,7 @@ export function UserAdminForm() {
                                         <TableCell>
                                             <Badge variant={user.role === 'Admin' || user.role === 'Portfolio Manager' ? 'destructive' : 'secondary'}>{user.role}</Badge>
                                         </TableCell>
-                                        <TableCell>{getUserProjectCount(user.id)}</TableCell>
+                                        <TableCell>{getUserProjectCount(user)}</TableCell>
                                         <TableCell>
                                             {isManager && (
                                                 <DropdownMenu>

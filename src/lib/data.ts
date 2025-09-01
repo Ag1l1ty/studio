@@ -196,8 +196,9 @@ export let MOCK_USERS: User[] = [
     { id: 'USR-007', firstName: 'Laura', lastName: 'Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png', assignedProjectIds: ['PRJ-001', 'PRJ-002', 'PRJ-003', 'PRJ-004', 'PRJ-005', 'PRJ-006'] },
 ];
 
-export function addUser(user: User) {
+export function addUser(user: User): User[] {
     MOCK_USERS.push(user);
+    return MOCK_USERS;
 }
 
 export function updateUser(user: User): User {
