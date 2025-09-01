@@ -37,7 +37,10 @@ const formSchema = z.object({
       (val) => (val === "" ? undefined : Number(val)),
       z.number().int().min(1, "Please select a number of adjustments").optional()
     ),
-    blockHours: z.coerce.number().min(0, "Hours must be a positive number"),
+     blockHours: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+      z.number().min(0, "Hours must be a positive number").optional()
+    ),
 });
 
 type UpdateResult = {
@@ -67,7 +70,7 @@ export function RiskMonitoringForm() {
             hoursToFix: 0,
             functionalFit: 0,
             featureAdjustments: '',
-            blockHours: 0,
+            blockHours: '',
         },
     });
 
@@ -168,7 +171,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: 0 }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '' }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
