@@ -288,7 +288,7 @@ export function RiskMonitoringForm() {
                             <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select number of adjustments" />
+                                        <SelectValue placeholder="Cambios en alcance post desarrollo local" />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
