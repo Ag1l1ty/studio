@@ -20,15 +20,15 @@ import { Progress } from '@/components/ui/progress';
 import type { Delivery, Project } from '@/lib/types';
 
 export function ProjectAdminForm() {
+    const { isManager, isProjectManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
     const [deliveries, setDeliveries] = useState(getDeliveries());
-    const { isManager, isProjectManager } = useAuth();
 
     const getProjectProgress = (project: Project) => {
         if (project.stage === 'Cerrado') {
             return 100;
         }
-        const closedDeliveries = deliveries.filter(d => d.projectId === project.id && d.stage === 'Cerrado').length;
+        const closedDeliveries = project.metrics.reduce((acc, m) => acc + m.deliveries, 0);
         const totalDeliveries = project.projectedDeliveries || 0;
         if (totalDeliveries === 0) return 0;
         return (closedDeliveries / totalDeliveries) * 100;
