@@ -77,7 +77,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
                     name: project.name,
                     description: project.description,
                     projectedDeliveries: project.projectedDeliveries,
-                    budget: project.budget.toString(), // Format as string for the input
+                    budget: new Intl.NumberFormat('en-US').format(project.budget), // Format as string for the input
                     startDate: new Date(project.startDate),
                     endDate: new Date(project.endDate),
                 });
