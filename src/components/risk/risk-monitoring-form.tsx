@@ -258,7 +258,7 @@ export function RiskMonitoringForm() {
                     name="hoursToFix"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Hours to Fix</FormLabel>
+                            <FormLabel>Horas Arreglar Errores</FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="e.g., 5" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
