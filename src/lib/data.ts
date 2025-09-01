@@ -231,6 +231,10 @@ export function updateProject(project: Project): Project {
     return project;
 }
 
+export function deleteProject(projectId: string) {
+    MOCK_PROJECTS = MOCK_PROJECTS.filter(p => p.id !== projectId);
+    MOCK_DELIVERIES = MOCK_DELIVERIES.filter(d => d.projectId !== projectId);
+}
 
 
 export function getProjectById(id: string): Project | undefined {

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects, addProject, updateProject } from '@/lib/data';
+import { getProjects, addProject, updateProject, deleteProject } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,6 +15,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from '@/hooks/use-auth';
 import { Progress } from '@/components/ui/progress';
 import type { Project } from '@/lib/types';
@@ -26,6 +36,8 @@ export function ProjectAdminForm() {
     const [projects, setProjects] = useState(getProjects());
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+    const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+    const [isConfirmingDelete, setConfirmingDelete] = useState(false);
     const { toast } = useToast();
 
     const getProjectProgress = (project: Project) => {
@@ -79,6 +91,24 @@ export function ProjectAdminForm() {
         setProjectToEdit(project);
         setCreateProjectDialogOpen(true);
     };
+
+    const handleDeleteClick = (project: Project) => {
+        setProjectToDelete(project);
+        setConfirmingDelete(true);
+    };
+    
+    const handleConfirmDelete = () => {
+        if (projectToDelete) {
+            deleteProject(projectToDelete.id);
+            setProjects(getProjects());
+            toast({
+                title: "Proyecto Eliminado",
+                description: `El proyecto "${projectToDelete.name}" ha sido eliminado.`,
+            });
+        }
+        setConfirmingDelete(false);
+        setProjectToDelete(null);
+    }
 
     const handleDialogClose = () => {
         setCreateProjectDialogOpen(false);
@@ -146,7 +176,7 @@ export function ProjectAdminForm() {
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                                         {(isManager || isProjectManager) && <DropdownMenuItem onClick={() => handleEditClick(project)}>Edit</DropdownMenuItem>}
-                                                        {isManager && <DropdownMenuItem>Delete</DropdownMenuItem>}
+                                                        {isManager && <DropdownMenuItem onClick={() => handleDeleteClick(project)}>Delete</DropdownMenuItem>}
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -164,6 +194,20 @@ export function ProjectAdminForm() {
                 onProjectSubmit={handleProjectSubmit}
                 project={projectToEdit}
             />
+            <AlertDialog open={isConfirmingDelete} onOpenChange={setConfirmingDelete}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                           Esta acción no se puede deshacer. Esto eliminará permanentemente el proyecto "{projectToDelete?.name}".
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setConfirmingDelete(false)}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmDelete}>Sí, eliminar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
