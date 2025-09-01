@@ -210,6 +210,10 @@ export function getDeliveries(): Delivery[] {
   return JSON.parse(JSON.stringify(MOCK_DELIVERIES));
 }
 
+export function getDeliveriesByProjectId(projectId: string): Delivery[] {
+    return MOCK_DELIVERIES.filter(d => d.projectId === projectId);
+}
+
 export function getDeliveryById(id: string): Delivery | undefined {
     const delivery = MOCK_DELIVERIES.find(d => d.id === id);
     if (!delivery) return undefined;
@@ -246,7 +250,7 @@ export function getDashboardKpis(projects: Project[]) {
 }
 
 export const aggregateMetrics = (projects: Project[]) => {
-    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number; totalErrorTime: number; errorEntries: number, budget: number, spent: number } } = {};
+    const monthlyData: { [key: string]: { actual: number; planned: number; errors: number; totalErrorTime: number; errorEntries: number, budget: number, spent: number, cumulativeBudget: number } } = {};
     const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthMap: { [key: string]: number } = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 
@@ -268,7 +272,7 @@ export const aggregateMetrics = (projects: Project[]) => {
             const dataKey = `${monthName}-${currentYear}`;
 
             if (!monthlyData[dataKey]) {
-                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0 };
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0, cumulativeBudget: 0 };
             }
             monthlyData[dataKey].planned += plannedPerMonth;
             monthlyData[dataKey].budget += budgetPerMonth;
@@ -284,7 +288,7 @@ export const aggregateMetrics = (projects: Project[]) => {
             
             const dataKey = `${metric.month}-${metricYear}`;
              if (!monthlyData[dataKey]) {
-                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0 };
+                monthlyData[dataKey] = { planned: 0, actual: 0, errors: 0, totalErrorTime: 0, errorEntries: 0, budget: 0, spent: 0, cumulativeBudget: 0 };
             }
             monthlyData[dataKey].actual += metric.deliveries;
             monthlyData[dataKey].errors += metric.errors;

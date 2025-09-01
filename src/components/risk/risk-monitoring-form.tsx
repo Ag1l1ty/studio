@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -21,16 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getProjects, getProjectById, getRiskProfile } from '@/lib/data';
+import { getProjects, getProjectById, getRiskProfile, getDeliveriesByProjectId } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
-import type { RiskLevel } from '@/lib/types';
+import type { RiskLevel, Delivery } from '@/lib/types';
 
 const formSchema = z.object({
     projectId: z.string().min(1, 'Please select a project'),
+    deliveryId: z.string().min(1, 'Please select a delivery'),
     budgetDeviation: z.coerce.number().min(-100).max(100),
     timelineDeviation: z.coerce.number().min(-100).max(100),
     hasTechnicalIssues: z.boolean(),
@@ -46,12 +47,14 @@ type UpdateResult = {
 
 export function RiskMonitoringForm() {
     const projects = getProjects();
+    const [deliveries, setDeliveries] = useState<Delivery[]>([]);
     const [result, setResult] = useState<UpdateResult | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             projectId: '',
+            deliveryId: '',
             budgetDeviation: 0,
             timelineDeviation: 0,
             hasTechnicalIssues: false,
@@ -60,7 +63,17 @@ export function RiskMonitoringForm() {
     });
 
     const selectedProjectId = form.watch('projectId');
+    const selectedDeliveryId = form.watch('deliveryId');
     const initialProject = getProjectById(selectedProjectId);
+
+    useEffect(() => {
+        if (selectedProjectId) {
+            setDeliveries(getDeliveriesByProjectId(selectedProjectId));
+            form.setValue('deliveryId', '');
+        } else {
+            setDeliveries([]);
+        }
+    }, [selectedProjectId, form]);
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         if (!initialProject || typeof initialProject.riskScore === 'undefined') return;
@@ -137,10 +150,35 @@ export function RiskMonitoringForm() {
                         </FormItem>
                     )}
                 />
-                
+
                 {initialProject && (
                     <div className="text-sm">Current Risk Level: <span className="font-semibold">{initialProject.riskLevel}</span> (Score: {initialProject.riskScore})</div>
                 )}
+                
+                <FormField
+                    control={form.control}
+                    name="deliveryId"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Risk Delivery</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProjectId}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a delivery to adjust the valuation" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {deliveries.map(d => (
+                                        <SelectItem key={d.id} value={d.id}>
+                                            Delivery #{d.deliveryNumber}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <FormField
                     control={form.control}
@@ -149,7 +187,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>Budget Deviation (%)</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input type="number" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -163,7 +201,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>Timeline Deviation (%)</FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} />
+                                <Input type="number" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
@@ -180,7 +218,7 @@ export function RiskMonitoringForm() {
                                     <FormLabel>Significant Technical Issues?</FormLabel>
                                 </div>
                                 <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!selectedDeliveryId} />
                                 </FormControl>
                             </FormItem>
                         )}
@@ -194,7 +232,7 @@ export function RiskMonitoringForm() {
                                     <FormLabel>Unplanned Scope Changes?</FormLabel>
                                 </div>
                                 <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!selectedDeliveryId} />
                                 </FormControl>
                             </FormItem>
                         )}
@@ -207,14 +245,14 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>Comments</FormLabel>
                             <FormControl>
-                                <Textarea placeholder="Add any relevant comments about the project's status..." {...field} />
+                                <Textarea placeholder="Add any relevant comments about the project's status..." {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
                     )}
                 />
 
-                <Button type="submit" disabled={!initialProject}>Update Risk</Button>
+                <Button type="submit" disabled={!selectedDeliveryId}>Update Risk</Button>
             </form>
         </Form>
     );
