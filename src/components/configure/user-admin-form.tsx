@@ -21,7 +21,6 @@ import {
 const MOCK_USERS = [
     { id: 'USR-001', name: 'Ana Rodriguez', email: 'ana.rodriguez@example.com', role: 'Project Manager', avatar: '/avatars/01.png' },
     { id: 'USR-002', name: 'Carlos Gomez', email: 'carlos.gomez@example.com', role: 'Project Manager', avatar: '/avatars/02.png' },
-    { id: 'USR-003', name: 'Sofia Fernandez', email: 'sofia.fernandez@example.com', role: 'Developer', avatar: '/avatars/03.png' },
     { id: 'USR-004', name: 'Luis Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png' },
     { id: 'USR-005', name: 'Elena Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png' },
 ];
@@ -111,3 +110,5 @@ export function UserAdminForm() {
         </Card>
     );
 }
+
+    

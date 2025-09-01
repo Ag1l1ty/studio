@@ -1,5 +1,5 @@
 
-import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult } from './types';
+import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 
 let MOCK_PROJECTS: Project[] = [
@@ -59,7 +59,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 25,
     startDate: '2023-09-01',
     endDate: '2024-05-30',
-    owner: { name: 'Sofia Fernandez', avatar: '/avatars/03.png' },
+    owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
     metrics: [
       { month: 'Jan', deliveries: 5, errors: 1, budget: 40000, spent: 38000, errorSolutionTime: 1 },
       { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
@@ -362,3 +362,5 @@ export function updateProjectRisk(projectId: string, score: number, level: RiskL
         }
     }
 }
+
+    
