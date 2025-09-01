@@ -30,6 +30,8 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import type { Project } from '@/lib/types';
+import { useEffect } from 'react';
 
 const numberValue = z.custom<number>().refine(value => value > 0, {
     message: "Budget must be a positive number.",
@@ -51,10 +53,11 @@ const formSchema = z.object({
 type CreateProjectDialogProps = {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    onProjectCreated: (values: z.infer<typeof formSchema>) => void;
+    onProjectSubmit: (values: z.infer<typeof formSchema>, id?: string) => void;
+    project?: Project | null;
 }
 
-export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, project }: CreateProjectDialogProps) {
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -66,6 +69,31 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
             budget: 0,
         },
     });
+    
+    useEffect(() => {
+        if (isOpen) {
+            if (project) {
+                 form.reset({
+                    name: project.name,
+                    description: project.description,
+                    projectedDeliveries: project.projectedDeliveries,
+                    budget: project.budget.toString(), // Format as string for the input
+                    startDate: new Date(project.startDate),
+                    endDate: new Date(project.endDate),
+                });
+            } else {
+                form.reset({
+                    name: "",
+                    description: "",
+                    projectedDeliveries: 1,
+                    budget: 0,
+                    startDate: undefined,
+                    endDate: undefined
+                });
+            }
+        }
+    }, [isOpen, project, form]);
+
 
     const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
         const value = e.target.value;
@@ -80,13 +108,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
 
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        onProjectCreated(values);
-        toast({
-            title: "Project Created",
-            description: `Project "${values.name}" has been successfully created.`,
-        });
-        form.reset();
-        onOpenChange(false);
+        onProjectSubmit(values, project?.id);
     }
     
     // We need to stop the form from submitting when the dialog closes
@@ -101,9 +123,9 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
          <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
-                    <DialogTitle>Create New Project</DialogTitle>
+                    <DialogTitle>{project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}</DialogTitle>
                     <DialogDescription>
-                        Fill in the details below to create a new project.
+                         {project ? 'Actualice los detalles del proyecto.' : 'Complete los detalles a continuación para crear un nuevo proyecto.'}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -248,7 +270,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectCreated }: 
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>Cancel</Button>
-                            <Button type="submit">Create Project</Button>
+                            <Button type="submit">{project ? 'Guardar Cambios' : 'Crear Proyecto'}</Button>
                         </DialogFooter>
                     </form>
                 </Form>

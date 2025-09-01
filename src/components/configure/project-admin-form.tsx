@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects, addProject } from '@/lib/data';
+import { getProjects, addProject, updateProject } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -19,11 +19,14 @@ import { useAuth } from '@/hooks/use-auth';
 import { Progress } from '@/components/ui/progress';
 import type { Project } from '@/lib/types';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export function ProjectAdminForm() {
     const { isManager, isProjectManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
+    const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+    const { toast } = useToast();
 
     const getProjectProgress = (project: Project) => {
         if (project.stage === 'Cerrado') {
@@ -35,20 +38,53 @@ export function ProjectAdminForm() {
         return (closedDeliveries / totalDeliveries) * 100;
     }
 
-    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>) => {
-        const newProject: Project = {
-            ...newProjectData,
-            id: `PRJ-00${getProjects().length + 1}`,
-            stage: 'Definición',
-            riskLevel: 'Low', // Default risk level
-            budgetSpent: 0,
-            owner: { name: 'New User', avatar: '' }, // Placeholder owner
-            metrics: [],
-        };
-        addProject(newProject);
-        setProjects(getProjects());
-        setCreateProjectDialogOpen(false);
+    const handleProjectSubmit = (values: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'>, id?: string) => {
+        if (id) {
+            // Update existing project
+            const originalProject = projects.find(p => p.id === id);
+            if (!originalProject) return;
+
+            const updatedProjectData: Project = {
+                ...originalProject,
+                ...values,
+            };
+            const updatedProject = updateProject(updatedProjectData);
+            setProjects(projects.map(p => p.id === id ? updatedProject : p));
+            toast({
+                title: "Proyecto Actualizado",
+                description: `Los datos del proyecto "${values.name}" han sido actualizados.`,
+            });
+        } else {
+            // Create new project
+            const newProject: Project = {
+                ...values,
+                id: `PRJ-00${getProjects().length + 1}`,
+                stage: 'Definición',
+                riskLevel: 'Low', // Default risk level
+                budgetSpent: 0,
+                owner: { name: 'New User', avatar: '' }, // Placeholder owner
+                metrics: [],
+            };
+            addProject(newProject);
+            setProjects(getProjects());
+             toast({
+                title: "Proyecto Creado",
+                description: `El proyecto "${newProject.name}" ha sido creado con éxito.`,
+            });
+        }
+       handleDialogClose();
     };
+    
+    const handleEditClick = (project: Project) => {
+        setProjectToEdit(project);
+        setCreateProjectDialogOpen(true);
+    };
+
+    const handleDialogClose = () => {
+        setCreateProjectDialogOpen(false);
+        setProjectToEdit(null);
+    }
+
 
     return (
         <>
@@ -109,7 +145,7 @@ export function ProjectAdminForm() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        {(isManager || isProjectManager) && <DropdownMenuItem>Edit</DropdownMenuItem>}
+                                                        {(isManager || isProjectManager) && <DropdownMenuItem onClick={() => handleEditClick(project)}>Edit</DropdownMenuItem>}
                                                         {isManager && <DropdownMenuItem>Delete</DropdownMenuItem>}
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -124,8 +160,9 @@ export function ProjectAdminForm() {
             </Card>
             <CreateProjectDialog
                 isOpen={isCreateProjectDialogOpen}
-                onOpenChange={setCreateProjectDialogOpen}
-                onProjectCreated={handleProjectCreated}
+                onOpenChange={handleDialogClose}
+                onProjectSubmit={handleProjectSubmit}
+                project={projectToEdit}
             />
         </>
     );

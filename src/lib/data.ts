@@ -223,6 +223,15 @@ export function addProject(project: Project) {
     MOCK_PROJECTS.push(project);
 }
 
+export function updateProject(project: Project): Project {
+    const index = MOCK_PROJECTS.findIndex(p => p.id === project.id);
+    if (index !== -1) {
+        MOCK_PROJECTS[index] = project;
+    }
+    return project;
+}
+
+
 
 export function getProjectById(id: string): Project | undefined {
     const project = MOCK_PROJECTS.find(p => p.id === id);
