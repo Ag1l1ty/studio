@@ -33,8 +33,18 @@ const formSchema = z.object({
     timelineDeviation: z.coerce.number().min(-100).max(100),
     hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
     functionalFit: z.coerce.number().min(0, "Hours must be a positive number"),
-    featureAdjustments: z.coerce.number().int().min(1, "Please select a number of adjustments"),
-    blockHours: z.coerce.number().int().min(1, "Please select a number of block hours"),
+    featureAdjustments: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+      z.number().int().min(1, "Please select a number of adjustments").optional()
+    ),
+    blockHours: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+      z.number().int().min(1, "Please select a number of block hours").optional()
+    ),
+    changesScope: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+      z.number().int().min(1, "Please select a number of scope changes").optional()
+    )
 });
 
 type UpdateResult = {
@@ -63,8 +73,9 @@ export function RiskMonitoringForm() {
             timelineDeviation: 0,
             hoursToFix: 0,
             functionalFit: 0,
-            featureAdjustments: undefined,
-            blockHours: undefined,
+            featureAdjustments: '',
+            blockHours: '',
+            changesScope: '',
         },
     });
 
@@ -110,16 +121,22 @@ export function RiskMonitoringForm() {
         }
         
         // Feature Adjustments Logic
-        if (values.featureAdjustments >= 3) {
+        if (values.featureAdjustments && values.featureAdjustments >= 3) {
             newScore += 2;
-        } else {
+        } else if (values.featureAdjustments) {
             newScore = Math.max(1, newScore - 1);
         }
 
         // Block hours logic
-        if (values.blockHours >= 10) {
+        if (values.blockHours && values.blockHours >= 10) {
             newScore += 1;
         }
+
+        // Scope Changes logic
+        if (values.changesScope && values.changesScope >= 2) {
+            newScore += 1;
+        }
+
 
         // Ensure score doesn't go above a maximum (e.g., 25)
         newScore = Math.min(newScore, 25);
@@ -165,7 +182,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: undefined, blockHours: undefined }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '', changesScope: '' }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -270,7 +287,7 @@ export function RiskMonitoringForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Feature Adjustments</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : ""} disabled={!selectedDeliveryId}>
+                            <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select number of adjustments" />
@@ -293,7 +310,7 @@ export function RiskMonitoringForm() {
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Block hours</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : ""} disabled={!selectedDeliveryId}>
+                            <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select number of block hours" />
@@ -306,6 +323,29 @@ export function RiskMonitoringForm() {
                                 </SelectContent>
                             </Select>
                              <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                
+                <FormField
+                    control={form.control}
+                    name="changesScope"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Changes scope</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select number of scope changes" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                                        <SelectItem key={num} value={String(num)}>{num}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
