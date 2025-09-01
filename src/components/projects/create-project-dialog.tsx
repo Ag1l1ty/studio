@@ -30,8 +30,9 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import type { Project } from '@/lib/types';
+import type { Project, User } from '@/lib/types';
 import { useEffect } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const numberValue = z.custom<number>().refine(value => value > 0, {
     message: "Budget must be a positive number.",
@@ -44,6 +45,7 @@ const formSchema = z.object({
     budget: z.string().refine(val => !isNaN(Number(val.replace(/,/g, ''))), "Must be a number").transform(val => Number(val.replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     startDate: z.date({ required_error: "A start date is required." }),
     endDate: z.date({ required_error: "An end date is required." }),
+    ownerId: z.string().min(1, "An owner is required."),
 }).refine(data => data.endDate > data.startDate, {
     message: "End date must be after start date.",
     path: ["endDate"],
@@ -55,9 +57,10 @@ type CreateProjectDialogProps = {
     onOpenChange: (open: boolean) => void;
     onProjectSubmit: (values: z.infer<typeof formSchema>, id?: string) => void;
     project?: Project | null;
+    users: User[];
 }
 
-export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, project }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, project, users }: CreateProjectDialogProps) {
     const { toast } = useToast();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -67,6 +70,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
             description: "",
             projectedDeliveries: 1,
             budget: 0,
+            ownerId: "",
         },
     });
     
@@ -80,6 +84,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
                     budget: new Intl.NumberFormat('en-US').format(project.budget), // Format as string for the input
                     startDate: new Date(project.startDate),
                     endDate: new Date(project.endDate),
+                    ownerId: project.owner.id,
                 });
             } else {
                 form.reset({
@@ -88,7 +93,8 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
                     projectedDeliveries: 1,
                     budget: 0,
                     startDate: undefined,
-                    endDate: undefined
+                    endDate: undefined,
+                    ownerId: "",
                 });
             }
         }
@@ -191,6 +197,29 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
                                 )}
                             />
                         </div>
+
+                         <FormField
+                            control={form.control}
+                            name="ownerId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Project Owner</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a project owner" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {users.map(user => (
+                                                <SelectItem key={user.id} value={user.id}>{user.firstName} {user.lastName}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         
                         <div className="text-sm font-medium">Projected Dates per Delivery</div>
                         <div className="p-4 border rounded-md bg-secondary/50 text-muted-foreground text-sm">

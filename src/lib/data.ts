@@ -15,7 +15,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 20,
     startDate: '2024-01-15',
     endDate: '2024-09-30',
-    owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
+    owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
     metrics: [
       { month: 'Jan', deliveries: 2, errors: 2, budget: 55000, spent: 50000, errorSolutionTime: 3 },
       { month: 'Feb', deliveries: 3, errors: 1, budget: 55000, spent: 60000, errorSolutionTime: 2 },
@@ -37,7 +37,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 10,
     startDate: '2023-11-01',
     endDate: '2024-12-31',
-    owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' },
+    owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' },
     metrics: [
       { month: 'Jan', deliveries: 1, errors: 5, budget: 100000, spent: 110000, errorSolutionTime: 7 },
       { month: 'Feb', deliveries: 1, errors: 8, budget: 100000, spent: 120000, errorSolutionTime: 9 },
@@ -59,7 +59,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 25,
     startDate: '2023-09-01',
     endDate: '2024-05-30',
-    owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
+    owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
     metrics: [
       { month: 'Jan', deliveries: 5, errors: 1, budget: 40000, spent: 38000, errorSolutionTime: 1 },
       { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
@@ -81,7 +81,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 15,
     startDate: '2024-06-01',
     endDate: '2025-06-30',
-    owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' },
+    owner: { id: 'USR-004', name: 'Luis Martinez', avatar: '/avatars/04.png' },
     metrics: [
         { month: 'Jun', deliveries: 0, errors: 0, budget: 50000, spent: 50000, errorSolutionTime: 0 },
     ],
@@ -98,7 +98,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 8,
     startDate: '2023-05-01',
     endDate: '2024-02-28',
-    owner: { name: 'Elena Petrova', avatar: '/avatars/05.png' },
+    owner: { id: 'USR-005', name: 'Elena Petrova', avatar: '/avatars/05.png' },
     metrics: [
         { month: 'Jan', deliveries: 4, errors: 0, budget: 50000, spent: 50000, errorSolutionTime: 0 },
         { month: 'Feb', deliveries: 4, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
@@ -116,7 +116,7 @@ let MOCK_PROJECTS: Project[] = [
     projectedDeliveries: 12,
     startDate: '2024-03-01',
     endDate: '2024-10-31',
-    owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' },
+    owner: { id: 'USR-006', name: 'Javier Nuñez', avatar: '/avatars/06.png' },
     metrics: [
       { month: 'Mar', deliveries: 2, errors: 1, budget: 30000, spent: 28000, errorSolutionTime: 4 },
       { month: 'Apr', deliveries: 2, errors: 0, budget: 30000, spent: 30000, errorSolutionTime: 0 },
@@ -139,13 +139,13 @@ let MOCK_DELIVERIES: Delivery[] = [
         creationDate: subDays(today, 20).toISOString(), 
         estimatedDate: '2024-07-15', 
         lastBudgetUpdate: subDays(today, 3).toISOString(), 
-        owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
+        owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
         budgetHistory: [
             { date: subDays(today, 15).toISOString(), amount: 5000 },
             { date: subDays(today, 3).toISOString(), amount: 10000 },
         ]
     },
-    { id: 'DLV-002', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 14, stage: 'Definición', budget: 25000, budgetSpent: 0, creationDate: subDays(today, 2).toISOString(), estimatedDate: '2024-07-30', owner: { name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
+    { id: 'DLV-002', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 14, stage: 'Definición', budget: 25000, budgetSpent: 0, creationDate: subDays(today, 2).toISOString(), estimatedDate: '2024-07-30', owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
     { 
       id: 'DLV-003', 
       projectId: 'PRJ-002', 
@@ -156,7 +156,7 @@ let MOCK_DELIVERIES: Delivery[] = [
       budgetSpent: 95000, 
       creationDate: subDays(today, 60).toISOString(), 
       estimatedDate: addDays(today, 30).toISOString(), 
-      owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' },
+      owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' },
       stageDates: {
         'Definición': subDays(today, 58).toISOString(),
         'Desarrollo Local': subDays(today, 40).toISOString(),
@@ -168,8 +168,8 @@ let MOCK_DELIVERIES: Delivery[] = [
         { date: subDays(today, 10).toISOString(), amount: 95000 },
       ]
     },
-    { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, budgetSpent: 20000, creationDate: subDays(today, 30).toISOString(), estimatedDate: '2024-07-20', owner: { name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
-    { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, budgetSpent: 0, creationDate: subDays(today, 1).toISOString(), estimatedDate: '2024-09-01', owner: { name: 'Luis Martinez', avatar: '/avatars/04.png' }, lastBudgetUpdate: subDays(today, 10).toISOString() },
+    { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, budgetSpent: 20000, creationDate: subDays(today, 30).toISOString(), estimatedDate: '2024-07-20', owner: { id: 'USR-006', name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
+    { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, budgetSpent: 0, creationDate: subDays(today, 1).toISOString(), estimatedDate: '2024-09-01', owner: { id: 'USR-004', name: 'Luis Martinez', avatar: '/avatars/04.png' }, lastBudgetUpdate: subDays(today, 10).toISOString() },
     { 
       id: 'DLV-006', 
       projectId: 'PRJ-002', 
@@ -180,7 +180,7 @@ let MOCK_DELIVERIES: Delivery[] = [
       budgetSpent: 10000, 
       creationDate: subDays(today, 15).toISOString(), 
       estimatedDate: '2024-08-15', 
-      owner: { name: 'Carlos Gomez', avatar: '/avatars/02.png' }, 
+      owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' }, 
       errorCount: 5, 
       errorSolutionTime: 2 
     },

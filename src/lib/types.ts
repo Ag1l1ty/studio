@@ -32,6 +32,7 @@ export type Delivery = {
   creationDate: string;
   lastBudgetUpdate?: string;
   owner: {
+    id: string;
     name: string;
     avatar: string;
   };
@@ -57,6 +58,7 @@ export type Project = {
   startDate: string;
   endDate: string;
   owner: {
+    id: string;
     name: string;
     avatar: string;
   };

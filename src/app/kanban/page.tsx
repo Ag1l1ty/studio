@@ -2,9 +2,9 @@
 "use client";
 
 import { useState } from 'react';
-import type { Project, RiskLevel, ProjectStage, Delivery } from '@/lib/types';
+import type { Project, RiskLevel, ProjectStage, Delivery, User } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById } from '@/lib/data';
+import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById, MOCK_USERS } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,6 +66,7 @@ const createDeliveryFormSchema = (deliveries: Delivery[], currentDeliveryId?: st
 export default function KanbanPage() {
     const { isManager, isProjectManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
+    const [users, setUsers] = useState(MOCK_USERS);
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(projects.map(p => p.id)));
@@ -229,14 +230,20 @@ export default function KanbanPage() {
         }
     };
 
-    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent' | 'startDate' | 'endDate'> & { startDate: Date; endDate: Date }) => {
+    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'> & { startDate: Date; endDate: Date, ownerId: string }) => {
+        const owner = users.find(u => u.id === newProjectData.ownerId);
+        if (!owner) return;
+        
         const newProject: Project = {
-            ...newProjectData,
             id: `PRJ-00${getProjects().length + 1}`,
+            name: newProjectData.name,
+            description: newProjectData.description,
+            budget: newProjectData.budget,
+            projectedDeliveries: newProjectData.projectedDeliveries,
             stage: 'Definición',
             riskLevel: 'Low',
             budgetSpent: 0,
-            owner: { name: 'New User', avatar: '' },
+            owner: { id: owner.id, name: `${owner.firstName} ${owner.lastName}`, avatar: owner.avatar },
             metrics: [],
             startDate: newProjectData.startDate.toISOString(),
             endDate: newProjectData.endDate.toISOString(),
@@ -349,6 +356,7 @@ export default function KanbanPage() {
                 isOpen={isCreateProjectDialogOpen}
                 onOpenChange={setCreateProjectDialogOpen}
                 onProjectSubmit={handleProjectCreated}
+                users={users}
             />
              <CreateDeliveryCardDialog
                 isOpen={isCreateDeliveryCardDialogOpen}
