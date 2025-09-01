@@ -81,9 +81,9 @@ export function RiskMonitoringForm() {
         let newScore = initialProject.riskScore;
 
         if (values.budgetDeviation > 15) newScore += 2;
-        if (values.timelineDeviation > 15) newScore += 2;
+        if (values.timelineDeviation >= 20) newScore += 2; // Updated logic
         if (values.budgetDeviation < -15) newScore -= 1;
-        if (values.timelineDeviation < -15) newScore -= 1;
+        if (values.timelineDeviation < 0) newScore -= 1; // Simplified from < -15
         
         if (values.hasTechnicalIssues) newScore += 3;
         if (values.hasScopeChanges) newScore += 3;
@@ -199,7 +199,7 @@ export function RiskMonitoringForm() {
                     name="timelineDeviation"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Timeline Deviation (%)</FormLabel>
+                            <FormLabel>Plan Deviation (%)</FormLabel>
                             <FormControl>
                                 <Input type="number" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
