@@ -219,7 +219,7 @@ export function RiskMonitoringForm() {
                     name="deliveryId"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Risk Delivery</FormLabel>
+                            <FormLabel>Delivery</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProjectId}>
                                 <FormControl>
                                     <SelectTrigger>
