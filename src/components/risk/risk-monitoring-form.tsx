@@ -34,6 +34,7 @@ const formSchema = z.object({
     hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
     functionalFit: z.coerce.number().min(0, "Hours must be a positive number"),
     featureAdjustments: z.coerce.number().int().min(1, "Please select a number of adjustments"),
+    blockHours: z.coerce.number().int().min(1, "Please select a number of block hours"),
 });
 
 type UpdateResult = {
@@ -62,6 +63,8 @@ export function RiskMonitoringForm() {
             timelineDeviation: 0,
             hoursToFix: 0,
             functionalFit: 0,
+            featureAdjustments: undefined,
+            blockHours: undefined,
         },
     });
 
@@ -113,6 +116,11 @@ export function RiskMonitoringForm() {
             newScore = Math.max(1, newScore - 1);
         }
 
+        // Block hours logic
+        if (values.blockHours >= 10) {
+            newScore += 1;
+        }
+
         // Ensure score doesn't go above a maximum (e.g., 25)
         newScore = Math.min(newScore, 25);
         
@@ -157,7 +165,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0 }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: undefined, blockHours: undefined }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -270,6 +278,29 @@ export function RiskMonitoringForm() {
                                 </FormControl>
                                 <SelectContent>
                                     {Array.from({ length: 10 }, (_, i) => i + 1).map(num => (
+                                        <SelectItem key={num} value={String(num)}>{num}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="blockHours"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Block hours</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value ? String(field.value) : ""} disabled={!selectedDeliveryId}>
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select number of block hours" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {Array.from({ length: 24 }, (_, i) => i + 1).map(num => (
                                         <SelectItem key={num} value={String(num)}>{num}</SelectItem>
                                     ))}
                                 </SelectContent>
