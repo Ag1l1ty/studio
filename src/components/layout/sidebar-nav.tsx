@@ -17,7 +17,7 @@ const navItems = [
   { href: '/kanban', label: 'Kanban Board', icon: FolderKanban },
   { href: '/risk-assessment', label: 'Risk Assessment', icon: ShieldCheck },
   { href: '/risk-monitoring', label: 'Risk Monitoring', icon: Activity },
-  { href: '/configure', label: 'Configuration', icon: Settings },
+  { href: '/configure', label: 'Administration', icon: Settings },
 ];
 
 export function SidebarNav() {
