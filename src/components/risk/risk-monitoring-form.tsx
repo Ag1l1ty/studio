@@ -272,7 +272,7 @@ export function RiskMonitoringForm() {
                     name="functionalFit"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Functional Fit</FormLabel>
+                            <FormLabel>Cantidad Ajustes Funcionales Post-definición</FormLabel>
                             <FormControl>
                                 <Input type="number" placeholder="e.g., 2" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
