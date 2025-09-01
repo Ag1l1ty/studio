@@ -180,7 +180,7 @@ let MOCK_DELIVERIES: Delivery[] = [
       budget: 120000, 
       budgetSpent: 10000, 
       creationDate: subDays(today, 15).toISOString(), 
-      estimatedDate: '2024-08-15', 
+      estimatedDate: '2024-08-15',
       owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' }, 
       errorCount: 5, 
       errorSolutionTime: 2 
@@ -295,9 +295,9 @@ export function getDashboardKpis(projects: Project[]) {
         ['Moderado - alto', 'Agresivo', 'Muy Agresivo'].includes(p.riskLevel)
     ).length;
     
-    const currentYear = new Date().getFullYear();
     const totalDeliveries = projects.reduce((acc, project) => {
-        if (project.stage === 'Cerrado' && getYear(parseISO(project.endDate)) === currentYear) {
+        // If the project is closed, count all its deliveries.
+        if (project.stage === 'Cerrado') {
             return acc + project.metrics.reduce((sum, metric) => sum + metric.deliveries, 0);
         }
         return acc;
