@@ -150,9 +150,21 @@ export default function KanbanPage() {
 
         const movedDelivery = deliveries.find(d => d.id === draggableId);
         if (!movedDelivery) return;
+
+        const sourceIndex = STAGES.indexOf(source.droppableId as ProjectStage);
+        const destinationIndex = STAGES.indexOf(destination.droppableId as ProjectStage);
+        const tstIndex = STAGES.indexOf('Ambiente TST');
+
+        if (sourceIndex < tstIndex && destinationIndex > tstIndex) {
+            toast({
+                variant: 'destructive',
+                title: 'Movimiento no permitido',
+                description: 'Debe mover la tarjeta a "Ambiente TST" antes de pasar a etapas posteriores.',
+            });
+            return;
+        }
         
-        const isMovingFromTst = movedDelivery.stage === 'Ambiente TST' && 
-                               STAGES.indexOf(destination.droppableId as ProjectStage) > STAGES.indexOf('Ambiente TST');
+        const isMovingFromTst = movedDelivery.stage === 'Ambiente TST' && destinationIndex > tstIndex;
         
         if (isMovingFromTst) {
             if (movedDelivery.errorCount === undefined || movedDelivery.errorSolutionTime === undefined) {
