@@ -198,7 +198,8 @@ export function addProject(project: Project) {
 
 
 export function getProjectById(id: string): Project | undefined {
-    return MOCK_PROJECTS.find(p => p.id === id);
+    const project = MOCK_PROJECTS.find(p => p.id === id);
+    return project ? JSON.parse(JSON.stringify(project)) : undefined;
 }
 
 export function getProjectsByStage(stage: ProjectStage): Project[] {
@@ -348,9 +349,11 @@ export function getRiskProfile(score: number): Omit<RiskResult, 'score'> {
 }
 
 export function updateProjectRisk(projectId: string, score: number, level: RiskLevel) {
-    const project = MOCK_PROJECTS.find(p => p.id === projectId);
-    if (project) {
-        project.riskScore = score;
-        project.riskLevel = level;
+    const projectIndex = MOCK_PROJECTS.findIndex(p => p.id === projectId);
+    if (projectIndex !== -1) {
+        MOCK_PROJECTS[projectIndex].riskScore = score;
+        MOCK_PROJECTS[projectIndex].riskLevel = level;
     }
 }
+
+    

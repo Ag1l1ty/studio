@@ -21,28 +21,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getProjects, getProjectById, getRiskProfile, getDeliveriesByProjectId } from '@/lib/data';
+import { getProjects, getProjectById, getRiskProfile, getDeliveriesByProjectId, updateProjectRisk } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import { Input } from '../ui/input';
-import type { RiskLevel, Delivery } from '@/lib/types';
+import type { RiskLevel, Delivery, Project } from '@/lib/types';
 
 const formSchema = z.object({
     projectId: z.string().min(1, 'Please select a project'),
     deliveryId: z.string().min(1, 'Please select a delivery'),
     timelineDeviation: z.coerce.number().min(-100).max(100),
+    hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
 });
 
 type UpdateResult = {
     initialRisk: RiskLevel;
+    initialScore: number;
     newRisk: RiskLevel;
+    newScore: number;
     change: 'Increased' | 'Decreased' | 'Maintained';
 }
 
 export function RiskMonitoringForm() {
-    const projects = getProjects();
+    const [projects, setProjects] = useState<Project[]>([]);
     const [deliveries, setDeliveries] = useState<Delivery[]>([]);
     const [result, setResult] = useState<UpdateResult | null>(null);
+    const [initialProject, setInitialProject] = useState<Project | null>(null);
+
+    useEffect(() => {
+        setProjects(getProjects());
+    }, []);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -50,46 +58,69 @@ export function RiskMonitoringForm() {
             projectId: '',
             deliveryId: '',
             timelineDeviation: 0,
+            hoursToFix: 0,
         },
     });
 
     const selectedProjectId = form.watch('projectId');
     const selectedDeliveryId = form.watch('deliveryId');
-    const initialProject = getProjectById(selectedProjectId);
 
     useEffect(() => {
         if (selectedProjectId) {
             setDeliveries(getDeliveriesByProjectId(selectedProjectId));
+            setInitialProject(getProjectById(selectedProjectId) || null);
             form.setValue('deliveryId', '');
         } else {
             setDeliveries([]);
+            setInitialProject(null);
         }
     }, [selectedProjectId, form]);
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        if (!initialProject || typeof initialProject.riskScore === 'undefined') return;
+        const project = getProjectById(values.projectId);
+        if (!project || typeof project.riskScore === 'undefined') return;
         
-        let newScore = initialProject.riskScore;
+        let newScore = project.riskScore;
 
-        if (values.timelineDeviation >= 20) newScore += 2;
-        if (values.timelineDeviation < 0) newScore -= 1;
+        // Timeline deviation logic
+        if (values.timelineDeviation >= 20) {
+            newScore += 2;
+        } else if (values.timelineDeviation < 0) {
+            newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
+        }
         
-        // Ensure score doesn't go below a minimum (e.g., 1) or above a maximum (e.g., 25)
-        newScore = Math.max(1, Math.min(25, newScore));
+        // Hours to fix logic
+        if (values.hoursToFix >= 3) {
+            newScore += 2;
+        } else {
+            newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
+        }
+
+        // Ensure score doesn't go above a maximum (e.g., 25)
+        newScore = Math.min(newScore, 25);
         
-        const initialRiskProfile = getRiskProfile(initialProject.riskScore);
+        const initialRiskProfile = getRiskProfile(project.riskScore);
         const newRiskProfile = getRiskProfile(newScore);
-        const newRisk = newRiskProfile.classification;
+        const newRiskClassification = newRiskProfile.classification;
+        
+        updateProjectRisk(values.projectId, newScore, newRiskClassification);
+        setProjects(getProjects());
         
         const riskOrder: RiskLevel[] = ['Muy conservador', 'Conservador', 'Moderado', 'Moderado - alto', 'Agresivo', 'Muy Agresivo'];
         const initialIndex = riskOrder.indexOf(initialRiskProfile.classification);
-        const newIndex = riskOrder.indexOf(newRisk);
+        const newIndex = riskOrder.indexOf(newRiskClassification);
 
         let change: UpdateResult['change'] = 'Maintained';
         if (newIndex > initialIndex) change = 'Increased';
         if (newIndex < initialIndex) change = 'Decreased';
 
-        setResult({ initialRisk: initialProject.riskLevel, newRisk, change });
+        setResult({ 
+            initialRisk: project.riskLevel,
+            initialScore: project.riskScore,
+            newRisk: newRiskClassification,
+            newScore: newScore,
+            change 
+        });
     }
 
     if (result && initialProject) {
@@ -105,11 +136,11 @@ export function RiskMonitoringForm() {
                     <div className="flex justify-center">{changeIcon}</div>
                     <p className="text-xl font-bold">Risk Level {result.change}</p>
                     <div className="flex items-center justify-center gap-4 text-lg">
-                        <span className="text-muted-foreground">From: {result.initialRisk}</span>
+                        <span className="text-muted-foreground">From: {result.initialRisk} ({result.initialScore.toFixed(1)})</span>
                         <span>&rarr;</span>
-                        <span className="font-semibold">To: {result.newRisk}</span>
+                        <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset(); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0 }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -129,7 +160,7 @@ export function RiskMonitoringForm() {
                                     <SelectTrigger><SelectValue placeholder="Select a project to monitor" /></SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                    {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({p.id})</SelectItem>)}
+                                    {projects.filter(p => typeof p.riskScore !== 'undefined' && p.riskScore > 0).map(p => <SelectItem key={p.id} value={p.id}>{p.name} ({p.id})</SelectItem>)}
                                 </SelectContent>
                             </Select>
                             <FormMessage />
@@ -138,7 +169,7 @@ export function RiskMonitoringForm() {
                 />
 
                 {initialProject && (
-                    <div className="text-sm">Current Risk Level: <span className="font-semibold">{initialProject.riskLevel}</span> (Score: {initialProject.riskScore})</div>
+                    <div className="text-sm">Current Risk Level: <span className="font-semibold">{initialProject.riskLevel}</span> (Score: {initialProject.riskScore?.toFixed(1)})</div>
                 )}
                 
                 <FormField
@@ -179,9 +210,25 @@ export function RiskMonitoringForm() {
                         </FormItem>
                     )}
                 />
+                
+                <FormField
+                    control={form.control}
+                    name="hoursToFix"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Hours to Fix</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="e.g., 5" {...field} disabled={!selectedDeliveryId} />
+                            </FormControl>
+                             <FormMessage />
+                        </FormItem>
+                    )}
+                />
 
                 <Button type="submit" disabled={!selectedDeliveryId}>Update Risk</Button>
             </form>
         </Form>
     );
 }
+
+    
