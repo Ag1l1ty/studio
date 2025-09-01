@@ -297,7 +297,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>Cantidad Horas Bloqueos</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="Ingresa el número de horas laborables" {...field} disabled={!selectedDeliveryId} />
+                                <Input type="number" placeholder="Solo horas laborables" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
@@ -309,5 +309,7 @@ export function RiskMonitoringForm() {
         </Form>
     );
 }
+
+    
 
     
