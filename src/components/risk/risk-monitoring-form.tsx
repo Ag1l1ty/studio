@@ -272,7 +272,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>Cantidad Ajustes Funcionales Post-definición</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="e.g., 2" {...field} disabled={!selectedDeliveryId} />
+                                <Input type="number" placeholder="Cambios en alcance funcional inicial" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
@@ -284,7 +284,7 @@ export function RiskMonitoringForm() {
                     name="featureAdjustments"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Cantidad de Cambios Funcionales Post-Desarrollo</FormLabel>
+                            <FormLabel>Cantidad Cambios Funcionales Post-Desarrollo</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value?.toString()} disabled={!selectedDeliveryId}>
                                 <FormControl>
                                     <SelectTrigger>
@@ -321,3 +321,4 @@ export function RiskMonitoringForm() {
         </Form>
     );
 }
+
