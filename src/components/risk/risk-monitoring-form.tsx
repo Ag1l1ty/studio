@@ -24,19 +24,13 @@ import {
 import { getProjects, getProjectById, getRiskProfile, getDeliveriesByProjectId } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
-import { Switch } from '../ui/switch';
-import { Textarea } from '../ui/textarea';
 import { Input } from '../ui/input';
 import type { RiskLevel, Delivery } from '@/lib/types';
 
 const formSchema = z.object({
     projectId: z.string().min(1, 'Please select a project'),
     deliveryId: z.string().min(1, 'Please select a delivery'),
-    budgetDeviation: z.coerce.number().min(-100).max(100),
     timelineDeviation: z.coerce.number().min(-100).max(100),
-    hasTechnicalIssues: z.boolean(),
-    hasScopeChanges: z.boolean(),
-    comments: z.string().optional(),
 });
 
 type UpdateResult = {
@@ -55,10 +49,7 @@ export function RiskMonitoringForm() {
         defaultValues: {
             projectId: '',
             deliveryId: '',
-            budgetDeviation: 0,
             timelineDeviation: 0,
-            hasTechnicalIssues: false,
-            hasScopeChanges: false,
         },
     });
 
@@ -80,14 +71,9 @@ export function RiskMonitoringForm() {
         
         let newScore = initialProject.riskScore;
 
-        if (values.budgetDeviation > 15) newScore += 2;
-        if (values.timelineDeviation >= 20) newScore += 2; // Updated logic
-        if (values.budgetDeviation < -15) newScore -= 1;
-        if (values.timelineDeviation < 0) newScore -= 1; // Simplified from < -15
+        if (values.timelineDeviation >= 20) newScore += 2;
+        if (values.timelineDeviation < 0) newScore -= 1;
         
-        if (values.hasTechnicalIssues) newScore += 3;
-        if (values.hasScopeChanges) newScore += 3;
-
         // Ensure score doesn't go below a minimum (e.g., 1) or above a maximum (e.g., 25)
         newScore = Math.max(1, Math.min(25, newScore));
         
@@ -182,70 +168,12 @@ export function RiskMonitoringForm() {
 
                 <FormField
                     control={form.control}
-                    name="budgetDeviation"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Budget Deviation (%)</FormLabel>
-                            <FormControl>
-                                <Input type="number" {...field} disabled={!selectedDeliveryId} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
                     name="timelineDeviation"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>Plan Deviation (%)</FormLabel>
                             <FormControl>
                                 <Input type="number" {...field} disabled={!selectedDeliveryId} />
-                            </FormControl>
-                             <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                <div className="grid grid-cols-2 gap-8">
-                    <FormField
-                        control={form.control}
-                        name="hasTechnicalIssues"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                               <div className="space-y-0.5">
-                                    <FormLabel>Significant Technical Issues?</FormLabel>
-                                </div>
-                                <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!selectedDeliveryId} />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="hasScopeChanges"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                    <FormLabel>Unplanned Scope Changes?</FormLabel>
-                                </div>
-                                <FormControl>
-                                    <Switch checked={field.value} onCheckedChange={field.onChange} disabled={!selectedDeliveryId} />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                </div>
-                 <FormField
-                    control={form.control}
-                    name="comments"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Comments</FormLabel>
-                            <FormControl>
-                                <Textarea placeholder="Add any relevant comments about the project's status..." {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
