@@ -35,6 +35,7 @@ const formSchema = z.object({
     technicalUncertainty: z.enum(['low', 'medium', 'high']),
     technologyMaturity: z.enum(['stable', 'recent', 'emerging']),
     externalDependencies: z.enum(['low', 'medium', 'high']),
+    organizationalComplexity: z.enum(['low', 'medium', 'high']),
 });
 
 
@@ -56,6 +57,7 @@ export function RiskAssessmentForm() {
             technicalUncertainty: 'medium',
             technologyMaturity: 'stable',
             externalDependencies: 'low',
+            organizationalComplexity: 'low',
         },
     });
 
@@ -95,6 +97,10 @@ export function RiskAssessmentForm() {
         // externalDependencies scoring
         if (values.externalDependencies === 'medium') score += 1.5;
         if (values.externalDependencies === 'high') score += 3;
+
+        // organizationalComplexity scoring
+        if (values.organizationalComplexity === 'medium') score += 1.5;
+        if (values.organizationalComplexity === 'high') score += 3;
         
         const riskProfile = getRiskProfile(score);
         
@@ -263,6 +269,27 @@ export function RiskAssessmentForm() {
                                     <SelectItem value="low">Ninguna o muy pocas (internas controlables)</SelectItem>
                                     <SelectItem value="medium">1 – 2 proveedores / 1 terceros críticos externas al equipo de proyecto</SelectItem>
                                     <SelectItem value="high">Mayor o igual a 3 terceros críticos o dependencias externas al equipo de proyecto</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+
+                <FormField
+                    control={form.control}
+                    name="organizationalComplexity"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Complejidad organizacional</FormLabel>
+                             <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!selectedProject}>
+                                <FormControl>
+                                    <SelectTrigger><SelectValue placeholder="Select organizational complexity level" /></SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    <SelectItem value="low">Único departamento, con prioridades alineadas y sin cambios</SelectItem>
+                                    <SelectItem value="medium">Varios departamentos involucrados con prioridades moderadamente alineadas</SelectItem>
+                                    <SelectItem value="high">Múltiples áreas con objetivos contrapuestos y de baja disponibilidad</SelectItem>
                                 </SelectContent>
                             </Select>
                             <FormMessage />
