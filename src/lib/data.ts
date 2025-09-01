@@ -191,6 +191,7 @@ let MOCK_DELIVERIES: Delivery[] = [
 export let MOCK_USERS: User[] = [
     { id: 'USR-001', firstName: 'Ana', lastName: 'Rodriguez', email: 'ana.rodriguez@example.com', role: 'PM/SM', avatar: '/avatars/01.png', assignedProjectIds: ['PRJ-001', 'PRJ-003'] },
     { id: 'USR-002', firstName: 'Carlos', lastName: 'Gomez', email: 'carlos.gomez@example.com', role: 'PM/SM', avatar: '/avatars/02.png', assignedProjectIds: ['PRJ-002'] },
+    { id: 'USR-003', firstName: 'Admin', lastName: 'User', email: 'admin.user@example.com', role: 'Admin', avatar: '/avatars/03.png', assignedProjectIds: [] },
     { id: 'USR-004', firstName: 'Luis', lastName: 'Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png', assignedProjectIds: ['PRJ-004'] },
     { id: 'USR-005', firstName: 'Elena', lastName: 'Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png', assignedProjectIds: ['PRJ-005'] },
     { id: 'USR-006', firstName: 'Javier', lastName: 'Nuñez', email: 'javier.nunez@example.com', role: 'PM/SM', avatar: '/avatars/06.png', assignedProjectIds: ['PRJ-006'] },
@@ -296,7 +297,6 @@ export function getDashboardKpis(projects: Project[]) {
     ).length;
     
     const totalDeliveries = projects.reduce((acc, project) => {
-        // If the project is closed, count all its deliveries.
         if (project.stage === 'Cerrado') {
             return acc + project.metrics.reduce((sum, metric) => sum + metric.deliveries, 0);
         }

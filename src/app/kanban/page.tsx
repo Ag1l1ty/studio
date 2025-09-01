@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import type { Project, RiskLevel, ProjectStage, Delivery, User } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById, MOCK_USERS } from '@/lib/data';
+import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById, MOCK_USERS, updateProject } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +30,7 @@ import { ListFilter, PlusCircle, ChevronDown } from 'lucide-react';
 import { DragDropContext, type DropResult } from 'react-beautiful-dnd';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
 import { CreateDeliveryCardDialog } from '@/components/kanban/create-delivery-card-dialog';
-import { addMonths, format } from 'date-fns';
+import { addMonths, format, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import * as z from 'zod';
@@ -113,10 +113,10 @@ export default function KanbanPage() {
                 if (project) {
                     project.budgetSpent += delivery.budget;
                     
-                    const deliveryDate = new Date(delivery.estimatedDate);
+                    const deliveryDate = new Date(); // Use current date for closing
                     const monthName = format(deliveryDate, 'MMM');
                     
-                    const metricIndex = project.metrics.findIndex(m => m.month === monthName);
+                    let metricIndex = project.metrics.findIndex(m => m.month === monthName);
 
                     if (metricIndex > -1) {
                         project.metrics[metricIndex].deliveries += 1;
@@ -125,14 +125,17 @@ export default function KanbanPage() {
                             project.metrics[metricIndex].errors += delivery.errorCount;
                         }
                     } else {
+                        // If no metric for this month, create one
                         project.metrics.push({
                             month: monthName,
                             deliveries: 1,
                             errors: delivery.errorCount || 0,
-                            budget: delivery.budget,
+                            budget: 0, // Budget is project-level, not added monthly here
                             spent: delivery.budget,
+                            errorSolutionTime: delivery.errorSolutionTime
                         });
                     }
+                    updateProject(project); // Persist changes to the project
                     setProjects(getProjects());
                 }
             }
@@ -230,7 +233,7 @@ export default function KanbanPage() {
         }
     };
 
-    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'> & { startDate: Date; endDate: Date, ownerId: string }) => {
+    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'> & { ownerId: string }) => {
         const owner = users.find(u => u.id === newProjectData.ownerId);
         if (!owner) return;
         
@@ -241,7 +244,7 @@ export default function KanbanPage() {
             budget: newProjectData.budget,
             projectedDeliveries: newProjectData.projectedDeliveries,
             stage: 'Definición',
-            riskLevel: 'Low',
+            riskLevel: 'No Assessment',
             budgetSpent: 0,
             owner: { id: owner.id, name: `${owner.firstName} ${owner.lastName}`, avatar: owner.avatar },
             metrics: [],
@@ -400,3 +403,4 @@ export default function KanbanPage() {
     
 
     
+
