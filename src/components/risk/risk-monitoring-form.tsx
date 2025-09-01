@@ -30,7 +30,10 @@ import type { RiskLevel, Delivery, Project } from '@/lib/types';
 const formSchema = z.object({
     projectId: z.string().min(1, 'Please select a project'),
     deliveryId: z.string().min(1, 'Please select a delivery'),
-    timelineDeviation: z.coerce.number().min(-100).max(100),
+    timelineDeviation: z.preprocess(
+      (val) => (val === "" ? undefined : Number(val)),
+       z.coerce.number().min(-100).max(100).optional()
+    ),
     hoursToFix: z.coerce.number().min(0, "Hours must be a positive number"),
     functionalFit: z.coerce.number().min(0, "Hours must be a positive number"),
     featureAdjustments: z.preprocess(
@@ -66,7 +69,7 @@ export function RiskMonitoringForm() {
         defaultValues: {
             projectId: '',
             deliveryId: '',
-            timelineDeviation: 0,
+            timelineDeviation: '',
             hoursToFix: 0,
             functionalFit: 0,
             featureAdjustments: '',
@@ -95,9 +98,9 @@ export function RiskMonitoringForm() {
         let newScore = project.riskScore;
 
         // Timeline deviation logic
-        if (values.timelineDeviation >= 20) {
+        if (values.timelineDeviation && values.timelineDeviation >= 20) {
             newScore += 2;
-        } else {
+        } else if (values.timelineDeviation) {
             newScore = Math.max(1, newScore - 1); // Ensure score doesn't drop below 1
         }
         
@@ -171,7 +174,7 @@ export function RiskMonitoringForm() {
                         <span>&rarr;</span>
                         <span className="font-semibold">To: {result.newRisk} ({result.newScore.toFixed(1)})</span>
                     </div>
-                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: 0, hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '' }); setResult(null); }}>Monitor Another Project</Button>
+                     <Button onClick={() => { form.reset({ projectId: '', deliveryId: '', timelineDeviation: '', hoursToFix: 0, functionalFit: 0, featureAdjustments: '', blockHours: '' }); setResult(null); }}>Monitor Another Project</Button>
                 </CardContent>
             </Card>
         );
@@ -235,7 +238,7 @@ export function RiskMonitoringForm() {
                         <FormItem>
                             <FormLabel>(%) Desviación Plan </FormLabel>
                             <FormControl>
-                                <Input type="number" {...field} disabled={!selectedDeliveryId} />
+                                <Input type="number" placeholder="Procentaje Desvio Planeación" {...field} disabled={!selectedDeliveryId} />
                             </FormControl>
                              <FormMessage />
                         </FormItem>
@@ -316,3 +319,4 @@ export function RiskMonitoringForm() {
     
 
     
+
