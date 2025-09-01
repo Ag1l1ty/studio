@@ -149,7 +149,7 @@ export function RiskAssessmentForm() {
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a project to assess" />
+                                    <SelectValue placeholder="Selecciona proyecto a valorar riesgo" />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
