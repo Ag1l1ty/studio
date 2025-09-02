@@ -20,7 +20,7 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
 
   return (
     <SidebarProvider>
@@ -50,7 +50,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
               </div>
             )}
-             <Button variant="ghost" className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+             <Button 
+                variant="ghost" 
+                className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                onClick={logout}
+            >
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
             </Button>

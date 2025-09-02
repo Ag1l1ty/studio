@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { AppLayout } from '@/components/layout/app-layout';
+import { AuthWrapper } from '@/components/auth/auth-wrapper';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
@@ -24,9 +24,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <AppLayout>
+        <AuthWrapper>
           {children}
-        </AppLayout>
+        </AuthWrapper>
         <Toaster />
       </body>
     </html>
