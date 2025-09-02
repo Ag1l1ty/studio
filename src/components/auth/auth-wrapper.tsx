@@ -7,8 +7,18 @@ import { AppLayout } from '@/components/layout/app-layout';
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();
+    const [forceShowLogin, setForceShowLogin] = React.useState(false);
 
-    if (isLoading) {
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            console.log('AuthWrapper - Force showing login after timeout');
+            setForceShowLogin(true);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+    }, []);
+
+    if (isLoading && !forceShowLogin) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
