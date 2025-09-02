@@ -86,7 +86,7 @@ export function UserAdminForm() {
                 id: `USR-00${users.length + 1}`,
             };
             addUser(newUser);
-            setUsers([...MOCK_USERS]); // Create a new array from the updated source
+            setUsers(prevUsers => [...prevUsers, newUser]);
             toast({
                 title: "Usuario Creado",
                 description: `El usuario ${newUser.firstName} ${newUser.lastName} ha sido creado con éxito.`,
