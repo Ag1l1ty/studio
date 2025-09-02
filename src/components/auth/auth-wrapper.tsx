@@ -7,26 +7,17 @@ import { AppLayout } from '@/components/layout/app-layout';
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();
-    const [forceShowLogin, setForceShowLogin] = React.useState(false);
+    const [showLogin, setShowLogin] = React.useState(true);
 
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            console.log('AuthWrapper - Force showing login after timeout');
-            setForceShowLogin(true);
-        }, 2000);
-        
-        return () => clearTimeout(timer);
-    }, []);
+        console.log('AuthWrapper - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
+        if (!isLoading) {
+            setShowLogin(!isAuthenticated);
+        }
+    }, [isAuthenticated, isLoading]);
 
-    if (isLoading && !forceShowLogin) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Cargando...</p>
-                </div>
-            </div>
-        );
+    if (!isAuthenticated) {
+        return <LoginForm />;
     }
 
     if (!isAuthenticated) {
