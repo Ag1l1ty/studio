@@ -6,123 +6,26 @@ import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, 
 let MOCK_PROJECTS: Project[] = [
   {
     id: 'PRJ-001',
-    name: 'Digital Onboarding Platform',
-    description: 'Development of a new digital onboarding experience for clients.',
-    stage: 'Desarrollo Local',
-    riskLevel: 'Moderado',
-    riskScore: 10,
-    budget: 500000,
-    budgetSpent: 275000,
-    projectedDeliveries: 20,
-    startDate: '2024-01-15',
-    endDate: '2024-09-30',
-    owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
-    metrics: [
-      { month: 'Jan', deliveries: 2, errors: 2, budget: 55000, spent: 50000, errorSolutionTime: 3 },
-      { month: 'Feb', deliveries: 3, errors: 1, budget: 55000, spent: 60000, errorSolutionTime: 2 },
-      { month: 'Mar', deliveries: 4, errors: 3, budget: 55000, spent: 52000, errorSolutionTime: 4 },
-      { month: 'Apr', deliveries: 3, errors: 4, budget: 55000, spent: 58000, errorSolutionTime: 5 },
-      { month: 'May', deliveries: 4, errors: 2, budget: 55000, spent: 55000, errorSolutionTime: 3 },
-      { month: 'Jun', deliveries: 2, errors: 1, budget: 55000, spent: 54000, errorSolutionTime: 2 },
-    ],
-  },
-  {
-    id: 'PRJ-002',
-    name: 'AI-Powered Claims Processing',
-    description: 'Implementing an AI model to automate insurance claims processing.',
-    stage: 'Ambiente TST',
-    riskLevel: 'Agresivo',
-    riskScore: 18,
-    budget: 1200000,
-    budgetSpent: 950000,
-    projectedDeliveries: 10,
-    startDate: '2023-11-01',
-    endDate: '2024-12-31',
-    owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' },
-    metrics: [
-      { month: 'Jan', deliveries: 1, errors: 5, budget: 100000, spent: 110000, errorSolutionTime: 7 },
-      { month: 'Feb', deliveries: 1, errors: 8, budget: 100000, spent: 120000, errorSolutionTime: 9 },
-      { month: 'Mar', deliveries: 1, errors: 6, budget: 100000, spent: 95000, errorSolutionTime: 8 },
-      { month: 'Apr', deliveries: 1, errors: 4, budget: 100000, spent: 105000, errorSolutionTime: 6 },
-      { month: 'May', deliveries: 1, errors: 3, budget: 100000, spent: 98000, errorSolutionTime: 5 },
-      { month: 'Jun', deliveries: 1, errors: 2, budget: 100000, spent: 102000, errorSolutionTime: 4 },
-    ],
-  },
-  {
-    id: 'PRJ-003',
-    name: 'Mobile App Refresh',
-    description: 'Complete UI/UX overhaul for the main customer-facing mobile app.',
+    name: 'AXA Portfolio Insights Platform',
+    description: 'Sistema de gestión y monitoreo de portafolio de proyectos para AXA.',
     stage: 'Soporte Productivo',
-    riskLevel: 'Muy conservador',
-    riskScore: 2,
-    budget: 350000,
-    budgetSpent: 345000,
-    projectedDeliveries: 25,
-    startDate: '2023-09-01',
-    endDate: '2024-05-30',
-    owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
-    metrics: [
-      { month: 'Jan', deliveries: 5, errors: 1, budget: 40000, spent: 38000, errorSolutionTime: 1 },
-      { month: 'Feb', deliveries: 5, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
-      { month: 'Mar', deliveries: 5, errors: 1, budget: 40000, spent: 41000, errorSolutionTime: 2 },
-      { month: 'Apr', deliveries: 5, errors: 0, budget: 40000, spent: 39000, errorSolutionTime: 0 },
-      { month: 'May', deliveries: 4, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
-      { month: 'Jun', deliveries: 1, errors: 0, budget: 10000, spent: 10000, errorSolutionTime: 0 },
-    ],
-  },
-  {
-    id: 'PRJ-004',
-    name: 'Internal CRM System',
-    description: 'New CRM system for the sales and marketing teams.',
-    stage: 'Definición',
-    riskLevel: 'No Assessment',
-    riskScore: 0,
-    budget: 750000,
-    budgetSpent: 50000,
-    projectedDeliveries: 15,
-    startDate: '2024-06-01',
-    endDate: '2025-06-30',
-    owner: { id: 'USR-004', name: 'Luis Martinez', avatar: '/avatars/04.png' },
-    metrics: [
-        { month: 'Jun', deliveries: 0, errors: 0, budget: 50000, spent: 50000, errorSolutionTime: 0 },
-    ],
-  },
-  {
-    id: 'PRJ-005',
-    name: 'Data Warehouse Migration',
-    description: 'Migrating legacy data warehouse to a cloud-based solution.',
-    stage: 'Cerrado',
-    riskLevel: 'Conservador',
-    riskScore: 5,
-    budget: 400000,
-    budgetSpent: 390000,
-    projectedDeliveries: 8,
-    startDate: '2023-05-01',
-    endDate: '2024-02-28',
-    owner: { id: 'USR-005', name: 'Elena Petrova', avatar: '/avatars/05.png' },
-    metrics: [
-        { month: 'Jan', deliveries: 4, errors: 0, budget: 50000, spent: 50000, errorSolutionTime: 0 },
-        { month: 'Feb', deliveries: 4, errors: 0, budget: 40000, spent: 40000, errorSolutionTime: 0 },
-    ],
-  },
-  {
-    id: 'PRJ-006',
-    name: 'Cybersecurity Audit Tool',
-    description: 'A tool for internal teams to perform regular security audits.',
-    stage: 'Ambiente DEV',
-    riskLevel: 'Moderado - alto',
-    riskScore: 12,
-    budget: 250000,
-    budgetSpent: 110000,
+    riskLevel: 'Moderado',
+    riskScore: 8,
+    budget: 850000,
+    budgetSpent: 720000,
     projectedDeliveries: 12,
-    startDate: '2024-03-01',
-    endDate: '2024-10-31',
-    owner: { id: 'USR-006', name: 'Javier Nuñez', avatar: '/avatars/06.png' },
+    startDate: '2024-01-01',
+    endDate: '2024-12-31',
+    owner: { id: 'USR-001', name: 'Jose Andres Sanchez', avatar: '/avatars/01.png' },
     metrics: [
-      { month: 'Mar', deliveries: 2, errors: 1, budget: 30000, spent: 28000, errorSolutionTime: 4 },
-      { month: 'Apr', deliveries: 2, errors: 0, budget: 30000, spent: 30000, errorSolutionTime: 0 },
-      { month: 'May', deliveries: 1, errors: 1, budget: 30000, spent: 32000, errorSolutionTime: 5 },
-      { month: 'Jun', deliveries: 1, errors: 0, budget: 30000, spent: 20000, errorSolutionTime: 0 },
+      { month: 'Jan', deliveries: 1, errors: 0, budget: 70000, spent: 65000, errorSolutionTime: 0 },
+      { month: 'Feb', deliveries: 1, errors: 1, budget: 70000, spent: 72000, errorSolutionTime: 2 },
+      { month: 'Mar', deliveries: 1, errors: 0, budget: 70000, spent: 68000, errorSolutionTime: 0 },
+      { month: 'Apr', deliveries: 1, errors: 0, budget: 70000, spent: 70000, errorSolutionTime: 0 },
+      { month: 'May', deliveries: 1, errors: 1, budget: 70000, spent: 75000, errorSolutionTime: 3 },
+      { month: 'Jun', deliveries: 1, errors: 0, budget: 70000, spent: 69000, errorSolutionTime: 0 },
+      { month: 'Jul', deliveries: 1, errors: 0, budget: 70000, spent: 71000, errorSolutionTime: 0 },
+      { month: 'Aug', deliveries: 1, errors: 0, budget: 70000, spent: 70000, errorSolutionTime: 0 },
     ],
   },
 ];
@@ -132,70 +35,34 @@ let MOCK_DELIVERIES: Delivery[] = [
     { 
         id: 'DLV-001', 
         projectId: 'PRJ-001', 
-        projectName: 'Digital Onboarding Platform', 
-        deliveryNumber: 13, 
-        stage: 'Desarrollo Local', 
-        budget: 25000, 
-        budgetSpent: 10000, 
-        creationDate: subDays(today, 20).toISOString(), 
-        estimatedDate: '2024-07-15', 
-        lastBudgetUpdate: subDays(today, 3).toISOString(), 
-        owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' },
+        projectName: 'AXA Portfolio Insights Platform', 
+        deliveryNumber: 9, 
+        stage: 'Soporte Productivo', 
+        budget: 85000, 
+        budgetSpent: 82000, 
+        creationDate: subDays(today, 45).toISOString(), 
+        estimatedDate: '2024-09-15', 
+        lastBudgetUpdate: subDays(today, 5).toISOString(), 
+        owner: { id: 'USR-001', name: 'Jose Andres Sanchez', avatar: '/avatars/01.png' },
         budgetHistory: [
-            { date: subDays(today, 15).toISOString(), amount: 5000 },
-            { date: subDays(today, 3).toISOString(), amount: 10000 },
-        ]
-    },
-    { id: 'DLV-002', projectId: 'PRJ-001', projectName: 'Digital Onboarding Platform', deliveryNumber: 14, stage: 'Definición', budget: 25000, budgetSpent: 0, creationDate: subDays(today, 2).toISOString(), estimatedDate: '2024-07-30', owner: { id: 'USR-001', name: 'Ana Rodriguez', avatar: '/avatars/01.png' } },
-    { 
-      id: 'DLV-003', 
-      projectId: 'PRJ-002', 
-      projectName: 'AI-Powered Claims Processing', 
-      deliveryNumber: 7, 
-      stage: 'Ambiente TST', 
-      budget: 150000, 
-      budgetSpent: 95000, 
-      creationDate: subDays(today, 60).toISOString(), 
-      estimatedDate: addDays(today, 30).toISOString(), 
-      owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' },
-      stageDates: {
-        'Definición': subDays(today, 58).toISOString(),
-        'Desarrollo Local': subDays(today, 40).toISOString(),
-        'Ambiente DEV': subDays(today, 15).toISOString(),
-        'Ambiente TST': addDays(today, 5).toISOString(), // This stage is delayed
-      },
-      budgetHistory: [
-        { date: subDays(today, 30).toISOString(), amount: 40000 },
-        { date: subDays(today, 10).toISOString(), amount: 95000 },
-      ]
-    },
-    { id: 'DLV-004', projectId: 'PRJ-006', projectName: 'Cybersecurity Audit Tool', deliveryNumber: 6, stage: 'Ambiente DEV', budget: 20000, budgetSpent: 20000, creationDate: subDays(today, 30).toISOString(), estimatedDate: '2024-07-20', owner: { id: 'USR-006', name: 'Javier Nuñez', avatar: '/avatars/06.png' } },
-    { id: 'DLV-005', projectId: 'PRJ-004', projectName: 'Internal CRM System', deliveryNumber: 1, stage: 'Definición', budget: 75000, budgetSpent: 0, creationDate: subDays(today, 1).toISOString(), estimatedDate: '2024-09-01', owner: { id: 'USR-004', name: 'Luis Martinez', avatar: '/avatars/04.png' }, lastBudgetUpdate: subDays(today, 10).toISOString() },
-    { 
-      id: 'DLV-006', 
-      projectId: 'PRJ-002', 
-      projectName: 'AI-Powered Claims Processing', 
-      deliveryNumber: 8, 
-      stage: 'Ambiente TST', 
-      budget: 120000, 
-      budgetSpent: 10000, 
-      creationDate: subDays(today, 15).toISOString(), 
-      estimatedDate: '2024-08-15',
-      owner: { id: 'USR-002', name: 'Carlos Gomez', avatar: '/avatars/02.png' }, 
-      errorCount: 5, 
-      errorSolutionTime: 2 
+            { date: subDays(today, 30).toISOString(), amount: 40000 },
+            { date: subDays(today, 15).toISOString(), amount: 70000 },
+            { date: subDays(today, 5).toISOString(), amount: 82000 },
+        ],
+        stageDates: {
+            'Definición': subDays(today, 240).toISOString(),
+            'Desarrollo Local': subDays(today, 180).toISOString(),
+            'Ambiente DEV': subDays(today, 120).toISOString(),
+            'Ambiente TST': subDays(today, 60).toISOString(),
+            'Soporte Productivo': subDays(today, 30).toISOString(),
+        },
+        riskAssessed: true
     },
 ];
 
 // Mock data for users - in a real app, this would come from your auth provider or database
 const DEFAULT_USERS: User[] = [
-    { id: 'USR-001', firstName: 'Ana', lastName: 'Rodriguez', email: 'ana.rodriguez@example.com', role: 'PM/SM', avatar: '/avatars/01.png', assignedProjectIds: ['PRJ-001', 'PRJ-003'] },
-    { id: 'USR-002', firstName: 'Carlos', lastName: 'Gomez', email: 'carlos.gomez@example.com', role: 'PM/SM', avatar: '/avatars/02.png', assignedProjectIds: ['PRJ-002'] },
-    { id: 'USR-003', firstName: 'Admin', lastName: 'User', email: 'admin.user@example.com', role: 'Admin', avatar: '/avatars/03.png', assignedProjectIds: [] },
-    { id: 'USR-004', firstName: 'Luis', lastName: 'Martinez', email: 'luis.martinez@example.com', role: 'Admin', avatar: '/avatars/04.png', assignedProjectIds: ['PRJ-004'] },
-    { id: 'USR-005', firstName: 'Elena', lastName: 'Petrova', email: 'elena.petrova@example.com', role: 'Viewer', avatar: '/avatars/05.png', assignedProjectIds: ['PRJ-005'] },
-    { id: 'USR-006', firstName: 'Javier', lastName: 'Nuñez', email: 'javier.nunez@example.com', role: 'PM/SM', avatar: '/avatars/06.png', assignedProjectIds: ['PRJ-006'] },
-    { id: 'USR-007', firstName: 'Laura', lastName: 'Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png', assignedProjectIds: ['PRJ-001', 'PRJ-002', 'PRJ-003', 'PRJ-004', 'PRJ-005', 'PRJ-006'] },
+    { id: 'USR-001', firstName: 'Jose Andres', lastName: 'Sanchez', email: 'joseandres.sanchez@agilitychanges.com', role: 'Admin', avatar: '/avatars/01.png', assignedProjectIds: ['PRJ-001'] },
 ];
 
 const USERS_STORAGE_KEY = 'axa-portfolio-users';
@@ -208,7 +75,14 @@ function getUsersFromStorage(): User[] {
     try {
         const stored = localStorage.getItem(USERS_STORAGE_KEY);
         if (stored) {
-            return JSON.parse(stored);
+            const parsedUsers = JSON.parse(stored);
+            if (parsedUsers.length > 1 || (parsedUsers.length === 1 && parsedUsers[0].email !== 'joseandres.sanchez@agilitychanges.com')) {
+                console.log('Clearing old demo data and using new production data');
+                localStorage.removeItem(USERS_STORAGE_KEY);
+                saveUsersToStorage(DEFAULT_USERS);
+                return DEFAULT_USERS;
+            }
+            return parsedUsers;
         } else {
             saveUsersToStorage(DEFAULT_USERS);
             return DEFAULT_USERS;
