@@ -1,10 +1,17 @@
-import { getProjectById } from "@/lib/data";
+import { getProjectById, getProjects } from "@/lib/data";
 import { notFound } from 'next/navigation';
 import { ProjectDetailCard } from "@/components/projects/project-detail-card";
 import { ProjectTrendsChart } from "@/components/projects/project-trends-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, AlertTriangle, Calendar, Users, Target } from "lucide-react";
 import { KpiCard } from "@/components/dashboard/kpi-card";
+
+export async function generateStaticParams() {
+    const projects = getProjects();
+    return projects.map((project) => ({
+        id: project.id,
+    }));
+}
 
 export default function ProjectDetailsPage({ params }: { params: { id: string } }) {
     const project = getProjectById(params.id);

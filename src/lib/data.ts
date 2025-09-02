@@ -188,7 +188,7 @@ let MOCK_DELIVERIES: Delivery[] = [
 ];
 
 // Mock data for users - in a real app, this would come from your auth provider or database
-export let MOCK_USERS: User[] = [
+const DEFAULT_USERS: User[] = [
     { id: 'USR-001', firstName: 'Ana', lastName: 'Rodriguez', email: 'ana.rodriguez@example.com', role: 'PM/SM', avatar: '/avatars/01.png', assignedProjectIds: ['PRJ-001', 'PRJ-003'] },
     { id: 'USR-002', firstName: 'Carlos', lastName: 'Gomez', email: 'carlos.gomez@example.com', role: 'PM/SM', avatar: '/avatars/02.png', assignedProjectIds: ['PRJ-002'] },
     { id: 'USR-003', firstName: 'Admin', lastName: 'User', email: 'admin.user@example.com', role: 'Admin', avatar: '/avatars/03.png', assignedProjectIds: [] },
@@ -198,21 +198,67 @@ export let MOCK_USERS: User[] = [
     { id: 'USR-007', firstName: 'Laura', lastName: 'Torres', email: 'laura.torres@example.com', role: 'Portfolio Manager', avatar: '/avatars/07.png', assignedProjectIds: ['PRJ-001', 'PRJ-002', 'PRJ-003', 'PRJ-004', 'PRJ-005', 'PRJ-006'] },
 ];
 
+const USERS_STORAGE_KEY = 'axa-portfolio-users';
+
+function getUsersFromStorage(): User[] {
+    if (typeof window === 'undefined') {
+        return DEFAULT_USERS;
+    }
+    
+    try {
+        const stored = localStorage.getItem(USERS_STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch (error) {
+        console.warn('Failed to load users from localStorage:', error);
+    }
+    
+    return DEFAULT_USERS;
+}
+
+function saveUsersToStorage(users: User[]): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    
+    try {
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    } catch (error) {
+        console.warn('Failed to save users to localStorage:', error);
+    }
+}
+
+export let MOCK_USERS: User[] = getUsersFromStorage();
+
+export function getUsers(): User[] {
+    return JSON.parse(JSON.stringify(getUsersFromStorage()));
+}
+
 export function addUser(user: User): User {
-    MOCK_USERS.push(user);
+    const users = getUsersFromStorage();
+    users.push(user);
+    saveUsersToStorage(users);
+    MOCK_USERS = users;
     return user;
 }
 
 export function updateUser(user: User): User {
-    const index = MOCK_USERS.findIndex(u => u.id === user.id);
+    const users = getUsersFromStorage();
+    const index = users.findIndex(u => u.id === user.id);
     if (index !== -1) {
-        MOCK_USERS[index] = user;
+        users[index] = user;
+        saveUsersToStorage(users);
+        MOCK_USERS = users;
     }
     return user;
 }
 
 export function deleteUser(userId: string) {
-    MOCK_USERS = MOCK_USERS.filter(u => u.id !== userId);
+    const users = getUsersFromStorage();
+    const filteredUsers = users.filter(u => u.id !== userId);
+    saveUsersToStorage(filteredUsers);
+    MOCK_USERS = filteredUsers;
 }
 
 

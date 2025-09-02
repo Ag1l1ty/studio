@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects, MOCK_USERS, addUser, updateUser, deleteUser } from '@/lib/data';
+import { getProjects, getUsers, addUser, updateUser, deleteUser } from '@/lib/data';
 import type { User, Role } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ import { CreateUserDialog } from './create-user-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 export function UserAdminForm() {
-    const [users, setUsers] = useState(MOCK_USERS);
+    const [users, setUsers] = useState(() => getUsers());
     const projects = getProjects();
     const { isManager } = useAuth();
     const [isCreateUserDialogOpen, setCreateUserDialogOpen] = useState(false);
@@ -70,10 +70,17 @@ export function UserAdminForm() {
     }
 
 
-    const handleUserSubmit = (values: Omit<User, 'id'>, id?: string) => {
+    const handleUserSubmit = (values: { firstName: string; lastName: string; email: string; role: string; avatar?: string; assignedProjectIds?: string[] }, id?: string) => {
         if (id) {
             // Update existing user
-            const updatedUser = updateUser({ ...values, id });
+            const updatedUser: User = { 
+                ...values, 
+                id,
+                role: values.role as Role,
+                avatar: values.avatar || '',
+                assignedProjectIds: values.assignedProjectIds || []
+            };
+            updateUser(updatedUser);
             setUsers(users.map(u => u.id === id ? updatedUser : u));
             toast({
                 title: "Usuario Actualizado",
@@ -84,6 +91,9 @@ export function UserAdminForm() {
             const newUser: User = {
                 ...values,
                 id: `USR-00${users.length + 1}`,
+                role: values.role as Role,
+                avatar: values.avatar || '',
+                assignedProjectIds: values.assignedProjectIds || []
             };
             addUser(newUser);
             setUsers(prevUsers => [...prevUsers, newUser]);
