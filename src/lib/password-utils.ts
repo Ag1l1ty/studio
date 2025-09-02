@@ -1,5 +1,9 @@
 
 export function hashPassword(password: string): string {
+    if (!password) {
+        return '';
+    }
+    
     let hash = 0;
     const salt = 'axa-portfolio-salt-2024';
     const combined = password + salt;
@@ -14,7 +18,14 @@ export function hashPassword(password: string): string {
 }
 
 export function verifyPassword(password: string, hashedPassword: string): boolean {
-    return hashPassword(password) === hashedPassword;
+    if (!password || !hashedPassword) {
+        return false;
+    }
+    
+    const properHash = hashPassword(password);
+    const legacyHash = btoa(password + 'salt');
+    
+    return properHash === hashedPassword || legacyHash === hashedPassword;
 }
 
 export function generateRandomPassword(): string {

@@ -143,7 +143,7 @@ export function UserAdminForm() {
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-9 w-9">
                                                     <AvatarImage src={user.avatar} alt={`${user.firstName} ${user.lastName}`} />
-                                                    <AvatarFallback>{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
+                                                    <AvatarFallback>{user.firstName?.charAt(0) || '?'}{user.lastName?.charAt(0) || '?'}</AvatarFallback>
                                                 </Avatar>
                                                 <div className="grid gap-0.5">
                                                     <span className="font-semibold">{user.firstName} {user.lastName}</span>

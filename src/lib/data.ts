@@ -75,6 +75,30 @@ const DEFAULT_USERS: User[] = [
         temporaryPassword: false,
         lastPasswordChange: new Date().toISOString(),
     },
+    {
+        id: 'USR-002',
+        firstName: 'Maria',
+        lastName: 'Rodriguez',
+        email: 'maria.rodriguez@test.com',
+        role: 'PM/SM',
+        avatar: '/avatars/02.png',
+        assignedProjectIds: ['PRJ-001'],
+        password: 'dGVzdHBhc3MxMjNzYWx0',
+        temporaryPassword: false,
+        lastPasswordChange: new Date().toISOString(),
+    },
+    {
+        id: 'USR-003',
+        firstName: 'Carlos',
+        lastName: 'Rodriguez',
+        email: 'carlos.rodriguez@test.com',
+        role: 'Viewer',
+        avatar: '/avatars/03.png',
+        assignedProjectIds: [],
+        password: 'cGFzc3dvcmQxMjNzYWx0',
+        temporaryPassword: false,
+        lastPasswordChange: new Date().toISOString(),
+    },
 ];
 
 const USERS_STORAGE_KEY = 'axa-portfolio-users';

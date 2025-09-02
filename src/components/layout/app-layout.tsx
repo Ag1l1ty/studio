@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
                       <AvatarImage src={currentUser.avatar} alt={`${currentUser.firstName} ${currentUser.lastName}`} />
-                      <AvatarFallback>{currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{currentUser.firstName?.charAt(0) || 'U'}{currentUser.lastName?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
                       <span className="text-sm font-medium text-sidebar-foreground">{currentUser.firstName} {currentUser.lastName}</span>
