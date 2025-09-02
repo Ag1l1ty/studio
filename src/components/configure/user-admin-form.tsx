@@ -59,7 +59,7 @@ export function UserAdminForm() {
     const handleConfirmDelete = () => {
         if (userToDelete) {
             deleteUser(userToDelete.id);
-            setUsers([...MOCK_USERS]); // Refresh from the source
+            setUsers(users.filter(u => u.id !== userToDelete.id)); // Correctly update the state
             toast({
                 title: "Usuario Eliminado",
                 description: `El usuario ${userToDelete.firstName} ${userToDelete.lastName} ha sido eliminado.`,
