@@ -2,6 +2,7 @@
 
 import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role, User, RiskProfile } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
+import { hashPassword } from './password-utils';
 
 let MOCK_PROJECTS: Project[] = [
   {
@@ -62,7 +63,18 @@ let MOCK_DELIVERIES: Delivery[] = [
 
 // Mock data for users - in a real app, this would come from your auth provider or database
 const DEFAULT_USERS: User[] = [
-    { id: 'USR-001', firstName: 'Jose Andres', lastName: 'Sanchez', email: 'joseandres.sanchez@agilitychanges.com', role: 'Admin', avatar: '/avatars/01.png', assignedProjectIds: ['PRJ-001'] },
+    {
+        id: 'USR-001',
+        firstName: 'Jose Andres',
+        lastName: 'Sanchez',
+        email: 'joseandres.sanchez@agilitychanges.com',
+        role: 'Admin',
+        avatar: '/avatars/01.png',
+        assignedProjectIds: ['PRJ-001'],
+        password: hashPassword('salpicon25*'),
+        temporaryPassword: false,
+        lastPasswordChange: new Date().toISOString(),
+    },
 ];
 
 const USERS_STORAGE_KEY = 'axa-portfolio-users';
@@ -75,14 +87,7 @@ function getUsersFromStorage(): User[] {
     try {
         const stored = localStorage.getItem(USERS_STORAGE_KEY);
         if (stored) {
-            const parsedUsers = JSON.parse(stored);
-            if (parsedUsers.length > 1 || (parsedUsers.length === 1 && parsedUsers[0].email !== 'joseandres.sanchez@agilitychanges.com')) {
-                console.log('Clearing old demo data and using new production data');
-                localStorage.removeItem(USERS_STORAGE_KEY);
-                saveUsersToStorage(DEFAULT_USERS);
-                return DEFAULT_USERS;
-            }
-            return parsedUsers;
+            return JSON.parse(stored);
         } else {
             saveUsersToStorage(DEFAULT_USERS);
             return DEFAULT_USERS;
@@ -116,19 +121,40 @@ export function getUsers(): User[] {
     return JSON.parse(JSON.stringify(getUsersFromStorage()));
 }
 
-export function addUser(user: User): User {
+export function addUser(user: Omit<User, 'id'>): User {
+    console.log('addUser called with:', user);
+    const newUser: User = {
+        ...user,
+        id: `USR-${String(Date.now()).slice(-3)}`,
+        password: user.password ? hashPassword(user.password) : undefined,
+        lastPasswordChange: new Date().toISOString(),
+    };
+    console.log('Created newUser:', newUser);
+    
     const users = getUsersFromStorage();
-    users.push(user);
+    console.log('Current users before adding:', users.length);
+    users.push(newUser);
+    console.log('Users after adding:', users.length);
     saveUsersToStorage(users);
+    console.log('Saved users to localStorage');
     MOCK_USERS = users;
-    return user;
+    return newUser;
 }
 
 export function updateUser(user: User): User {
     const users = getUsersFromStorage();
     const index = users.findIndex(u => u.id === user.id);
     if (index !== -1) {
-        users[index] = user;
+        const updatedUser = { 
+            ...user,
+            lastPasswordChange: user.password && user.password !== users[index].password ? new Date().toISOString() : users[index].lastPasswordChange
+        };
+        
+        if (user.password && user.password !== users[index].password) {
+            updatedUser.password = hashPassword(user.password);
+        }
+        
+        users[index] = updatedUser;
         saveUsersToStorage(users);
         MOCK_USERS = users;
     }

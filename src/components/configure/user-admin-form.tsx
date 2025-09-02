@@ -74,7 +74,7 @@ export function UserAdminForm() {
     }
 
 
-    const handleUserSubmit = (values: { firstName: string; lastName: string; email: string; role: string; avatar?: string; assignedProjectIds?: string[] }, id?: string) => {
+    const handleUserSubmit = (values: any, id?: string) => {
         if (id) {
             // Update existing user
             const updatedUser: User = { 
@@ -85,25 +85,18 @@ export function UserAdminForm() {
                 assignedProjectIds: values.assignedProjectIds || []
             };
             updateUser(updatedUser);
-            setUsers(users.map(u => u.id === id ? updatedUser : u));
+            setUsers(getUsers());
             toast({
                 title: "Usuario Actualizado",
                 description: `Los datos de ${values.firstName} ${values.lastName} han sido actualizados.`,
             });
         } else {
-            // Create new user
-            const newUser: User = {
-                ...values,
-                id: `USR-00${users.length + 1}`,
-                role: values.role as Role,
-                avatar: values.avatar || '',
-                assignedProjectIds: values.assignedProjectIds || []
-            };
-            addUser(newUser);
-            setUsers(prevUsers => [...prevUsers, newUser]);
+            // Create new user - addUser now handles ID generation and password hashing
+            addUser(values);
+            setUsers(getUsers());
             toast({
                 title: "Usuario Creado",
-                description: `El usuario ${newUser.firstName} ${newUser.lastName} ha sido creado con éxito.`,
+                description: `El usuario ${values.firstName} ${values.lastName} ha sido creado con éxito.${values.temporaryPassword ? ' Se ha generado una contraseña temporal.' : ''}`,
             });
         }
         setCreateUserDialogOpen(false);

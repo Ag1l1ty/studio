@@ -13,6 +13,9 @@ export type User = {
     role: Role;
     avatar: string;
     assignedProjectIds?: string[];
+    password?: string;
+    temporaryPassword?: boolean;
+    lastPasswordChange?: string;
 };
 
 export type BudgetHistoryEntry = {

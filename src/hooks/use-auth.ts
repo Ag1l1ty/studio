@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import type { Role, User } from '@/lib/types';
 import { getUsers } from '@/lib/data';
+import { verifyPassword } from '@/lib/password-utils';
 
 const SESSION_STORAGE_KEY = 'axa-portfolio-session';
 
@@ -54,11 +55,18 @@ export function useAuth() {
         console.log('Auth Debug - Available users:', users.map(u => ({ id: u.id, email: u.email })));
         const foundUser = users.find(u => u.email === email);
         console.log('Auth Debug - Found user:', foundUser);
+        
         if (foundUser) {
-            if (email === 'joseandres.sanchez@agilitychanges.com' && password !== 'salpicon25*') {
-                console.log('Auth Debug - Invalid password for real user');
+            if (foundUser.password && !verifyPassword(password, foundUser.password)) {
+                console.log('Auth Debug - Invalid password');
                 return false;
             }
+            
+            if (!foundUser.password) {
+                console.log('Auth Debug - User has no password set');
+                return false;
+            }
+            
             const userData = { id: foundUser.id };
             console.log('Auth Debug - Setting user data:', userData);
             setUser(userData);
