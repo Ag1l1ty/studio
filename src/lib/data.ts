@@ -209,12 +209,19 @@ function getUsersFromStorage(): User[] {
         const stored = localStorage.getItem(USERS_STORAGE_KEY);
         if (stored) {
             return JSON.parse(stored);
+        } else {
+            saveUsersToStorage(DEFAULT_USERS);
+            return DEFAULT_USERS;
         }
     } catch (error) {
         console.warn('Failed to load users from localStorage:', error);
+        try {
+            saveUsersToStorage(DEFAULT_USERS);
+        } catch (saveError) {
+            console.warn('Failed to save default users to localStorage:', saveError);
+        }
+        return DEFAULT_USERS;
     }
-    
-    return DEFAULT_USERS;
 }
 
 function saveUsersToStorage(users: User[]): void {

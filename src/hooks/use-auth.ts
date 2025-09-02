@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
-import type { Role } from '@/lib/types';
-import { MOCK_USERS } from '@/lib/data';
+import type { Role, User } from '@/lib/types';
+import { getUsers } from '@/lib/data';
 
 // This is a mock auth hook. In a real app, you'd use a real auth provider.
 export function useAuth() {
@@ -15,8 +15,14 @@ export function useAuth() {
         // 'USR-007': Portfolio Manager (Laura Torres)
         id: 'USR-004', 
     });
+    
+    const [users, setUsers] = useState<User[]>([]);
+    
+    useEffect(() => {
+        setUsers(getUsers());
+    }, []);
 
-    const currentUser = MOCK_USERS.find(u => u.id === user.id);
+    const currentUser = users.find(u => u.id === user.id);
     const role: Role = currentUser?.role || 'Viewer';
 
     const isAdmin = role === 'Admin';

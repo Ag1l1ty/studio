@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getProjects, getUsers, addUser, updateUser, deleteUser } from '@/lib/data';
 import type { User, Role } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +41,10 @@ export function UserAdminForm() {
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [isConfirmingDelete, setConfirmingDelete] = useState(false);
     const { toast } = useToast();
+
+    useEffect(() => {
+        setUsers(getUsers());
+    }, []);
 
     const getUserProjectCount = (user: User) => {
         return user.assignedProjectIds?.length || 0;
