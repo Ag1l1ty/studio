@@ -14,7 +14,14 @@ export function useAuth() {
     
     useEffect(() => {
         const initializeAuth = async () => {
-            setUsers(getUsers());
+            try {
+                console.log('Auth Debug - Starting initialization');
+                setUsers(getUsers());
+                console.log('Auth Debug - Users loaded successfully');
+            } catch (error) {
+                console.error('Auth Debug - Error loading users:', error);
+                setUsers([]);
+            }
             
             if (typeof window !== 'undefined') {
                 try {
@@ -32,10 +39,8 @@ export function useAuth() {
                 }
             }
             
-            setTimeout(() => {
-                console.log('Auth Debug - Setting isLoading to false');
-                setIsLoading(false);
-            }, 100);
+            console.log('Auth Debug - Setting isLoading to false');
+            setIsLoading(false);
         };
         
         initializeAuth();
