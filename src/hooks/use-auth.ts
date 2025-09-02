@@ -13,13 +13,9 @@ export function useAuth() {
     const [isLoading, setIsLoading] = useState(true);
     
     useEffect(() => {
-        console.log('Auth Debug - useEffect triggered');
-        
-        setIsLoading(false);
-        
-        setTimeout(() => {
+        const initializeAuth = async () => {
             try {
-                console.log('Auth Debug - Loading users');
+                console.log('Auth Debug - Starting initialization');
                 setUsers(getUsers());
                 console.log('Auth Debug - Users loaded successfully');
             } catch (error) {
@@ -42,7 +38,12 @@ export function useAuth() {
                     console.warn('Failed to load session from localStorage:', error);
                 }
             }
-        }, 0);
+            
+            console.log('Auth Debug - Setting isLoading to false');
+            setIsLoading(false);
+        };
+        
+        initializeAuth();
     }, []);
 
     const currentUser = users.find(u => u.id === user?.id);

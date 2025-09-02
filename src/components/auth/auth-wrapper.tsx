@@ -6,19 +6,7 @@ import { LoginForm } from './login-form';
 import { AppLayout } from '@/components/layout/app-layout';
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isLoading } = useAuth();
-    const [showLogin, setShowLogin] = React.useState(true);
-
-    React.useEffect(() => {
-        console.log('AuthWrapper - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
-        if (!isLoading) {
-            setShowLogin(!isAuthenticated);
-        }
-    }, [isAuthenticated, isLoading]);
-
-    if (!isAuthenticated) {
-        return <LoginForm />;
-    }
+    const { isAuthenticated } = useAuth();
 
     if (!isAuthenticated) {
         return <LoginForm />;
