@@ -3,6 +3,7 @@
 import type { Project, ProjectStage, Delivery, RiskLevel, RiskResult, Role, User, RiskProfile } from './types';
 import { subDays, addDays, getMonth, getYear, differenceInMonths, startOfMonth, parseISO, format } from 'date-fns';
 import { hashPassword } from './password-utils';
+import { supabaseService } from './supabase-service';
 
 let MOCK_PROJECTS: Project[] = [
   {
@@ -149,6 +150,15 @@ export function getUsers(): User[] {
     return JSON.parse(JSON.stringify(getUsersFromStorage()));
 }
 
+async function getSupabaseUsers(): Promise<User[]> {
+    try {
+        return await supabaseService.getUsers();
+    } catch (error) {
+        console.warn('Failed to fetch users from Supabase, falling back to localStorage:', error);
+        return getUsersFromStorage();
+    }
+}
+
 export function addUser(user: Omit<User, 'id'>): User {
     console.log('addUser called with:', user);
     const newUser: User = {
@@ -158,6 +168,12 @@ export function addUser(user: Omit<User, 'id'>): User {
         lastPasswordChange: new Date().toISOString(),
     };
     console.log('Created newUser:', newUser);
+    
+    supabaseService.addUser(user).then((supabaseUser: User) => {
+        console.log('User added to Supabase:', supabaseUser);
+    }).catch((error: any) => {
+        console.warn('Failed to add user to Supabase, using localStorage only:', error);
+    });
     
     const users = getUsersFromStorage();
     console.log('Current users before adding:', users.length);
@@ -170,6 +186,12 @@ export function addUser(user: Omit<User, 'id'>): User {
 }
 
 export function updateUser(user: User): User {
+    supabaseService.updateUser(user).then((supabaseUser: User) => {
+        console.log('User updated in Supabase:', supabaseUser);
+    }).catch((error: any) => {
+        console.warn('Failed to update user in Supabase, using localStorage only:', error);
+    });
+
     const users = getUsersFromStorage();
     const index = users.findIndex(u => u.id === user.id);
     if (index !== -1) {
@@ -190,6 +212,12 @@ export function updateUser(user: User): User {
 }
 
 export function deleteUser(userId: string) {
+    supabaseService.deleteUser(userId).then(() => {
+        console.log('User deleted from Supabase:', userId);
+    }).catch((error: any) => {
+        console.warn('Failed to delete user from Supabase, using localStorage only:', error);
+    });
+
     const users = getUsersFromStorage();
     const filteredUsers = users.filter(u => u.id !== userId);
     saveUsersToStorage(filteredUsers);
@@ -203,11 +231,32 @@ export function getProjects(): Project[] {
   return JSON.parse(JSON.stringify(MOCK_PROJECTS));
 }
 
+async function getSupabaseProjects(): Promise<Project[]> {
+    try {
+        return await supabaseService.getProjects();
+    } catch (error) {
+        console.warn('Failed to fetch projects from Supabase, falling back to mock data:', error);
+        return JSON.parse(JSON.stringify(MOCK_PROJECTS));
+    }
+}
+
 export function addProject(project: Project) {
+    supabaseService.addProject(project).then(() => {
+        console.log('Project added to Supabase:', project.id);
+    }).catch((error: any) => {
+        console.warn('Failed to add project to Supabase, using mock data only:', error);
+    });
+
     MOCK_PROJECTS.push(project);
 }
 
 export function updateProject(project: Project): Project {
+    supabaseService.updateProject(project).then(() => {
+        console.log('Project updated in Supabase:', project.id);
+    }).catch((error: any) => {
+        console.warn('Failed to update project in Supabase, using mock data only:', error);
+    });
+
     const index = MOCK_PROJECTS.findIndex(p => p.id === project.id);
     if (index !== -1) {
         MOCK_PROJECTS[index] = project;
@@ -216,6 +265,12 @@ export function updateProject(project: Project): Project {
 }
 
 export function deleteProject(projectId: string) {
+    supabaseService.deleteProject(projectId).then(() => {
+        console.log('Project deleted from Supabase:', projectId);
+    }).catch((error: any) => {
+        console.warn('Failed to delete project from Supabase, using mock data only:', error);
+    });
+
     MOCK_PROJECTS = MOCK_PROJECTS.filter(p => p.id !== projectId);
     MOCK_DELIVERIES = MOCK_DELIVERIES.filter(d => d.projectId !== projectId);
 }
@@ -235,6 +290,15 @@ export function getDeliveries(): Delivery[] {
   return JSON.parse(JSON.stringify(MOCK_DELIVERIES));
 }
 
+async function getSupabaseDeliveries(): Promise<Delivery[]> {
+    try {
+        return await supabaseService.getDeliveries();
+    } catch (error) {
+        console.warn('Failed to fetch deliveries from Supabase, falling back to mock data:', error);
+        return JSON.parse(JSON.stringify(MOCK_DELIVERIES));
+    }
+}
+
 export function getDeliveriesByProjectId(projectId: string): Delivery[] {
     return MOCK_DELIVERIES.filter(d => d.projectId === projectId);
 }
@@ -251,10 +315,22 @@ export function getDeliveryById(id: string): Delivery | undefined {
 
 
 export function addDelivery(delivery: Delivery) {
+    supabaseService.addDelivery(delivery).then(() => {
+        console.log('Delivery added to Supabase:', delivery.id);
+    }).catch((error: any) => {
+        console.warn('Failed to add delivery to Supabase, using mock data only:', error);
+    });
+
     MOCK_DELIVERIES.push(delivery);
 }
 
 export function updateDelivery(delivery: Delivery): Delivery {
+    supabaseService.updateDelivery(delivery).then(() => {
+        console.log('Delivery updated in Supabase:', delivery.id);
+    }).catch((error: any) => {
+        console.warn('Failed to update delivery in Supabase, using mock data only:', error);
+    });
+
     const index = MOCK_DELIVERIES.findIndex(d => d.id === delivery.id);
     if (index !== -1) {
         MOCK_DELIVERIES[index] = delivery;
@@ -263,6 +339,12 @@ export function updateDelivery(delivery: Delivery): Delivery {
 }
 
 export function deleteDelivery(deliveryId: string) {
+    supabaseService.deleteDelivery(deliveryId).then(() => {
+        console.log('Delivery deleted from Supabase:', deliveryId);
+    }).catch((error: any) => {
+        console.warn('Failed to delete delivery from Supabase, using mock data only:', error);
+    });
+
     MOCK_DELIVERIES = MOCK_DELIVERIES.filter(d => d.id !== deliveryId);
 }
 
@@ -390,7 +472,22 @@ export function getRiskProfiles(): RiskProfile[] {
     return JSON.parse(JSON.stringify(MOCK_RISK_PROFILES));
 }
 
+async function getSupabaseRiskProfiles(): Promise<RiskProfile[]> {
+    try {
+        return await supabaseService.getRiskProfiles();
+    } catch (error) {
+        console.warn('Failed to fetch risk profiles from Supabase, falling back to mock data:', error);
+        return JSON.parse(JSON.stringify(MOCK_RISK_PROFILES));
+    }
+}
+
 export function updateRiskProfiles(profiles: RiskProfile[]) {
+    supabaseService.updateRiskProfiles(profiles).then(() => {
+        console.log('Risk profiles updated in Supabase');
+    }).catch((error: any) => {
+        console.warn('Failed to update risk profiles in Supabase, using mock data only:', error);
+    });
+
     MOCK_RISK_PROFILES = profiles;
 }
 
