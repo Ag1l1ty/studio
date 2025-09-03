@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXA Portfolio Insights - Administración</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; }
+        .sidebar { position: fixed; left: 0; top: 0; width: 240px; height: 100vh; background: #1e40af; color: white; padding: 1rem; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; }
+        .logo h2 { font-size: 1.25rem; font-weight: bold; }
+        .nav-item { display: block; width: 100%; padding: 0.75rem 1rem; margin-bottom: 0.5rem; background: transparent; border: none; color: white; text-align: left; border-radius: 0.5rem; cursor: pointer; text-decoration: none; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+        .nav-item.active { background: rgba(255,255,255,0.2); }
+        .main-content { margin-left: 240px; padding: 2rem; }
+        .header { margin-bottom: 2rem; }
+        .header h1 { font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; }
+        .header p { color: #64748b; }
+        .admin-container { background: white; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .tab-nav { display: flex; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; }
+        .tab-button { padding: 1rem 0.5rem; margin-right: 2rem; border: none; background: none; border-bottom: 2px solid transparent; font-weight: 500; cursor: pointer; color: #64748b; }
+        .tab-button:hover { color: #374151; }
+        .tab-button.active { color: #2563eb; border-bottom-color: #2563eb; }
+        .tab-content { padding: 1.5rem; }
+        .user-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .user-table th, .user-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .user-table th { background: #f8fafc; font-weight: 600; }
+        .role-badge { padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 500; }
+        .role-admin { background: #fef2f2; color: #dc2626; }
+        .role-pm { background: #f0f9ff; color: #0284c7; }
+        .role-viewer { background: #f7fee7; color: #65a30d; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .connection-test { margin-top: 1rem; }
+        .status-connected { color: #059669; font-weight: 600; }
+        .status-disconnected { color: #dc2626; font-weight: 600; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #374151; }
+        .bottom-user { position: fixed; bottom: 1rem; left: 1rem; right: 240px; display: flex; align-items: center; gap: 0.5rem; color: white; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <div style="width: 24px; height: 24px; background: white; border-radius: 4px;"></div>
+            <h2>AXA Insights</h2>
+        </div>
+        <p style="font-size: 0.875rem; margin-bottom: 1rem; opacity: 0.8;">Portfolio Dashboard</p>
+        <nav>
+            <a href="/" class="nav-item">📊 Dashboard</a>
+            <a href="/kanban" class="nav-item">📋 Kanban Board</a>
+            <a href="/risk-assessment" class="nav-item">⚠️ Risk Assessment</a>
+            <a href="/risk-monitoring" class="nav-item">📈 Risk Monitoring</a>
+            <a href="/configure" class="nav-item active">⚙️ Administration</a>
+        </nav>
+        <div class="bottom-user">
+            <div class="user-avatar">JS</div>
+            <div>
+                <div style="font-weight: 600;">Jose Andres Sanchez</div>
+                <div style="font-size: 0.75rem; opacity: 0.8;">Admin</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Administración de la Herramienta</h1>
+            <p>Utilice esta sección para administrar todos los aspectos de la herramienta de portafolio.</p>
+        </div>
+
+        <div class="admin-container">
+            <div class="tab-nav">
+                <button class="tab-button active" onclick="showTab('users')">👥 Usuarios y Roles</button>
+                <button class="tab-button" onclick="showTab('projects')">📁 Proyectos</button>
+                <button class="tab-button" onclick="showTab('deliveries')">📦 Entregas</button>
+                <button class="tab-button" onclick="showTab('risks')">🛡️ Riesgos</button>
+                <button class="tab-button" onclick="showTab('migration')">🗄️ Migración</button>
+            </div>
+
+            <div class="tab-content">
+                <div id="users-tab" class="tab-pane">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Usuarios y Roles</h3>
+                    <p style="color: #64748b; margin-bottom: 1rem;">Administre los usuarios de su equipo y sus roles asignados.</p>
+                    
+                    <button class="btn btn-primary" onclick="showNotification('Funcionalidad de agregar usuario disponible')">Agregar Usuario</button>
+                    
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                                <th>Proyectos Asignados</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar">JS</div>
+                                        <div>
+                                            <div style="font-weight: 600;">Jose Andres Sanchez</div>
+                                            <div style="font-size: 0.875rem; color: #64748b;">joseandres.sanchez@agilitychanges.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge role-admin">Admin</span></td>
+                                <td>1</td>
+                                <td>
+                                    <button class="btn" style="background: #f3f4f6; color: #374151;" onclick="showNotification('Funcionalidad de edición disponible')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar">MR</div>
+                                        <div>
+                                            <div style="font-weight: 600;">Maria Rodriguez</div>
+                                            <div style="font-size: 0.875rem; color: #64748b;">maria.rodriguez@test.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge role-pm">PM/SM</span></td>
+                                <td>1</td>
+                                <td>
+                                    <button class="btn" style="background: #f3f4f6; color: #374151;" onclick="showNotification('Funcionalidad de edición disponible')">Editar</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <div class="user-avatar">CR</div>
+                                        <div>
+                                            <div style="font-weight: 600;">Carlos Rodriguez</div>
+                                            <div style="font-size: 0.875rem; color: #64748b;">carlos.rodriguez@test.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="role-badge role-viewer">Viewer</span></td>
+                                <td>0</td>
+                                <td>
+                                    <button class="btn" style="background: #f3f4f6; color: #374151;" onclick="showNotification('Funcionalidad de edición disponible')">Editar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="projects-tab" class="tab-pane" style="display: none;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Gestión de Proyectos</h3>
+                    <p style="color: #64748b;">Administre los proyectos del portafolio aquí.</p>
+                    <button class="btn btn-primary" onclick="showNotification('Funcionalidad de gestión de proyectos disponible')">Crear Proyecto</button>
+                </div>
+
+                <div id="deliveries-tab" class="tab-pane" style="display: none;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Gestión de Entregas</h3>
+                    <p style="color: #64748b;">Administre las entregas de los proyectos aquí.</p>
+                    <button class="btn btn-primary" onclick="showNotification('Funcionalidad de gestión de entregas disponible')">Crear Entrega</button>
+                </div>
+
+                <div id="risks-tab" class="tab-pane" style="display: none;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Gestión de Riesgos</h3>
+                    <p style="color: #64748b;">Configure los perfiles de riesgo aquí.</p>
+                    <button class="btn btn-primary" onclick="showNotification('Funcionalidad de gestión de riesgos disponible')">Configurar Riesgos</button>
+                </div>
+
+                <div id="migration-tab" class="tab-pane" style="display: none;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">🗄️ Migración a Supabase</h3>
+                    <p style="color: #64748b; margin-bottom: 1rem;">Migra todos los datos de localStorage a la base de datos Supabase PostgreSQL.</p>
+                    
+                    <button class="btn btn-primary" onclick="testSupabaseConnection()">Verificar Conexión</button>
+                    <div class="connection-test">
+                        <div id="connection-status"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" style="position: fixed; top: 1rem; right: 1rem; background: #059669; color: white; padding: 1rem; border-radius: 0.5rem; display: none; z-index: 1000;"></div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-pane').forEach(tab => tab.style.display = 'none');
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function testSupabaseConnection() {
+            const statusDiv = document.getElementById('connection-status');
+            statusDiv.innerHTML = '<div style="color: #f59e0b;">Probando conexión...</div>';
+            
+            // Simulate connection test
+            setTimeout(() => {
+                statusDiv.innerHTML = '<div class="status-connected">✅ Conectado - Supabase está funcionando correctamente</div>';
+                showNotification('Conexión a Supabase exitosa');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

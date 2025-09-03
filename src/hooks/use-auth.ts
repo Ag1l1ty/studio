@@ -10,10 +10,11 @@ const SESSION_STORAGE_KEY = 'axa-portfolio-session';
 export function useAuth() {
     const [user, setUser] = useState<{ id: string } | null>({ id: 'USR-001' });
     const [users, setUsers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     
     useEffect(() => {
         setUsers(getUsers());
+        setIsLoading(false);
     }, []);
 
     const currentUser = users.find(u => u.id === user?.id);
