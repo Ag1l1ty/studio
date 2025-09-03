@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserAdminForm } from "@/components/configure/user-admin-form";
 import { ProjectAdminForm } from "@/components/configure/project-admin-form";
@@ -7,6 +10,20 @@ import { MigrationAdmin } from "@/components/configure/migration-admin";
 import { Users, FolderKanban, Package, ShieldAlert, Database } from "lucide-react";
 
 export default function ConfigurePage() {
+    const [mounted, setMounted] = useState(false);
+    
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return (
+            <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+                <h2 className="text-3xl font-bold tracking-tight mb-4">Administración de la Herramienta</h2>
+                <p className="text-muted-foreground mb-6">Cargando interfaz de administración...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
