@@ -37,7 +37,7 @@ const STAGES: ProjectStage[] = ['Definición', 'Desarrollo Local', 'Ambiente DEV
 const createFormSchema = (deliveries: Delivery[], currentDeliveryId?: string) => z.object({
     projectId: z.string().min(1, "Please select a project."),
     deliveryNumber: z.coerce.number().int().positive("Delivery number must be a positive integer."),
-    budget: z.any().refine(val => !isNaN(Number(String(val).replace(/,/g, ''))), "Must be a number").transform(val => Number(String(val).replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
+    budget: z.string().refine(val => !isNaN(Number(val.replace(/,/g, ''))), "Must be a number").transform(val => Number(val.replace(/,/g, ''))).pipe(z.number().positive("Budget must be a positive number.")),
     estimatedDate: z.date({ required_error: "An estimated date is required." }),
     stage: z.string().optional(),
 }).superRefine((data, ctx) => {
@@ -73,7 +73,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
         defaultValues: {
             projectId: "",
             deliveryNumber: 1,
-            budget: 0,
+            budget: "0",
             stage: 'Definición'
         },
     });
@@ -86,7 +86,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                 form.reset({
                     projectId: delivery.projectId,
                     deliveryNumber: delivery.deliveryNumber,
-                    budget: new Intl.NumberFormat('en-US').format(delivery.budget),
+                    budget: delivery.budget.toString(), // Convert to string for the input
                     estimatedDate: new Date(delivery.estimatedDate),
                     stage: delivery.stage,
                 });
@@ -95,7 +95,7 @@ export function CreateDeliveryCardDialog({ isOpen, onOpenChange, projects, deliv
                 form.reset({
                     projectId: "",
                     deliveryNumber: 1,
-                    budget: 0,
+                    budget: "0",
                     estimatedDate: undefined,
                     stage: 'Definición',
                 });

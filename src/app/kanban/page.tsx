@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import type { Project, RiskLevel, ProjectStage, Delivery, User } from '@/lib/types';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
-import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById, MOCK_USERS, updateProject } from '@/lib/data';
+import { addProject, getProjects, getDeliveries, addDelivery, updateDelivery, getProjectById, getUsers, updateProject } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,7 +66,7 @@ const createDeliveryFormSchema = (deliveries: Delivery[], currentDeliveryId?: st
 export default function KanbanPage() {
     const { isManager, isProjectManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
-    const [users, setUsers] = useState(MOCK_USERS);
+    const [users, setUsers] = useState(getUsers());
     const [deliveries, setDeliveries] = useState(getDeliveries());
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set(projects.map(p => p.id)));
@@ -233,23 +233,23 @@ export default function KanbanPage() {
         }
     };
 
-    const handleProjectCreated = (newProjectData: Omit<Project, 'id' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'> & { ownerId: string }) => {
-        const owner = users.find(u => u.id === newProjectData.ownerId);
+    const handleProjectCreated = (values: { name: string; description: string; budget: number; projectedDeliveries: number; startDate: Date; endDate: Date; ownerId: string; }, id?: string) => {
+        const owner = users.find(u => u.id === values.ownerId);
         if (!owner) return;
         
         const newProject: Project = {
             id: `PRJ-00${getProjects().length + 1}`,
-            name: newProjectData.name,
-            description: newProjectData.description,
-            budget: newProjectData.budget,
-            projectedDeliveries: newProjectData.projectedDeliveries,
+            name: values.name,
+            description: values.description,
+            budget: values.budget,
+            projectedDeliveries: values.projectedDeliveries,
             stage: 'Definición',
             riskLevel: 'No Assessment',
             budgetSpent: 0,
             owner: { id: owner.id, name: `${owner.firstName} ${owner.lastName}`, avatar: owner.avatar },
             metrics: [],
-            startDate: newProjectData.startDate.toISOString(),
-            endDate: newProjectData.endDate.toISOString(),
+            startDate: values.startDate.toISOString(),
+            endDate: values.endDate.toISOString(),
         };
         addProject(newProject);
         const updatedProjects = getProjects();

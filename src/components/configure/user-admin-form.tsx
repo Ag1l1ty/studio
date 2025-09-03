@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
-import { getProjects, MOCK_USERS, addUser, updateUser, deleteUser } from '@/lib/data';
+import { useState, useEffect } from 'react';
+import { getProjects, getUsers, addUser, updateUser, deleteUser } from '@/lib/data';
 import type { User, Role } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ import { CreateUserDialog } from './create-user-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 export function UserAdminForm() {
-    const [users, setUsers] = useState(MOCK_USERS);
+    const [users, setUsers] = useState(() => getUsers());
     const projects = getProjects();
     const { isManager } = useAuth();
     const [isCreateUserDialogOpen, setCreateUserDialogOpen] = useState(false);
@@ -41,6 +41,10 @@ export function UserAdminForm() {
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [isConfirmingDelete, setConfirmingDelete] = useState(false);
     const { toast } = useToast();
+
+    useEffect(() => {
+        setUsers(getUsers());
+    }, []);
 
     const getUserProjectCount = (user: User) => {
         return user.assignedProjectIds?.length || 0;
@@ -70,26 +74,29 @@ export function UserAdminForm() {
     }
 
 
-    const handleUserSubmit = (values: Omit<User, 'id'>, id?: string) => {
+    const handleUserSubmit = (values: any, id?: string) => {
         if (id) {
             // Update existing user
-            const updatedUser = updateUser({ ...values, id });
-            setUsers(users.map(u => u.id === id ? updatedUser : u));
+            const updatedUser: User = { 
+                ...values, 
+                id,
+                role: values.role as Role,
+                avatar: values.avatar || '',
+                assignedProjectIds: values.assignedProjectIds || []
+            };
+            updateUser(updatedUser);
+            setUsers(getUsers());
             toast({
                 title: "Usuario Actualizado",
                 description: `Los datos de ${values.firstName} ${values.lastName} han sido actualizados.`,
             });
         } else {
-            // Create new user
-            const newUser: User = {
-                ...values,
-                id: `USR-00${users.length + 1}`,
-            };
-            addUser(newUser);
-            setUsers(prevUsers => [...prevUsers, newUser]);
+            // Create new user - addUser now handles ID generation and password hashing
+            addUser(values);
+            setUsers(getUsers());
             toast({
                 title: "Usuario Creado",
-                description: `El usuario ${newUser.firstName} ${newUser.lastName} ha sido creado con éxito.`,
+                description: `El usuario ${values.firstName} ${values.lastName} ha sido creado con éxito.${values.temporaryPassword ? ' Se ha generado una contraseña temporal.' : ''}`,
             });
         }
         setCreateUserDialogOpen(false);
@@ -136,7 +143,7 @@ export function UserAdminForm() {
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-9 w-9">
                                                     <AvatarImage src={user.avatar} alt={`${user.firstName} ${user.lastName}`} />
-                                                    <AvatarFallback>{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
+                                                    <AvatarFallback>{user.firstName?.charAt(0) || '?'}{user.lastName?.charAt(0) || '?'}</AvatarFallback>
                                                 </Avatar>
                                                 <div className="grid gap-0.5">
                                                     <span className="font-semibold">{user.firstName} {user.lastName}</span>

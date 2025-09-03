@@ -20,7 +20,7 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
 
   return (
     <SidebarProvider>
@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
                       <AvatarImage src={currentUser.avatar} alt={`${currentUser.firstName} ${currentUser.lastName}`} />
-                      <AvatarFallback>{currentUser.firstName.charAt(0)}{currentUser.lastName.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{currentUser.firstName?.charAt(0) || 'U'}{currentUser.lastName?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
                       <span className="text-sm font-medium text-sidebar-foreground">{currentUser.firstName} {currentUser.lastName}</span>
@@ -50,7 +50,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
               </div>
             )}
-             <Button variant="ghost" className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent">
+             <Button 
+                variant="ghost" 
+                className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                onClick={logout}
+            >
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
             </Button>
