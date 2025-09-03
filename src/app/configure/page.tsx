@@ -3,6 +3,7 @@ import { UserAdminForm } from "@/components/configure/user-admin-form";
 import { ProjectAdminForm } from "@/components/configure/project-admin-form";
 import { DeliveryAdminForm } from "@/components/configure/delivery-admin-form";
 import { RiskAdminForm } from "@/components/configure/risk-admin-form";
+import { MigrationAdmin } from "@/components/configure/migration-admin";
 import { Users, FolderKanban, Package, ShieldAlert, Database } from "lucide-react";
 
 export default function ConfigurePage() {
@@ -53,20 +54,7 @@ export default function ConfigurePage() {
                 </TabsContent>
                 
                 <TabsContent value="migration">
-                    <div className="space-y-6">
-                        <div className="p-6 bg-muted rounded-lg">
-                            <h3 className="text-lg font-medium mb-2">Migración a Supabase</h3>
-                            <p className="mb-4">La funcionalidad de migración estará disponible próximamente.</p>
-                            <p>Para configurar Supabase, añade las siguientes variables de entorno en tu archivo .env.local:</p>
-                            <pre className="p-4 bg-card rounded-md mt-2 overflow-x-auto">
-                                <code>
-                                    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url{"\n"}
-                                    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key{"\n"}
-                                    SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-                                </code>
-                            </pre>
-                        </div>
-                    </div>
+                    <MigrationAdmin />
                 </TabsContent>
             </Tabs>
         </div>

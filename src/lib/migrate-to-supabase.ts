@@ -5,16 +5,16 @@ import type { User, Project, Delivery, RiskProfile } from './types';
 export interface MigrationResult {
     success: boolean;
     message: string;
-    details?: {
-        users?: number;
-        projects?: number;
-        deliveries?: number;
-        riskProfiles?: number;
+    migrated: {
+        users: number;
+        projects: number;
+        deliveries: number;
+        riskProfiles: number;
     };
-    errors?: string[];
+    error?: string;
 }
 
-export async function migrateToSupabase(): Promise<MigrationResult> {
+export async function migrateAllDataToSupabase(): Promise<MigrationResult> {
     const errors: string[] = [];
     const details = {
         users: 0,
@@ -85,20 +85,18 @@ export async function migrateToSupabase(): Promise<MigrationResult> {
             errors.push(errorMsg);
         }
 
-        const totalMigrated = details.users + details.projects + details.deliveries + details.riskProfiles;
-        
         if (errors.length === 0) {
             return {
                 success: true,
-                message: `Successfully migrated ${totalMigrated} items to Supabase`,
-                details,
+                message: `Successfully migrated all data to Supabase`,
+                migrated: details,
             };
         } else {
             return {
                 success: false,
-                message: `Migration completed with ${errors.length} errors. ${totalMigrated} items migrated successfully.`,
-                details,
-                errors,
+                message: `Migration completed with ${errors.length} errors`,
+                migrated: details,
+                error: errors.join('; '),
             };
         }
 
@@ -107,8 +105,29 @@ export async function migrateToSupabase(): Promise<MigrationResult> {
         return {
             success: false,
             message: `Migration failed: ${error}`,
-            errors: [String(error)],
+            migrated: { users: 0, projects: 0, deliveries: 0, riskProfiles: 0 },
+            error: String(error),
         };
+    }
+}
+
+export async function exportDataFromSupabase(): Promise<any> {
+    try {
+        const users = await supabaseService.getUsers();
+        const projects = await supabaseService.getProjects();
+        const deliveries = await supabaseService.getDeliveries();
+        const riskProfiles = await supabaseService.getRiskProfiles();
+        
+        return {
+            users,
+            projects,
+            deliveries,
+            riskProfiles,
+            exportDate: new Date().toISOString(),
+        };
+    } catch (error) {
+        console.error('Export failed:', error);
+        throw error;
     }
 }
 

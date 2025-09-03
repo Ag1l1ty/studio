@@ -1,20 +1,68 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Database, Upload, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import { migrateToSupabase, checkSupabaseConnection, type MigrationResult } from '@/lib/migrate-to-supabase';
 import { useToast } from '@/hooks/use-toast';
+
+let migrateAllDataToSupabase: any;
+let checkSupabaseConnection: any;
+let exportDataFromSupabase: any;
+
+interface MigrationResult {
+    success: boolean;
+    message: string;
+    migrated: {
+        users: number;
+        projects: number;
+        deliveries: number;
+        riskProfiles: number;
+    };
+    error?: string;
+}
 
 export function MigrationAdmin() {
     const [isConnected, setIsConnected] = useState<boolean | null>(null);
     const [isChecking, setIsChecking] = useState(false);
     const [isMigrating, setIsMigrating] = useState(false);
     const [migrationResult, setMigrationResult] = useState<MigrationResult | null>(null);
+    const [isClient, setIsClient] = useState(false);
     const { toast } = useToast();
+
+    useEffect(() => {
+        setIsClient(true);
+        import('@/lib/migrate-to-supabase').then((module) => {
+            migrateAllDataToSupabase = module.migrateAllDataToSupabase;
+            checkSupabaseConnection = module.checkSupabaseConnection;
+            exportDataFromSupabase = module.exportDataFromSupabase;
+        });
+    }, []);
+
+    if (!isClient) {
+        return (
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Database className="h-5 w-5" />
+                            Migración a Supabase
+                        </CardTitle>
+                        <CardDescription>
+                            Cargando configuración de migración...
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-center py-4">
+                            <p className="text-muted-foreground">Inicializando...</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     const handleCheckConnection = async () => {
         setIsChecking(true);
@@ -45,7 +93,7 @@ export function MigrationAdmin() {
         setMigrationResult(null);
         
         try {
-            const result = await migrateToSupabase();
+            const result = await migrateAllDataToSupabase();
             setMigrationResult(result);
             
             toast({
@@ -57,7 +105,8 @@ export function MigrationAdmin() {
             const errorResult: MigrationResult = {
                 success: false,
                 message: `Error durante la migración: ${error}`,
-                errors: [String(error)],
+                migrated: { users: 0, projects: 0, deliveries: 0, riskProfiles: 0 },
+                error: String(error),
             };
             setMigrationResult(errorResult);
             
@@ -144,44 +193,40 @@ export function MigrationAdmin() {
                                 </AlertDescription>
                             </Alert>
 
-                            {migrationResult.details && (
+                            {migrationResult.migrated && (
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div className="text-center p-3 bg-muted rounded-lg">
                                         <div className="text-2xl font-bold text-primary">
-                                            {migrationResult.details.users}
+                                            {migrationResult.migrated.users}
                                         </div>
                                         <div className="text-sm text-muted-foreground">Usuarios</div>
                                     </div>
                                     <div className="text-center p-3 bg-muted rounded-lg">
                                         <div className="text-2xl font-bold text-primary">
-                                            {migrationResult.details.projects}
+                                            {migrationResult.migrated.projects}
                                         </div>
                                         <div className="text-sm text-muted-foreground">Proyectos</div>
                                     </div>
                                     <div className="text-center p-3 bg-muted rounded-lg">
                                         <div className="text-2xl font-bold text-primary">
-                                            {migrationResult.details.deliveries}
+                                            {migrationResult.migrated.deliveries}
                                         </div>
                                         <div className="text-sm text-muted-foreground">Entregas</div>
                                     </div>
                                     <div className="text-center p-3 bg-muted rounded-lg">
                                         <div className="text-2xl font-bold text-primary">
-                                            {migrationResult.details.riskProfiles}
+                                            {migrationResult.migrated.riskProfiles}
                                         </div>
                                         <div className="text-sm text-muted-foreground">Perfiles</div>
                                     </div>
                                 </div>
                             )}
 
-                            {migrationResult.errors && migrationResult.errors.length > 0 && (
+                            {migrationResult.error && (
                                 <div className="space-y-2">
-                                    <h4 className="font-semibold text-destructive">Errores durante la migración:</h4>
-                                    <div className="max-h-40 overflow-y-auto space-y-1">
-                                        {migrationResult.errors.map((error, index) => (
-                                            <div key={index} className="text-sm text-destructive bg-destructive/10 p-2 rounded">
-                                                {error}
-                                            </div>
-                                        ))}
+                                    <h4 className="font-semibold text-destructive">Error durante la migración:</h4>
+                                    <div className="text-sm text-destructive bg-destructive/10 p-2 rounded">
+                                        {migrationResult.error}
                                     </div>
                                 </div>
                             )}
