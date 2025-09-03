@@ -13,35 +13,7 @@ export function useAuth() {
     const [isLoading, setIsLoading] = useState(false);
     
     useEffect(() => {
-        const initializeAuth = () => {
-            try {
-                setUsers(getUsers());
-                
-                const defaultUser = { id: 'USR-001' };
-                setUser(defaultUser);
-                
-                if (typeof window !== 'undefined') {
-                    try {
-                        const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
-                        if (savedSession) {
-                            const sessionData = JSON.parse(savedSession);
-                            setUser(sessionData);
-                        } else {
-                            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(defaultUser));
-                        }
-                    } catch (error) {
-                        console.warn('Failed to load session from localStorage:', error);
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading users:', error);
-                setUsers([]);
-            }
-            
-            setIsLoading(false);
-        };
-        
-        initializeAuth();
+        setUsers(getUsers());
     }, []);
 
     const currentUser = users.find(u => u.id === user?.id);
