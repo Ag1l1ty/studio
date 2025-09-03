@@ -106,7 +106,6 @@ const USERS_STORAGE_KEY = 'axa-portfolio-users';
 
 export function getUsersFromStorage(): User[] {
     if (typeof window === 'undefined') {
-        console.log('getUsersFromStorage - Server side, returning DEFAULT_USERS');
         return DEFAULT_USERS;
     }
     

@@ -15,31 +15,28 @@ export function useAuth() {
     useEffect(() => {
         const initializeAuth = async () => {
             try {
-                console.log('Auth Debug - Starting initialization');
                 setUsers(getUsers());
-                console.log('Auth Debug - Users loaded successfully');
             } catch (error) {
                 console.error('Auth Debug - Error loading users:', error);
                 setUsers([]);
             }
             
-            if (typeof window !== 'undefined') {
-                try {
-                    const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
-                    console.log('Auth Debug - Saved session:', savedSession);
-                    if (savedSession) {
-                        const sessionData = JSON.parse(savedSession);
-                        console.log('Auth Debug - Setting user:', sessionData);
-                        setUser(sessionData);
-                    } else {
-                        console.log('Auth Debug - No saved session found');
-                    }
-                } catch (error) {
-                    console.warn('Failed to load session from localStorage:', error);
+            try {
+                const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
+                if (savedSession) {
+                    const sessionData = JSON.parse(savedSession);
+                    setUser(sessionData);
+                } else {
+                    const defaultUser = { id: 'USR-001' };
+                    setUser(defaultUser);
+                    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(defaultUser));
                 }
+            } catch (error) {
+                console.warn('Failed to load session from localStorage:', error);
+                const defaultUser = { id: 'USR-001' };
+                setUser(defaultUser);
             }
             
-            console.log('Auth Debug - Setting isLoading to false');
             setIsLoading(false);
         };
         
