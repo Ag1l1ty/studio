@@ -8,14 +8,6 @@ import { AppLayout } from '@/components/layout/app-layout';
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();
 
-    if (typeof window === 'undefined') {
-        return (
-            <AppLayout>
-                {children}
-            </AppLayout>
-        );
-    }
-
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">

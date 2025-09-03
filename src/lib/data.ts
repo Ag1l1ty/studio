@@ -72,7 +72,7 @@ const DEFAULT_USERS: User[] = [
         role: 'Admin',
         avatar: '/avatars/01.png',
         assignedProjectIds: ['PRJ-001'],
-        password: 'dvncz7',
+        password: 'l60tth',
         temporaryPassword: false,
         lastPasswordChange: new Date().toISOString(),
     },

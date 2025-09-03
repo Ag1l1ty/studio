@@ -10,7 +10,7 @@ const SESSION_STORAGE_KEY = 'axa-portfolio-session';
 export function useAuth() {
     const [user, setUser] = useState<{ id: string } | null>(null);
     const [users, setUsers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(typeof window === 'undefined' ? false : true);
+    const [isLoading, setIsLoading] = useState(true);
     
     useEffect(() => {
         const initializeAuth = async () => {
