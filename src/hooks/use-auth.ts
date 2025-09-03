@@ -8,9 +8,9 @@ const SESSION_STORAGE_KEY = 'axa-portfolio-session';
 
 // This is a mock auth hook. In a real app, you'd use a real auth provider.
 export function useAuth() {
-    const [user, setUser] = useState<{ id: string } | null>(null);
+    const [user, setUser] = useState<{ id: string } | null>({ id: 'USR-001' });
     const [users, setUsers] = useState<User[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     
     useEffect(() => {
         const initializeAuth = () => {
