@@ -69,7 +69,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
             name: "",
             description: "",
             projectedDeliveries: 1,
-            budget: 0,
+            budget: "0",
             ownerId: "",
         },
     });
@@ -81,7 +81,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
                     name: project.name,
                     description: project.description,
                     projectedDeliveries: project.projectedDeliveries,
-                    budget: new Intl.NumberFormat('en-US').format(project.budget), // Format as string for the input
+                    budget: project.budget.toString(), // Convert to string for the input
                     startDate: new Date(project.startDate),
                     endDate: new Date(project.endDate),
                     ownerId: project.owner.id,
@@ -91,7 +91,7 @@ export function CreateProjectDialog({ isOpen, onOpenChange, onProjectSubmit, pro
                     name: "",
                     description: "",
                     projectedDeliveries: 1,
-                    budget: 0,
+                    budget: "0",
                     startDate: undefined,
                     endDate: undefined,
                     ownerId: "",

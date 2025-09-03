@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from 'react';
-import { getProjects, addProject, updateProject, deleteProject, MOCK_USERS } from '@/lib/data';
+import { getProjects, addProject, updateProject, deleteProject, getUsers } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -34,7 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 export function ProjectAdminForm() {
     const { isManager, isProjectManager } = useAuth();
     const [projects, setProjects] = useState(getProjects());
-    const [users, setUsers] = useState(MOCK_USERS);
+    const [users, setUsers] = useState(getUsers());
     const [isCreateProjectDialogOpen, setCreateProjectDialogOpen] = useState(false);
     const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
     const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
@@ -51,7 +51,7 @@ export function ProjectAdminForm() {
         return (closedDeliveries / totalDeliveries) * 100;
     }
 
-    const handleProjectSubmit = (values: Omit<Project, 'id' | 'owner' | 'metrics' | 'riskLevel' | 'stage' | 'budgetSpent'> & { ownerId: string }, id?: string) => {
+    const handleProjectSubmit = (values: { name: string; description: string; budget: number; projectedDeliveries: number; startDate: Date; endDate: Date; ownerId: string; }, id?: string) => {
         
         const owner = users.find(u => u.id === values.ownerId);
         if (!owner) return;
